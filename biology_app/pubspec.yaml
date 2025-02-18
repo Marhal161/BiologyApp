@@ -9,6 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  sqflite: ^2.3.2
+  path_provider: ^2.1.2
+  path: ^1.9.1
+  csv: ^5.1.1
+  
 
 dev_dependencies:
   flutter_test:
@@ -20,3 +25,5 @@ flutter:
   assets:
     - assets/images/
     - assets/images/bio.jpg
+    - assets/data/
+    - assets/data/topic1.json

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'topic_screen.dart';
+import '../database.dart';
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
@@ -9,40 +11,59 @@ class CategoriesScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Категории'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          _buildCategoryCard(
-            'Тема',
-            'assets/images/bio.jpg', 
-          ),
-          const SizedBox(height: 16),
-          _buildCategoryCard(
-            'Тема',
-            'assets/images/bio.jpg',
-          ),
-          const SizedBox(height: 16),
-          _buildCategoryCard(
-            'Тема',
-            'assets/images/bio.jpg',
-          ),
-          const SizedBox(height: 16),
-          _buildCategoryCard(
-            'Тема',
-            'assets/images/bio.jpg',
-          ),
-        ],
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: DBProvider.db.getTopics(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Ошибка: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Нет доступных тем'));
+          }
+
+          final topics = snapshot.data!;
+          print('Загруженные темы: $topics');
+          return ListView.builder(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: topics.length,
+            itemBuilder: (context, index) {
+              final topic = topics[index];
+              return Column(
+                children: [
+                  _buildCategoryCard(
+                    topic['title'],
+                    topic['image_path'],
+                    topic['id'],
+                    context,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
 
-  Widget _buildCategoryCard(String title, String imageUrl) {
+  Widget _buildCategoryCard(String title, String imageUrl, int topicId, BuildContext context) {
     return Card(
       elevation: 4,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          // Здесь будет переход к вопросам категории
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TopicScreen(
+                topicTitle: title,
+                topicId: topicId,
+              ),
+            ),
+          );
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -54,15 +75,27 @@ class CategoriesScreen extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            Padding(
+            Container(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Тема ${topicId}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

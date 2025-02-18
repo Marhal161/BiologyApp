@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
 import 'screens/categories_screen.dart';
+import 'database.dart';
 
-void main() {
-  runApp(const MainApp());
+void main() async {
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await DBProvider.db.initDB();
+    await DBProvider.db.clearDatabase();
+    print('База данных очищена');
+    
+    // Импортируем первую тему
+    await DBProvider.db.importTopicFromJSON(1);
+    print('Данные импортированы');
+    
+    runApp(const MainApp());
+  } catch (e) {
+    print('Ошибка при запуске: $e');
+  }
 }
 
 class MainApp extends StatelessWidget {
