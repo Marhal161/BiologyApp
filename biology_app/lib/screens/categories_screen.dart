@@ -3,16 +3,25 @@ import 'topic_screen.dart';
 import '../database.dart';
 
 class CategoriesScreen extends StatelessWidget {
-  const CategoriesScreen({super.key});
+  final int chapterId;
+  final String chapterTitle;
+  final String chapterImage;
+
+  const CategoriesScreen({
+    super.key,
+    required this.chapterId,
+    required this.chapterTitle,
+    required this.chapterImage,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Категории'),
+        title: Text(chapterTitle),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DBProvider.db.getTopics(),
+        future: DBProvider.db.getTopicsByChapter(chapterId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -25,7 +34,6 @@ class CategoriesScreen extends StatelessWidget {
           }
 
           final topics = snapshot.data!;
-          print('Загруженные темы: $topics');
           return ListView.builder(
             padding: const EdgeInsets.all(16.0),
             itemCount: topics.length,
@@ -73,6 +81,16 @@ class CategoriesScreen extends StatelessWidget {
               child: Image.asset(
                 imageUrl,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  print('Ошибка загрузки изображения: $error');
+                  return const Center(
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
+                  );
+                },
               ),
             ),
             Container(

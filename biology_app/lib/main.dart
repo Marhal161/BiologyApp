@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/categories_screen.dart';
+//import 'screens/categories_screen.dart';
 import 'database.dart';
+import 'screens/chapters_screen.dart';
 
 void main() async {
   try {
@@ -9,9 +10,11 @@ void main() async {
     await DBProvider.db.clearDatabase();
     print('База данных очищена');
     
-    // Импортируем первую тему
+    // Импортируем темы
     await DBProvider.db.importTopicFromJSON(1);
-    print('Данные импортированы');
+    // Добавьте импорт других тем при необходимости
+    // await DBProvider.db.importTopicFromJSON(2);
+    // await DBProvider.db.importTopicFromJSON(3);
     
     runApp(const MainApp());
   } catch (e) {
@@ -61,7 +64,7 @@ class StartScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const CategoriesScreen(),
+                    builder: (context) => const ChaptersScreen(),
                   ),
                 );
               },

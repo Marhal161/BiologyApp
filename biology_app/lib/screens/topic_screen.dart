@@ -16,7 +16,7 @@ class TopicScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(topicTitle),
-      ),
+      ),  
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
