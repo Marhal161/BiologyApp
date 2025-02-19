@@ -188,43 +188,77 @@ class _TestScreenState extends State<TestScreen> {
       ),
       body: questions.isEmpty
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  _buildQuestion(questions[currentQuestionIndex]),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      _saveAnswer();
-                      if (currentQuestionIndex < questions.length - 1) {
-                        setState(() {
-                          currentQuestionIndex++;
-                          selectedAnswer = null;
-                          answerController.clear();
-                          sequenceAnswer = '';
-                        });
-                      } else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ResultsScreen(
-                              topicTitle: widget.topicTitle,
-                              questions: questions,
-                              userAnswers: userAnswers,
-                            ),
+          : Column(
+              children: [
+                LinearProgressIndicator(
+                  value: (currentQuestionIndex + 1) / questions.length,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                  minHeight: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Вопрос ${currentQuestionIndex + 1}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'из ${questions.length}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        _buildQuestion(questions[currentQuestionIndex]),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            _saveAnswer();
+                            if (currentQuestionIndex < questions.length - 1) {
+                              setState(() {
+                                currentQuestionIndex++;
+                                selectedAnswer = null;
+                                answerController.clear();
+                                sequenceAnswer = '';
+                              });
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ResultsScreen(
+                                    topicTitle: widget.topicTitle,
+                                    questions: questions,
+                                    userAnswers: userAnswers,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: Text(
+                            currentQuestionIndex < questions.length - 1
+                                ? 'Следующий вопрос'
+                                : 'Проверить результаты',
                           ),
-                        );
-                      }
-                    },
-                    child: Text(
-                      currentQuestionIndex < questions.length - 1
-                          ? 'Следующий вопрос'
-                          : 'Проверить результаты',
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
     );
   }
