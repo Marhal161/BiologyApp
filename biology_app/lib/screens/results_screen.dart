@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'categories_screen.dart'; // Импортируем CategoriesScreen
 
 class ResultsScreen extends StatelessWidget {
   final String topicTitle;
@@ -84,12 +85,19 @@ class ResultsScreen extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.popUntil(
+                  // Переход на экран категорий
+                  Navigator.pushReplacement(
                     context,
-                    (route) => route.isFirst,
+                    MaterialPageRoute(
+                      builder: (context) => CategoriesScreen(
+                        chapterId: 1, // Укажите нужный ID главы
+                        chapterTitle: 'Название главы', // Укажите нужное название
+                        chapterImage: 'assets/images/bioChap1.jpeg', // Укажите нужное изображение
+                      ),
+                    ),
                   );
                 },
-                child: const Text('Завершить'),
+                child: const Text('Перейти к категориям'),
               ),
             ),
           ],

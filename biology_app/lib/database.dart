@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:csv/csv.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class DBProvider {
@@ -25,14 +24,26 @@ class DBProvider {
     String path = join(documentsDirectory.path, "BiologyDB.db");
     return await openDatabase(
       path, 
-      version: 2,
+      version: 3,
       onOpen: (db) {},
       onCreate: (Database db, int version) async {
         await db.execute("""
+          CREATE TABLE Chapters (
+            id INTEGER PRIMARY KEY,
+            image_path TEXT,
+            title TEXT,
+            order_number INTEGER
+          )
+        """);
+        
+        await db.execute("""
           CREATE TABLE Topics (
             id INTEGER PRIMARY KEY,
+            chapter_id INTEGER,
             title TEXT,
-            image_path TEXT
+            image_path TEXT,
+            order_number INTEGER,
+            FOREIGN KEY (chapter_id) REFERENCES Chapters (id)
           )
         """);
         
@@ -53,8 +64,17 @@ class DBProvider {
         """);
       },
       onUpgrade: (Database db, int oldVersion, int newVersion) async {
-        if (oldVersion < 2) {
-          await db.execute("ALTER TABLE Questions ADD COLUMN options TEXT");
+        if (oldVersion < 3) {
+          await db.execute("""
+            CREATE TABLE Chapters (
+              id INTEGER PRIMARY KEY,
+              title TEXT,
+              order_number INTEGER,
+              image_path TEXT
+            )
+          """);
+          await db.execute("ALTER TABLE Topics ADD COLUMN chapter_id INTEGER REFERENCES Chapters (id)");
+          await db.execute("ALTER TABLE Topics ADD COLUMN order_number INTEGER");
         }
       },
     );
@@ -69,13 +89,15 @@ class DBProvider {
     );
   }
 
-  Future<void> insertTopic(String title, String imagePath) async {
+  Future<void> insertTopic(String title, String imagePath, {int? chapterId, int? orderNumber}) async {
     final db = await database;
     await db.insert(
       'Topics',
       {
         'title': title,
         'image_path': imagePath,
+        'chapter_id': chapterId,
+        'order_number': orderNumber,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -102,78 +124,9 @@ class DBProvider {
 
   Future<void> clearDatabase() async {
     final db = await database;
+    await db.delete('Chapters');
     await db.delete('Topics');
     await db.delete('Questions');
-  }
-
-  Future<void> importFromCSV() async {
-    await clearDatabase();
-    
-    try {
-      // Проверяем наличие файла
-      bool exists = await rootBundle.load('assets/data/topics.csv').then((_) => true).catchError((_) => false);
-      print('Файл topics.csv существует: $exists');
-
-      if (!exists) {
-        print('Файл topics.csv не найден!');
-        return;
-      }
-
-      // Импорт тем
-      final topicsString = await rootBundle.loadString('assets/data/topics.csv');
-      print('Содержимое topics.csv: $topicsString');
-      
-      if (topicsString.isEmpty) {
-        print('Файл topics.csv пуст!');
-        return;
-      }
-
-      List<List<dynamic>> topics = const CsvToListConverter().convert(topicsString);
-      print('Конвертированные темы: $topics');
-      
-      if (topics.isEmpty) {
-        print('Нет тем для импорта!');
-        return;
-      }
-
-      // Пропускаем заголовок
-      for (var topic in topics.skip(1)) {
-        print('Вставка темы: $topic');
-        await insertTopic(
-          topic[1], // title
-          topic[2], // image_path
-        );
-      }
-
-      // Проверяем результат
-      final db = await database;
-      final allTopics = await db.query('Topics');
-      print('Темы в базе данных: $allTopics');
-
-    } catch (e, stackTrace) {
-      print('Ошибка при импорте: $e');
-      print('Stack trace: $stackTrace');
-    }
-    
-    // Импорт вопросов
-    final questionsString = await rootBundle.loadString('assets/data/questions.csv');
-    List<List<dynamic>> questions = const CsvToListConverter().convert(questionsString);
-    
-    // Пропускаем заголовок
-    for (var question in questions.skip(1)) {
-      await insertQuestion(
-        int.parse(question[1]), // topic_id
-        question[2], // question_text
-        question[3], // correct_answer
-        [
-          question[4], // wrong_answer1
-          question[5], // wrong_answer2
-          question[6], // wrong_answer3
-          question[7], // wrong_answer4
-        ],
-        question[8] == '1', // is_open_ended
-      );
-    }
   }
 
   Future<void> importFromJSON() async {
@@ -226,11 +179,23 @@ class DBProvider {
       final jsonString = await rootBundle.loadString('assets/data/topic$topicNumber.json');
       final data = json.decode(jsonString);
       
+      // Импорт главы, если она указана
+      final chapter = data['chapter'];
+      if (chapter != null) {
+        await insertChapter(
+          chapter['title'],
+          chapter['order_number'],
+          chapter['image_path'],
+        );
+      }
+      
       // Импорт темы
       final topic = data['topic'];
       await insertTopic(
         topic['title'],
         topic['image_path'],
+        chapterId: topic['chapter_id'],
+        orderNumber: topic['order_number'],
       );
       
       // Импорт вопросов
@@ -250,5 +215,36 @@ class DBProvider {
     } catch (e) {
       print('Ошибка при импорте темы $topicNumber: $e');
     }
+  }
+
+  Future<void> insertChapter(String title, int orderNumber, String imagePath) async {
+    final db = await database;
+    await db.insert(
+      'Chapters',
+      {
+        'title': title,
+        'order_number': orderNumber,
+        'image_path': imagePath,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getChapters() async {
+    final db = await database;
+    return await db.query(
+      'Chapters',
+      orderBy: 'order_number ASC',
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getTopicsByChapter(int chapterId) async {
+    final db = await database;
+    return await db.query(
+      'Topics',
+      where: 'chapter_id = ?',
+      whereArgs: [chapterId],
+      orderBy: 'order_number ASC',
+    );
   }
 }

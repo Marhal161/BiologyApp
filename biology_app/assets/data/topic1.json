@@ -1,8 +1,16 @@
 {
+  "chapter": {
+    "id": 1,
+    "title": "I глава – Общая биология.",
+    "image_path": "assets/images/bioChap1.jpeg",
+    "order_number": 1
+  },
   "topic": {
     "id": 1,
-    "title": "Клетка. Строение. Неклеточные формы жизни",
-    "image_path": "assets/images/bio.jpg"
+    "chapter_id": 1,
+    "title": "Клетка. Строение. Неклеточные формы жизни.",
+    "image_path": "assets/images/bioTopic1.jpg",
+    "order_number": 1
   },
   "questions": [
     {
