@@ -25,3 +25,12 @@ flutter:
   assets:
     - assets/images/
     - assets/data/
+
+fonts:
+  - family: Montserrat
+    fonts:
+      - asset: fonts/Montserrat-Medium.ttf
+        weight: 400
+      - asset: fonts/Montserrat-Bold.ttf
+        style: bold
+

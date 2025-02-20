@@ -18,41 +18,62 @@ class CategoriesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(chapterTitle),
+        title: Text(chapterTitle, style: TextStyle( color: Colors.white)),
+        backgroundColor: Color(0xFF2F642D),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DBProvider.db.getTopicsByChapter(chapterId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Ошибка: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Нет доступных тем'));
-          }
-
-          final topics = snapshot.data!;
-          return ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: topics.length,
-            itemBuilder: (context, index) {
-              final topic = topics[index];
-              return Column(
-                children: [
-                  _buildCategoryCard(
-                    topic['title'],
-                    topic['image_path'],
-                    topic['id'],
-                    context,
-                  ),
-                  const SizedBox(height: 16),
-                ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            colors: [Color(0xFF2F642D), Color(0xFF5A9647)],
+            focal: Alignment.topRight,
+            radius: 3.0,
+          ),
+        ),
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: DBProvider.db.getTopicsByChapter(chapterId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Ошибка: ${snapshot.error}',
+                  style: const TextStyle(color: Colors.white),
+                ),
               );
-            },
-          );
-        },
+            }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(
+                child: Text(
+                  'Нет доступных тем',
+                  style: TextStyle(color: Colors.white),
+                ),
+              );
+            }
+
+            final topics = snapshot.data!;
+            return ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: topics.length,
+              itemBuilder: (context, index) {
+                final topic = topics[index];
+                return Column(
+                  children: [
+                    _buildCategoryCard(
+                      topic['title'],
+                      topic['image_path'],
+                      topic['id'],
+                      context,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

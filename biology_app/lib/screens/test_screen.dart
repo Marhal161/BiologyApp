@@ -156,8 +156,8 @@ class _TestScreenState extends State<TestScreen> {
       width: 70,
       height: 70,
       child: ElevatedButton(
-        onPressed: sequenceAnswer.contains(letter) 
-            ? null 
+        onPressed: sequenceAnswer.contains(letter)
+            ? null
             : () {
                 setState(() {
                   sequenceAnswer += letter;
@@ -184,7 +184,9 @@ class _TestScreenState extends State<TestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.topicTitle),
+        title: Text(widget.topicTitle,style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF2F642D),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: questions.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -262,4 +264,4 @@ class _TestScreenState extends State<TestScreen> {
             ),
     );
   }
-} 
+}

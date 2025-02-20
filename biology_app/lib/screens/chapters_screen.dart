@@ -9,9 +9,19 @@ class ChaptersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Главы'),
+        title: const Text('Главы',style: TextStyle( color: Colors.white)),
+        backgroundColor: Color(0xFF2F642D),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            colors: [Color(0xFF2F642D), Color(0xFF5A9647)],
+            focal: Alignment.topRight,
+            radius: 3.0,
+    ),
+    ),
+      child: FutureBuilder<List<Map<String, dynamic>>>(
         future: DBProvider.db.getChapters(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -97,6 +107,7 @@ class ChaptersScreen extends StatelessWidget {
           );
         },
       ),
+      ),
     );
   }
-} 
+}
