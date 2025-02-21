@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-//import 'screens/categories_screen.dart';
 import 'database.dart';
 import 'screens/chapters_screen.dart';
 
@@ -10,11 +9,7 @@ void main() async {
     await DBProvider.db.clearDatabase();
     print('База данных очищена');
 
-    // Импортируем темы
     await DBProvider.db.importTopicFromJSON(1);
-    // Добавьте импорт других тем при необходимости
-    // await DBProvider.db.importTopicFromJSON(2);
-    // await DBProvider.db.importTopicFromJSON(3);
 
     runApp(const MainApp());
   } catch (e) {
@@ -31,6 +26,11 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Montserrat',
+        textSelectionTheme: const TextSelectionThemeData(
+          selectionHandleColor: Colors.white,
+          selectionColor: Colors.white54,
+          cursorColor: Colors.white,
+        ),
       ),
       home: const StartScreen(),
     );
@@ -54,7 +54,7 @@ class StartScreen extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.only(top: 60), // Добавлен отступ сверху
+          padding: const EdgeInsets.only(top: 60),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -64,6 +64,13 @@ class StartScreen extends StatelessWidget {
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black26,
+                      offset: Offset(0, 2),
+                      blurRadius: 10,
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -75,6 +82,13 @@ class StartScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.white70,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        offset: Offset(0, 2),
+                        blurRadius: 10,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -96,6 +110,8 @@ class StartScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
+                    shadowColor: Colors.black, // Цвет тени
+                    elevation: 4, // Высота тени
                   ),
                   child: const Text(
                     'Начать',
@@ -103,6 +119,13 @@ class StartScreen extends StatelessWidget {
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 2),
+                          blurRadius: 10,
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -18,9 +18,23 @@ class CategoriesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(chapterTitle, style: TextStyle( color: Colors.white)),
+        title: Text(chapterTitle, style: TextStyle( color: Colors.white,
+          shadows: [
+          Shadow(
+            color: Colors.black26,
+            offset: Offset(0, 2),
+            blurRadius: 10,
+          ),
+        ],)),
         backgroundColor: Color(0xFF2F642D),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white,
+          shadows: [
+          Shadow(
+            color: Colors.black26,
+            offset: Offset(0, 2),
+            blurRadius: 10,
+          ),
+        ],),
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -132,6 +146,13 @@ class CategoriesScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 2),
+                          blurRadius: 15,
+                        ),
+                      ],
                     ),
                   ),
                 ],

@@ -52,15 +52,38 @@ class _TestScreenState extends State<TestScreen> {
         children: [
           Text(
             question['question_text'],
-            style: const TextStyle(fontSize: 20),
+            style: const TextStyle(
+              fontSize: 20,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  color: Colors.black26,
+                  offset: Offset(0, 2),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 20),
           TextField(
             controller: answerController,
+            textInputAction: TextInputAction.done, // Закрывает клавиатуру при нажатии "Готово"
+            keyboardType: TextInputType.text, // Разрешает ввод текста
+            enableSuggestions: true, // Включает подсказки клавиатуры
+            autocorrect: true, // Разрешает автокоррекцию
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               labelText: 'Ваш ответ',
+              labelStyle: TextStyle(color: Colors.white),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.white),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.white),
+              ),
             ),
+            style: const TextStyle(color: Colors.white),
+            cursorColor: Colors.white,
           ),
         ],
       );
@@ -71,7 +94,17 @@ class _TestScreenState extends State<TestScreen> {
           children: [
             Text(
               question['question_text'],
-              style: const TextStyle(fontSize: 18),
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black26,
+                    offset: Offset(0, 2),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 10),
             Center(
@@ -102,7 +135,17 @@ class _TestScreenState extends State<TestScreen> {
               const SizedBox(height: 10),
               Text(
                 'Ваша последовательность: $sequenceAnswer',
-                style: const TextStyle(fontSize: 16),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black26,
+                      offset: Offset(0, 2),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
               ),
               if (sequenceAnswer.length == 4) ...[
                 const SizedBox(height: 8),
@@ -114,6 +157,15 @@ class _TestScreenState extends State<TestScreen> {
                     });
                   },
                   child: const Text('Сбросить'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF2F642D),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    shadowColor: Colors.black26,
+                    elevation: 4, // Adding shadow
+                  ),
                 ),
               ],
             ],
@@ -132,19 +184,32 @@ class _TestScreenState extends State<TestScreen> {
           children: [
             Text(
               question['question_text'],
-              style: const TextStyle(fontSize: 20),
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black26,
+                    offset: Offset(0, 2),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
             ...answers.map((answer) => RadioListTile<String>(
-                  title: Text(answer),
-                  value: answer,
-                  groupValue: selectedAnswer,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedAnswer = value;
-                    });
-                  },
-                )),
+              title: Text(
+                answer,
+                style: const TextStyle(color: Colors.white),
+              ),
+              value: answer,
+              groupValue: selectedAnswer,
+              onChanged: (value) {
+                setState(() {
+                  selectedAnswer = value;
+                });
+              },
+            )),
           ],
         );
       }
@@ -159,22 +224,26 @@ class _TestScreenState extends State<TestScreen> {
         onPressed: sequenceAnswer.contains(letter)
             ? null
             : () {
-                setState(() {
-                  sequenceAnswer += letter;
-                  if (sequenceAnswer.length == 4) {
-                    selectedAnswer = sequenceAnswer;
-                  }
-                });
-              },
+          setState(() {
+            sequenceAnswer += letter;
+            if (sequenceAnswer.length == 4) {
+              selectedAnswer = sequenceAnswer;
+            }
+          });
+        },
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
+          backgroundColor: Color(0xFF2F642D),
+          foregroundColor: Colors.white,
+          shadowColor: Colors.black26,
+          elevation: 4, // Adding shadow to the button
         ),
         child: Text(
           letter,
-          style: const TextStyle(fontSize: 22),
+          style: const TextStyle(fontSize: 24),
         ),
       ),
     );
@@ -184,84 +253,153 @@ class _TestScreenState extends State<TestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.topicTitle,style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF2F642D),
+        title: Text(widget.topicTitle, style: const TextStyle(
+          color: Colors.white,
+          shadows: [
+            Shadow(
+              color: Colors.black26,
+              offset: Offset(0, 2),
+              blurRadius: 10,
+            ),
+          ],
+        )),
+        backgroundColor: const Color(0xFF2F642D),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: questions.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                LinearProgressIndicator(
-                  value: (currentQuestionIndex + 1) / questions.length,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-                  minHeight: 10,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Вопрос ${currentQuestionIndex + 1}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'из ${questions.length}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            colors: [Color(0xFF2F642D), Color(0xFF5A9647)],
+            focal: Alignment.topRight,
+            radius: 3.0,
+          ),
+        ),
+        child: questions.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(
+                    begin: 0,
+                    end: (currentQuestionIndex + 1) / questions.length,
                   ),
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                  builder: (context, value, _) {
+                    return LinearProgressIndicator(
+                      value: value,
+                      backgroundColor: Colors.grey[200],
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3d82b4)),
+                      minHeight: 10,
+                    );
+                  },
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        _buildQuestion(questions[currentQuestionIndex]),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            _saveAnswer();
-                            if (currentQuestionIndex < questions.length - 1) {
-                              setState(() {
-                                currentQuestionIndex++;
-                                selectedAnswer = null;
-                                answerController.clear();
-                                sequenceAnswer = '';
-                              });
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ResultsScreen(
-                                    topicTitle: widget.topicTitle,
-                                    questions: questions,
-                                    userAnswers: userAnswers,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          child: Text(
-                            currentQuestionIndex < questions.length - 1
-                                ? 'Следующий вопрос'
-                                : 'Проверить результаты',
-                          ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center, // Центрируем элементы
+                children: [
+                  Text(
+                    'Вопрос ${currentQuestionIndex + 1}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 2),
+                          blurRadius: 10,
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8), // Добавляем небольшой отступ
+                  Text(
+                    'из ${questions.length}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 2),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildQuestion(questions[currentQuestionIndex]),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        _saveAnswer();
+                        if (currentQuestionIndex < questions.length - 1) {
+                          setState(() {
+                            currentQuestionIndex++;
+                            selectedAnswer = null;
+                            answerController.clear();
+                            sequenceAnswer = '';
+                          });
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ResultsScreen(
+                                topicTitle: widget.topicTitle,
+                                questions: questions,
+                                userAnswers: userAnswers,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: Text(
+                        currentQuestionIndex < questions.length - 1
+                            ? 'Следующий вопрос'
+                            : 'Проверить результаты',
+                        style: const TextStyle(
+                          shadows: [
+                            Shadow(
+                              color: Colors.black26,
+                              offset: Offset(0, 2),
+                              blurRadius: 10,
+                            ),
+                          ],
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF2F642D),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        shadowColor: Colors.black26,
+                        elevation: 4, // Adding shadow to the button
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

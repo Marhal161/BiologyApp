@@ -9,9 +9,22 @@ class ChaptersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Главы',style: TextStyle( color: Colors.white)),
+        title: const Text('Главы',style: TextStyle( color: Colors.white,                  shadows: [
+          Shadow(
+            color: Colors.black26,
+            offset: Offset(0, 2),
+            blurRadius: 10,
+          ),
+        ],)),
         backgroundColor: Color(0xFF2F642D),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white,
+          shadows: [
+          Shadow(
+            color: Colors.black26,
+            offset: Offset(0, 2),
+            blurRadius: 10,
+          ),
+        ],),
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -19,8 +32,8 @@ class ChaptersScreen extends StatelessWidget {
             colors: [Color(0xFF2F642D), Color(0xFF5A9647)],
             focal: Alignment.topRight,
             radius: 3.0,
-    ),
-    ),
+          ),
+        ),
       child: FutureBuilder<List<Map<String, dynamic>>>(
         future: DBProvider.db.getChapters(),
         builder: (context, snapshot) {
@@ -86,6 +99,7 @@ class ChaptersScreen extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 18,
                                 color: Colors.grey,
+
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -94,6 +108,13 @@ class ChaptersScreen extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black26,
+                                    offset: Offset(0, 2),
+                                    blurRadius: 15,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
