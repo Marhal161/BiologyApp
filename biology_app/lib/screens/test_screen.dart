@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import '../database.dart';
 import 'results_screen.dart';
+import 'dart:async';
 
 class TestScreen extends StatefulWidget {
   final int topicId;
   final String topicTitle;
+  final int timePerQuestion;
+  final bool isTimerEnabled;
 
   const TestScreen({
     super.key,
     required this.topicId,
     required this.topicTitle,
+    required this.timePerQuestion,
+    required this.isTimerEnabled,
   });
 
   @override
@@ -23,6 +28,8 @@ class _TestScreenState extends State<TestScreen> {
   TextEditingController answerController = TextEditingController();
   String sequenceAnswer = '';
   List<String?> userAnswers = [];
+  Timer? _timer;
+  int _timeLeft = 0;
 
   @override
   void initState() {
@@ -30,11 +37,64 @@ class _TestScreenState extends State<TestScreen> {
     _loadQuestions();
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    if (widget.isTimerEnabled) {
+      _timeLeft = widget.timePerQuestion;
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          if (_timeLeft > 0) {
+            _timeLeft--;
+          } else {
+            _timer?.cancel();
+            _moveToNextQuestion();
+          }
+        });
+      });
+    }
+  }
+
+  void _moveToNextQuestion() {
+    _saveAnswer();
+    if (currentQuestionIndex < questions.length - 1) {
+      setState(() {
+        currentQuestionIndex++;
+        selectedAnswer = null;
+        answerController.clear();
+        sequenceAnswer = '';
+        if (widget.isTimerEnabled) {
+          _startTimer();
+        }
+      });
+    } else {
+      _timer?.cancel();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultsScreen(
+            topicTitle: widget.topicTitle,
+            questions: questions,
+            userAnswers: userAnswers,
+          ),
+        ),
+      );
+    }
+  }
+
   Future<void> _loadQuestions() async {
     final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(widget.topicId);
     setState(() {
       questions = loadedQuestions;
       userAnswers = List.filled(loadedQuestions.length, null);
+      if (widget.isTimerEnabled) {
+        _startTimer();
+      }
     });
   }
 
@@ -249,6 +309,45 @@ class _TestScreenState extends State<TestScreen> {
     );
   }
 
+  Widget _buildTimer() {
+    if (!widget.isTimerEnabled) return const SizedBox.shrink();
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        children: [
+          Text(
+            'Осталось времени: $_timeLeft сек',
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              shadows: [
+                Shadow(
+                  color: Colors.black26,
+                  offset: Offset(0, 2),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: _timeLeft / widget.timePerQuestion,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(
+                _timeLeft < 5 ? Colors.red : const Color(0xFF3d82b4)
+              ),
+              minHeight: 8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -280,24 +379,30 @@ class _TestScreenState extends State<TestScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween<double>(
-                    begin: 0,
-                    end: (currentQuestionIndex + 1) / questions.length,
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(
+                        begin: 0,
+                        end: (currentQuestionIndex + 1) / questions.length,
+                      ),
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                      builder: (context, value, _) {
+                        return LinearProgressIndicator(
+                          value: value,
+                          backgroundColor: Colors.grey[200],
+                          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3d82b4)),
+                          minHeight: 10,
+                        );
+                      },
+                    ),
                   ),
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeInOut,
-                  builder: (context, value, _) {
-                    return LinearProgressIndicator(
-                      value: value,
-                      backgroundColor: Colors.grey[200],
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3d82b4)),
-                      minHeight: 10,
-                    );
-                  },
-                ),
+                  const SizedBox(height: 8),
+                  _buildTimer(),
+                ],
               ),
             ),
             Padding(
@@ -347,28 +452,7 @@ class _TestScreenState extends State<TestScreen> {
                     _buildQuestion(questions[currentQuestionIndex]),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                        _saveAnswer();
-                        if (currentQuestionIndex < questions.length - 1) {
-                          setState(() {
-                            currentQuestionIndex++;
-                            selectedAnswer = null;
-                            answerController.clear();
-                            sequenceAnswer = '';
-                          });
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ResultsScreen(
-                                topicTitle: widget.topicTitle,
-                                questions: questions,
-                                userAnswers: userAnswers,
-                              ),
-                            ),
-                          );
-                        }
-                      },
+                      onPressed: _moveToNextQuestion,
                       child: Text(
                         currentQuestionIndex < questions.length - 1
                             ? 'Следующий вопрос'
