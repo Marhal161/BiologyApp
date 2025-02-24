@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import '../database.dart';
 import 'results_screen.dart';
+import 'dart:async';
 
 class TestScreen extends StatefulWidget {
   final int topicId;
   final String topicTitle;
+  final bool isTimerEnabled;
+  final int timePerQuestion;
 
   const TestScreen({
     super.key,
     required this.topicId,
     required this.topicTitle,
+    required this.isTimerEnabled,
+    required this.timePerQuestion,
   });
 
   @override
@@ -23,11 +28,37 @@ class _TestScreenState extends State<TestScreen> {
   TextEditingController answerController = TextEditingController();
   String sequenceAnswer = '';
   List<String?> userAnswers = [];
+  Timer? _timer;
+  int _timeLeft = 0;
 
   @override
   void initState() {
     super.initState();
     _loadQuestions();
+    if (widget.isTimerEnabled) {
+      _startTimer();
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timeLeft = widget.timePerQuestion;
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_timeLeft > 0) {
+          _timeLeft--;
+        } else {
+          _timer?.cancel();
+          _moveToNextQuestion();
+        }
+      });
+    });
   }
 
   Future<void> _loadQuestions() async {
@@ -43,6 +74,33 @@ class _TestScreenState extends State<TestScreen> {
       userAnswers[currentQuestionIndex] = answerController.text.trim();
     } else {
       userAnswers[currentQuestionIndex] = selectedAnswer;
+    }
+  }
+
+  void _moveToNextQuestion() {
+    _saveAnswer();
+    if (currentQuestionIndex < questions.length - 1) {
+      setState(() {
+        currentQuestionIndex++;
+        selectedAnswer = null;
+        answerController.clear();
+        sequenceAnswer = '';
+        if (widget.isTimerEnabled) {
+          _startTimer();
+        }
+      });
+    } else {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultsScreen(
+            topicTitle: widget.topicTitle,
+            questions: questions,
+            userAnswers: userAnswers,
+          ),
+        ),
+        (route) => route.settings.name == '/categories',
+      );
     }
   }
 
@@ -147,27 +205,6 @@ class _TestScreenState extends State<TestScreen> {
                   ],
                 ),
               ),
-              if (sequenceAnswer.length == 4) ...[
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      sequenceAnswer = '';
-                      selectedAnswer = null;
-                    });
-                  },
-                  child: const Text('Сбросить'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF2F642D),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    shadowColor: Colors.black26,
-                    elevation: 4, // Adding shadow
-                  ),
-                ),
-              ],
             ],
           ],
         );
@@ -217,17 +254,26 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Widget _buildSequenceButton(String letter, int _) {
+    bool isSelected = sequenceAnswer.contains(letter);
+    
     return SizedBox(
       width: 70,
       height: 70,
       child: ElevatedButton(
-        onPressed: sequenceAnswer.contains(letter)
-            ? null
-            : () {
+        onPressed: () {
           setState(() {
-            sequenceAnswer += letter;
-            if (sequenceAnswer.length == 4) {
-              selectedAnswer = sequenceAnswer;
+            if (isSelected) {
+              // Если буква уже выбрана, удаляем её
+              sequenceAnswer = sequenceAnswer.replaceAll(letter, '');
+              selectedAnswer = sequenceAnswer.isEmpty ? null : sequenceAnswer;
+            } else {
+              // Если буква ещё не выбрана и последовательность не полная
+              if (sequenceAnswer.length < 4) {
+                sequenceAnswer += letter;
+                if (sequenceAnswer.length == 4) {
+                  selectedAnswer = sequenceAnswer;
+                }
+              }
             }
           });
         },
@@ -236,15 +282,58 @@ class _TestScreenState extends State<TestScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          backgroundColor: Color(0xFF2F642D),
+          backgroundColor: isSelected ? Colors.grey : const Color(0xFF2F642D),
           foregroundColor: Colors.white,
           shadowColor: Colors.black26,
-          elevation: 4, // Adding shadow to the button
+          elevation: 4,
         ),
         child: Text(
           letter,
           style: const TextStyle(fontSize: 24),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTimer() {
+    if (!widget.isTimerEnabled) return const SizedBox.shrink();
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        children: [
+          Text(
+            'Осталось времени: $_timeLeft сек',
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              shadows: [Shadow(color: Colors.black26, offset: Offset(0, 2), blurRadius: 10)],
+            ),
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(
+                begin: (_timeLeft + 1) / widget.timePerQuestion,
+                end: _timeLeft / widget.timePerQuestion,
+              ),
+              duration: const Duration(milliseconds: 1000), // Длительность анимации
+              curve: Curves.linear, // Линейная анимация для равномерного уменьшения
+              builder: (context, value, _) {
+                return LinearProgressIndicator(
+                  value: value,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    _timeLeft < 5 ? Colors.red : const Color(0xFF3d82b4)
+                  ),
+                  minHeight: 8,
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -339,6 +428,7 @@ class _TestScreenState extends State<TestScreen> {
                 ],
               ),
             ),
+            if (widget.isTimerEnabled) _buildTimer(),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -348,27 +438,17 @@ class _TestScreenState extends State<TestScreen> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        _saveAnswer();
-                        if (currentQuestionIndex < questions.length - 1) {
-                          setState(() {
-                            currentQuestionIndex++;
-                            selectedAnswer = null;
-                            answerController.clear();
-                            sequenceAnswer = '';
-                          });
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ResultsScreen(
-                                topicTitle: widget.topicTitle,
-                                questions: questions,
-                                userAnswers: userAnswers,
-                              ),
-                            ),
-                          );
-                        }
+                        _moveToNextQuestion();
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF2F642D),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        shadowColor: Colors.black26,
+                        elevation: 4,
+                      ),
                       child: Text(
                         currentQuestionIndex < questions.length - 1
                             ? 'Следующий вопрос'
@@ -382,15 +462,6 @@ class _TestScreenState extends State<TestScreen> {
                             ),
                           ],
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF2F642D),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        shadowColor: Colors.black26,
-                        elevation: 4,
                       ),
                     ),
                   ],

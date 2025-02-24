@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui'; // For the BackdropFilter
 import 'test_screen.dart';
 
-class TopicScreen extends StatelessWidget {
+class TopicScreen extends StatefulWidget {
   final String topicTitle;
   final int topicId;
 
@@ -13,11 +13,104 @@ class TopicScreen extends StatelessWidget {
   });
 
   @override
+  State<TopicScreen> createState() => _TopicScreenState();
+}
+
+class _TopicScreenState extends State<TopicScreen> {
+  bool isTimerEnabled = false;
+  int timePerQuestion = 30;
+
+  void _handleTimerCheckedChanged(bool value) {
+    setState(() {
+      isTimerEnabled = value;
+    });
+  }
+
+  void _showTimePickerDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF2F642D),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Text(
+            'Установите время',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              shadows: [Shadow(color: Colors.black26, offset: Offset(0, 2), blurRadius: 10)],
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Укажите время на ответ (в секундах):',
+                style: TextStyle(color: Colors.white),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                keyboardType: TextInputType.number,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                  labelText: 'Время в секундах',
+                  labelStyle: TextStyle(color: Colors.white70),
+                ),
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                    timePerQuestion = int.parse(value);
+                  }
+                },
+                controller: TextEditingController(text: timePerQuestion.toString()),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Отмена', style: TextStyle(color: Colors.white70)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TestScreen(
+                      topicId: widget.topicId,
+                      topicTitle: widget.topicTitle,
+                      isTimerEnabled: true,
+                      timePerQuestion: timePerQuestion,
+                    ),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF2F642D),
+              ),
+              child: const Text('Начать', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          topicTitle,
+          widget.topicTitle,
           style: TextStyle(
             color: Colors.white,
             shadows: [
@@ -64,7 +157,10 @@ class TopicScreen extends StatelessWidget {
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent, // Make background transparent for blur effect
                       builder: (BuildContext context) {
-                        return _SettingsMenu();
+                        return _SettingsMenu(
+                          onTimerCheckedChanged: _handleTimerCheckedChanged,
+                          isTimerEnabled: isTimerEnabled,
+                        );
                       },
                     );
                   },
@@ -76,15 +172,21 @@ class TopicScreen extends StatelessWidget {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TestScreen(
-                        topicId: topicId,
-                        topicTitle: topicTitle,
+                  if (isTimerEnabled) {
+                    _showTimePickerDialog();
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TestScreen(
+                          topicId: widget.topicId,
+                          topicTitle: widget.topicTitle,
+                          isTimerEnabled: false,
+                          timePerQuestion: 0,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2F642D),
@@ -117,19 +219,23 @@ class TopicScreen extends StatelessWidget {
 }
 
 class _SettingsMenu extends StatefulWidget {
+  final Function(bool) onTimerCheckedChanged;
+  final bool isTimerEnabled;
+  
+  const _SettingsMenu({
+    required this.onTimerCheckedChanged,
+    required this.isTimerEnabled,
+  });
+
   @override
-  _SettingsMenuState createState() => _SettingsMenuState();
+  State<_SettingsMenu> createState() => _SettingsMenuState();
 }
 
 class _SettingsMenuState extends State<_SettingsMenu> {
-  // Manage checkbox state locally in the settings menu
-  bool isTimerChecked = false;
-
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // BackdropFilter to apply the blur effect on the background
         Positioned.fill(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
@@ -138,30 +244,30 @@ class _SettingsMenuState extends State<_SettingsMenu> {
             ),
           ),
         ),
-        // Sliding menu content
         Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
           ),
-          // Add a fixed height to make the menu higher
-          height: MediaQuery.of(context).size.height * 0.4, // Adjust this value to make the menu higher or lower
+          height: MediaQuery.of(context).size.height * 0.4,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text('Меню настроек', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text(
+                'Меню настроек',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               CheckboxListTile(
-                title: Text('Таймер'),
-                value: isTimerChecked,
+                title: const Text('Таймер'),
+                value: widget.isTimerEnabled,
                 onChanged: (bool? value) {
-                  setState(() {
-                    isTimerChecked = value ?? false;
-                  });
+                  widget.onTimerCheckedChanged(value ?? false);
+                  Navigator.pop(context);
                 },
-                controlAffinity: ListTileControlAffinity.leading, // Checkbox on the left side
-                activeColor: Colors.green, // Change active (checked) color
-                checkColor: Colors.white, // Change check mark color
+                controlAffinity: ListTileControlAffinity.leading,
+                activeColor: Colors.green,
+                checkColor: Colors.white,
               ),
             ],
           ),

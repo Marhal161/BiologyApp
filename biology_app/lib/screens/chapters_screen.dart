@@ -62,9 +62,11 @@ class ChaptersScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
+                        settings: const RouteSettings(name: '/categories'),
                         builder: (context) => CategoriesScreen(
                           chapterId: chapter['id'],
-                          chapterTitle: chapter['title'], chapterImage: chapter['image_path'],
+                          chapterTitle: chapter['title'],
+                          chapterImage: chapter['image_path'],
                         ),
                       ),
                     );
