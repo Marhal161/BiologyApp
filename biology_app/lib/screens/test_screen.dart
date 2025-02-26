@@ -62,7 +62,8 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadQuestions() async {
-    final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(widget.topicId);
+    final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(
+        widget.topicId);
     setState(() {
       questions = loadedQuestions;
       userAnswers = List.filled(loadedQuestions.length, null);
@@ -93,13 +94,14 @@ class _TestScreenState extends State<TestScreen> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => ResultsScreen(
-            topicTitle: widget.topicTitle,
-            questions: questions,
-            userAnswers: userAnswers,
-          ),
+          builder: (context) =>
+              ResultsScreen(
+                topicTitle: widget.topicTitle,
+                questions: questions,
+                userAnswers: userAnswers,
+              ),
         ),
-        (route) => route.settings.name == '/categories',
+            (route) => route.settings.name == '/categories',
       );
     }
   }
@@ -125,10 +127,14 @@ class _TestScreenState extends State<TestScreen> {
           const SizedBox(height: 20),
           TextField(
             controller: answerController,
-            textInputAction: TextInputAction.done, // Закрывает клавиатуру при нажатии "Готово"
-            keyboardType: TextInputType.text, // Разрешает ввод текста
-            enableSuggestions: true, // Включает подсказки клавиатуры
-            autocorrect: true, // Разрешает автокоррекцию
+            textInputAction: TextInputAction.done,
+            // Закрывает клавиатуру при нажатии "Готово"
+            keyboardType: TextInputType.text,
+            // Разрешает ввод текста
+            enableSuggestions: true,
+            // Включает подсказки клавиатуры
+            autocorrect: true,
+            // Разрешает автокоррекцию
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               labelText: 'Ваш ответ',
@@ -215,7 +221,8 @@ class _TestScreenState extends State<TestScreen> {
           question['wrong_answer2'],
           question['wrong_answer3'],
           question['wrong_answer4'],
-        ]..shuffle(); // Перемешиваем варианты ответов
+        ]
+          ..shuffle(); // Перемешиваем варианты ответов
 
         return Column(
           children: [
@@ -234,19 +241,20 @@ class _TestScreenState extends State<TestScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            ...answers.map((answer) => RadioListTile<String>(
-              title: Text(
-                answer,
-                style: const TextStyle(color: Colors.white),
-              ),
-              value: answer,
-              groupValue: selectedAnswer,
-              onChanged: (value) {
-                setState(() {
-                  selectedAnswer = value;
-                });
-              },
-            )),
+            ...answers.map((answer) =>
+                RadioListTile<String>(
+                  title: Text(
+                    answer,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  value: answer,
+                  groupValue: selectedAnswer,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedAnswer = value;
+                    });
+                  },
+                )),
           ],
         );
       }
@@ -255,7 +263,7 @@ class _TestScreenState extends State<TestScreen> {
 
   Widget _buildSequenceButton(String letter, int _) {
     bool isSelected = sequenceAnswer.contains(letter);
-    
+
     return SizedBox(
       width: 70,
       height: 70,
@@ -296,44 +304,31 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Widget _buildTimer() {
-    if (!widget.isTimerEnabled) return const SizedBox.shrink();
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        children: [
-          Text(
-            'Осталось времени: $_timeLeft сек',
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              shadows: [Shadow(color: Colors.black26, offset: Offset(0, 2), blurRadius: 10)],
+    // Преобразуем оставшееся время в минуты и секунды
+    int minutes = _timeLeft ~/ 60;
+    int seconds = _timeLeft % 60;
+    String timeString = '${minutes.toString().padLeft(2, '0')}:${seconds
+        .toString().padLeft(2, '0')}';
+
+    // Определяем цвет текста в зависимости от оставшегося времени
+    Color textColor = _timeLeft <= 30 ? Colors.red : Colors.white;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Text(
+        timeString,
+        style: TextStyle(
+          fontSize: 24,
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          shadows: [
+            Shadow(
+              color: Colors.black26,
+              offset: Offset(0, 2),
+              blurRadius: 10,
             ),
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: TweenAnimationBuilder<double>(
-              tween: Tween<double>(
-                begin: (_timeLeft + 1) / widget.timePerQuestion,
-                end: _timeLeft / widget.timePerQuestion,
-              ),
-              duration: const Duration(milliseconds: 1000), // Длительность анимации
-              curve: Curves.linear, // Линейная анимация для равномерного уменьшения
-              builder: (context, value, _) {
-                return LinearProgressIndicator(
-                  value: value,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    _timeLeft < 5 ? Colors.red : const Color(0xFF3d82b4)
-                  ),
-                  minHeight: 8,
-                );
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -354,6 +349,10 @@ class _TestScreenState extends State<TestScreen> {
         )),
         backgroundColor: const Color(0xFF2F642D),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          if (widget.isTimerEnabled) _buildTimer(),
+          // Добавляем таймер в правую часть AppBar
+        ],
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -368,7 +367,8 @@ class _TestScreenState extends State<TestScreen> {
             : Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0, vertical: 8.0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: TweenAnimationBuilder<double>(
@@ -382,7 +382,8 @@ class _TestScreenState extends State<TestScreen> {
                     return LinearProgressIndicator(
                       value: value,
                       backgroundColor: Colors.grey[200],
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3d82b4)),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color(0xFF3d82b4)),
                       minHeight: 10,
                     );
                   },
@@ -392,7 +393,7 @@ class _TestScreenState extends State<TestScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center, // Центрируем элементы
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Вопрос ${currentQuestionIndex + 1}',
@@ -409,7 +410,7 @@ class _TestScreenState extends State<TestScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8), // Добавляем небольшой отступ
+                  const SizedBox(width: 8),
                   Text(
                     'из ${questions.length}',
                     style: const TextStyle(
@@ -428,7 +429,6 @@ class _TestScreenState extends State<TestScreen> {
                 ],
               ),
             ),
-            if (widget.isTimerEnabled) _buildTimer(),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),

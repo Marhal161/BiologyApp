@@ -27,6 +27,9 @@ class _TopicScreenState extends State<TopicScreen> {
   }
 
   void _showTimePickerDialog() {
+    // Переменная для отслеживания, показывается ли SnackBar
+    bool isSnackBarVisible = false;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -40,14 +43,17 @@ class _TopicScreenState extends State<TopicScreen> {
             style: TextStyle(
               color: Colors.white,
               fontSize: 22,
-              shadows: [Shadow(color: Colors.black26, offset: Offset(0, 2), blurRadius: 10)],
+              shadows: [
+                Shadow(
+                    color: Colors.black26, offset: Offset(0, 2), blurRadius: 10)
+              ],
             ),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Укажите время на ответ (в секундах):',
+                'Укажите время на ответ (в секундах, максимум 300 секунд):',
                 style: TextStyle(color: Colors.white),
               ),
               const SizedBox(height: 20),
@@ -66,38 +72,89 @@ class _TopicScreenState extends State<TopicScreen> {
                 ),
                 onChanged: (value) {
                   if (value.isNotEmpty) {
-                    timePerQuestion = int.parse(value);
+                    int newTime = int.parse(value);
+                    if (newTime > 300) {
+                      if (!isSnackBarVisible) {
+                        isSnackBarVisible = true;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Максимальное время - 300 секунд (5 минут)'),
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 2),
+                          ),
+                        ).closed.then((_) {
+                          isSnackBarVisible = false;
+                        });
+                      }
+                    } else if (newTime < 1) {
+                      if (!isSnackBarVisible) {
+                        isSnackBarVisible = true;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Минимальное время - 1 секунда'),
+                            backgroundColor: Colors.red,
+                            duration: Duration(seconds: 2),
+                          ),
+                        ).closed.then((_) {
+                          isSnackBarVisible = false;
+                        });
+                      }
+                    } else {
+                      timePerQuestion = newTime;
+                    }
                   }
                 },
-                controller: TextEditingController(text: timePerQuestion.toString()),
+                controller: TextEditingController(
+                    text: timePerQuestion.toString()),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Отмена', style: TextStyle(color: Colors.white70)),
+              child: const Text(
+                  'Отмена', style: TextStyle(color: Colors.white70)),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TestScreen(
-                      topicId: widget.topicId,
-                      topicTitle: widget.topicTitle,
-                      isTimerEnabled: true,
-                      timePerQuestion: timePerQuestion,
+                if (timePerQuestion <= 300 && timePerQuestion >= 1) {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TestScreen(
+                        topicId: widget.topicId,
+                        topicTitle: widget.topicTitle,
+                        isTimerEnabled: true,
+                        timePerQuestion: timePerQuestion,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  if (!isSnackBarVisible) {
+                    isSnackBarVisible = true;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            timePerQuestion > 300
+                                ? 'Максимальное время - 300 секунд (5 минут)'
+                                : 'Минимальное время - 1 секунда'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    ).closed.then((_) {
+                      isSnackBarVisible = false;
+                    });
+                  }
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFF2F642D),
               ),
-              child: const Text('Начать', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text(
+                  'Начать', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -146,8 +203,9 @@ class _TopicScreenState extends State<TopicScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Перемещаем кнопку настроек в начало Column
               Align(
-                alignment: Alignment.centerRight,
+                alignment: Alignment.topRight,
                 child: IconButton(
                   icon: Icon(Icons.settings),
                   onPressed: () {
@@ -155,7 +213,8 @@ class _TopicScreenState extends State<TopicScreen> {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
-                      backgroundColor: Colors.transparent, // Make background transparent for blur effect
+                      backgroundColor: Colors.transparent,
+                      // Make background transparent for blur effect
                       builder: (BuildContext context) {
                         return _SettingsMenu(
                           onTimerCheckedChanged: _handleTimerCheckedChanged,
@@ -164,7 +223,8 @@ class _TopicScreenState extends State<TopicScreen> {
                       },
                     );
                   },
-                  iconSize: 40, // Icon size
+                  iconSize: 40,
+                  // Icon size
                   color: Colors.white,
                   splashColor: Colors.white.withOpacity(0.3),
                 ),
@@ -190,7 +250,8 @@ class _TopicScreenState extends State<TopicScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2F642D),
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 50, vertical: 15),
                   shadowColor: Colors.black,
                   elevation: 4,
                 ),
@@ -221,7 +282,7 @@ class _TopicScreenState extends State<TopicScreen> {
 class _SettingsMenu extends StatefulWidget {
   final Function(bool) onTimerCheckedChanged;
   final bool isTimerEnabled;
-  
+
   const _SettingsMenu({
     required this.onTimerCheckedChanged,
     required this.isTimerEnabled,
