@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../database.dart';
 import 'results_screen.dart';
 import 'dart:async';
+import 'dart:convert';
 
 class TestScreen extends StatefulWidget {
   final int topicId;
@@ -88,14 +89,99 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadQuestions() async {
-    final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(widget.topicId);
-    setState(() {
-      questions = loadedQuestions;
-      userAnswers = List.filled(loadedQuestions.length, null);
-      if (widget.isTimerEnabled) {
-        _startTimer();
+    try {
+      print('Начинаю загрузку вопросов для темы с ID: ${widget.topicId}');
+      
+      final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(widget.topicId);
+      print('Загружено вопросов: ${loadedQuestions.length}');
+      
+      if (loadedQuestions.isEmpty) {
+        print('Внимание: для темы ${widget.topicId} не найдено вопросов!');
+        setState(() {
+          questions = [];
+        });
+        return;
       }
-    });
+      
+      // Преобразуем результаты запроса в список, которым можно управлять
+      List<Map<String, dynamic>> processedQuestions = [];
+      
+      // Преобразование данных из SQLite в правильный формат для отображения
+      for (var originalQuestion in loadedQuestions) {
+        // Создаем полную копию вопроса, чтобы избежать проблем read-only
+        Map<String, dynamic> question = Map<String, dynamic>();
+        originalQuestion.forEach((key, value) {
+          question[key] = value;
+        });
+        
+        print('Обработка вопроса с ID: ${question['id']}');
+        print('Тип вопроса: ${question['is_open_ended'] == 1 ? "открытый" : "с вариантами"}');
+        
+        // Обрабатываем options только для вопросов с вариантами ответов
+        if (question['is_open_ended'] == 0) {
+          List<dynamic> optionsList = [];
+          
+          // Проверяем, есть ли options и не пустое ли оно
+          if (question['options'] != null && question['options'].toString().isNotEmpty) {
+            try {
+              // Работаем только со строковым представлением
+              String optionsString = question['options'].toString();
+              var decodedOptions = json.decode(optionsString);
+              optionsList = decodedOptions is List ? List<dynamic>.from(decodedOptions) : [];
+              print('Успешно декодированы options: $optionsList');
+            } catch (e) {
+              print('Ошибка при декодировании options: $e');
+              // Создаем список из строковых ответов
+              optionsList = [];
+              if (question['wrong_answer1'] != null && question['wrong_answer1'].toString().isNotEmpty) 
+                optionsList.add(question['wrong_answer1']);
+              if (question['wrong_answer2'] != null && question['wrong_answer2'].toString().isNotEmpty) 
+                optionsList.add(question['wrong_answer2']);
+              if (question['wrong_answer3'] != null && question['wrong_answer3'].toString().isNotEmpty) 
+                optionsList.add(question['wrong_answer3']);
+              if (question['wrong_answer4'] != null && question['wrong_answer4'].toString().isNotEmpty) 
+                optionsList.add(question['wrong_answer4']);
+              if (question['correct_answer'] != null && question['correct_answer'].toString().isNotEmpty) 
+                optionsList.add(question['correct_answer']);
+            }
+          } else {
+            // Создаем options из wrong_answers и correct_answer
+            print('Options не найдены, создаем из wrong_answers и correct_answer');
+            optionsList = [];
+            if (question['wrong_answer1'] != null && question['wrong_answer1'].toString().isNotEmpty) 
+              optionsList.add(question['wrong_answer1']);
+            if (question['wrong_answer2'] != null && question['wrong_answer2'].toString().isNotEmpty) 
+              optionsList.add(question['wrong_answer2']);
+            if (question['wrong_answer3'] != null && question['wrong_answer3'].toString().isNotEmpty) 
+              optionsList.add(question['wrong_answer3']);
+            if (question['wrong_answer4'] != null && question['wrong_answer4'].toString().isNotEmpty) 
+              optionsList.add(question['wrong_answer4']);
+            if (question['correct_answer'] != null && question['correct_answer'].toString().isNotEmpty) 
+              optionsList.add(question['correct_answer']);
+          }
+          
+          // Присваиваем новый список, а не модифицируем существующий
+          question['options'] = optionsList;
+        }
+        
+        processedQuestions.add(question);
+      }
+      
+      setState(() {
+        questions = processedQuestions;
+        userAnswers = List.filled(processedQuestions.length, null);
+        if (widget.isTimerEnabled) {
+          _startTimer();
+        }
+      });
+      
+      print('Вопросы успешно загружены и обработаны');
+    } catch (e) {
+      print('Ошибка при загрузке вопросов: $e');
+      setState(() {
+        questions = []; // Установить пустой список, чтобы показать сообщение об ошибке
+      });
+    }
   }
 
   void _saveAnswer() {
@@ -352,16 +438,10 @@ class _TestScreenState extends State<TestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.topicTitle, style: const TextStyle(
-          color: Colors.white,
-          shadows: [
-            Shadow(
-              color: Colors.black26,
-              offset: Offset(0, 2),
-              blurRadius: 10,
-            ),
-          ],
-        )),
+        title: Text(
+          widget.topicTitle,
+          style: const TextStyle(color: Colors.white),
+        ),
         backgroundColor: const Color(0xFF2F642D),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -374,7 +454,44 @@ class _TestScreenState extends State<TestScreen> {
           ),
         ),
         child: questions.isEmpty
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Загрузка вопросов...',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 2),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _loadQuestions(); // Повторная попытка загрузки
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF2F642D),
+                      ),
+                      child: Text('Повторить попытку'),
+                    ),
+                  ],
+                ),
+              )
             : Column(
           children: [
             Padding(

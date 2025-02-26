@@ -6,11 +6,6 @@ void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
     await DBProvider.db.initDB();
-    await DBProvider.db.clearDatabase();
-    print('База данных очищена');
-
-    await DBProvider.db.importTopicFromJSON(1);
-
     runApp(const MainApp());
   } catch (e) {
     print('Ошибка при запуске: $e');
