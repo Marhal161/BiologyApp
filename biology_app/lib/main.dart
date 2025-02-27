@@ -5,11 +5,10 @@ import 'screens/chapters_screen.dart';
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    await DBProvider.db.initDB();
-    await DBProvider.db.clearDatabase();
-    print('База данных очищена');
-
-    await DBProvider.db.importTopicFromJSON(1);
+    
+    // Импортируем готовую базу данных из файла
+    await DBProvider.db.importFromDatabaseFile();
+    print('База данных импортирована из файла');
 
     runApp(const MainApp());
   } catch (e) {
