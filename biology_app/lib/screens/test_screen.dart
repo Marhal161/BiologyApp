@@ -91,19 +91,34 @@ class _TestScreenState extends State<TestScreen> {
         }
       });
     } else {
-      Navigator.pushAndRemoveUntil(
+      Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) =>
-              ResultsScreen(
-                topicTitle: widget.topicTitle,
-                questions: questions,
-                userAnswers: userAnswers,
-              ),
-        ),
-            (route) => route.settings.name == '/categories',
+        _createRoute(),
       );
     }
+  }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          ResultsScreen(
+            topicTitle: widget.topicTitle,
+            questions: questions,
+            userAnswers: userAnswers,
+          ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
   }
 
   Widget _buildQuestion(Map<String, dynamic> question) {
