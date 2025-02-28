@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui'; // Для использования ImageFilter.blur
 import 'topic_screen.dart';
 import '../database.dart';
 import '../services/test_progress_service.dart';
@@ -85,66 +86,73 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ],
         ),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(widget.chapterImage),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.5),
-              BlendMode.darken,
+      body: Stack(
+        children: [
+          // Фоновое изображение
+          Positioned.fill(
+            child: Image.asset(
+              widget.chapterImage,
+              fit: BoxFit.cover,
             ),
           ),
-        ),
-        child: Column(
-          children: [
-            // Поле поиска
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.transparent, // Полностью прозрачный фон
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.5), // Белая обводка
-                    width: 1,
-                  ),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  style: const TextStyle(color: Colors.white), // Белый текст
-                  decoration: InputDecoration(
-                    hintText: 'Поиск по темам...',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)), // Прозрачный текст подсказки
-                    prefixIcon: Icon(Icons.search, color: Colors.white), // Белая иконка
-                    border: InputBorder.none, // Убираем стандартную границу
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  ),
-                ),
-              ),
+          // Размытие фона
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: Container(
+              color: Colors.black.withOpacity(0.5), // Затемнение фона
             ),
-            // Список тем
-            Expanded(
-              child: ListView.builder(
+          ),
+          // Основной контент
+          Column(
+            children: [
+              // Поле поиска
+              Padding(
                 padding: const EdgeInsets.all(16.0),
-                itemCount: _filteredTopics.length,
-                itemBuilder: (context, index) {
-                  final topic = _filteredTopics[index];
-                  return Stack(
-                    children: [
-                      _buildTopicCard(context, topic),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: _buildTestIndicator(topic['id']),
-                      ),
-                    ],
-                  );
-                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent, // Полностью прозрачный фон
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.5), // Белая обводка
+                      width: 1,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    style: const TextStyle(color: Colors.white), // Белый текст
+                    decoration: InputDecoration(
+                      hintText: 'Поиск по темам...',
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)), // Прозрачный текст подсказки
+                      prefixIcon: Icon(Icons.search, color: Colors.white), // Белая иконка
+                      border: InputBorder.none, // Убираем стандартную границу
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
-        ),
+              // Список тем
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: _filteredTopics.length,
+                  itemBuilder: (context, index) {
+                    final topic = _filteredTopics[index];
+                    return Stack(
+                      children: [
+                        _buildTopicCard(context, topic),
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: _buildTestIndicator(topic['id']),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -278,7 +286,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         if (!snapshot.hasData) {
           return _buildIndicator(Colors.red); // Не пройден
         }
-        
+
         double score = snapshot.data!;
         if (score >= 90) {
           return _buildIndicator(Colors.green); // Пройден на 90% и выше
@@ -296,13 +304,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black45,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
       ),
     );
   }
