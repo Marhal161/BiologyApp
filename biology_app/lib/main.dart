@@ -5,7 +5,7 @@ import 'screens/chapters_screen.dart';
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     // Импортируем готовую базу данных из файла
     await DBProvider.db.importFromDatabaseFile();
     print('База данных импортирована из файла');
@@ -99,9 +99,7 @@ class StartScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChaptersScreen(),
-                      ),
+                      _createRoute(),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -133,6 +131,24 @@ class StartScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => const ChaptersScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
     );
   }
 }

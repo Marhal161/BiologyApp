@@ -39,6 +39,24 @@ class _TopicScreenState extends State<TopicScreen> {
     });
   }
 
+  Route _createRoute(Widget screen) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => screen,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
+
   void _handleTimerCheckedChanged(bool value) {
     setState(() {
       isTimerEnabled = value;
@@ -46,9 +64,8 @@ class _TopicScreenState extends State<TopicScreen> {
   }
 
   void _showTimePickerDialog() {
-    // Переменная для отслеживания, показывается ли SnackBar
     bool isSnackBarVisible = false;
-
+  
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -61,11 +78,7 @@ class _TopicScreenState extends State<TopicScreen> {
             'Установите время',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 22,
-              shadows: [
-                Shadow(
-                    color: Colors.black26, offset: Offset(0, 2), blurRadius: 10)
-              ],
+              fontWeight: FontWeight.bold,
             ),
           ),
           content: Column(
@@ -75,65 +88,57 @@ class _TopicScreenState extends State<TopicScreen> {
                 'Укажите время на ответ (в секундах, максимум 300 секунд):',
                 style: TextStyle(color: Colors.white),
               ),
-              const SizedBox(height: 20),
               TextField(
-                keyboardType: TextInputType.number,
                 style: const TextStyle(color: Colors.white),
+                keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  enabledBorder: OutlineInputBorder(
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white70),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  labelText: 'Время в секундах',
-                  labelStyle: TextStyle(color: Colors.white70),
                 ),
                 onChanged: (value) {
                   if (value.isNotEmpty) {
-                    int newTime = int.parse(value);
+                    int newTime = int.tryParse(value) ?? 0;
                     if (newTime > 300) {
                       if (!isSnackBarVisible) {
                         isSnackBarVisible = true;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Максимальное время - 300 секунд (5 минут)'),
+                          const SnackBar(
+                            content: Text('Максимальное время - 300 секунд (5 минут)'),
                             backgroundColor: Colors.red,
                             duration: Duration(seconds: 2),
                           ),
-                        ).closed.then((_) {
-                          isSnackBarVisible = false;
-                        });
+                        ).closed.then((_) => isSnackBarVisible = false);
                       }
                     } else if (newTime < 1) {
                       if (!isSnackBarVisible) {
                         isSnackBarVisible = true;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                             content: Text('Минимальное время - 1 секунда'),
                             backgroundColor: Colors.red,
                             duration: Duration(seconds: 2),
                           ),
-                        ).closed.then((_) {
-                          isSnackBarVisible = false;
-                        });
+                        ).closed.then((_) => isSnackBarVisible = false);
                       }
                     } else {
-                      timePerQuestion = newTime;
+                      setState(() {
+                        timePerQuestion = newTime;
+                      });
                     }
                   }
                 },
-                controller: TextEditingController(
-                    text: timePerQuestion.toString()),
+                controller: TextEditingController(text: timePerQuestion.toString()),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
-                  'Отмена', style: TextStyle(color: Colors.white70)),
+              child: const Text('Отмена', style: TextStyle(color: Colors.white70)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -141,39 +146,20 @@ class _TopicScreenState extends State<TopicScreen> {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => TestScreen(
-                        topicId: widget.topicId,
-                        topicTitle: widget.topicTitle,
-                        isTimerEnabled: true,
-                        timePerQuestion: timePerQuestion,
-                      ),
-                    ),
+                    _createRoute(TestScreen(
+                      topicId: widget.topicId,
+                      topicTitle: widget.topicTitle,
+                      isTimerEnabled: true,
+                      timePerQuestion: timePerQuestion,
+                    )),
                   );
-                } else {
-                  if (!isSnackBarVisible) {
-                    isSnackBarVisible = true;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            timePerQuestion > 300
-                                ? 'Максимальное время - 300 секунд (5 минут)'
-                                : 'Минимальное время - 1 секунда'),
-                        backgroundColor: Colors.red,
-                        duration: Duration(seconds: 2),
-                      ),
-                    ).closed.then((_) {
-                      isSnackBarVisible = false;
-                    });
-                  }
                 }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFF2F642D),
               ),
-              child: const Text(
-                  'Начать', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text('Начать', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -187,7 +173,7 @@ class _TopicScreenState extends State<TopicScreen> {
       appBar: AppBar(
         title: Text(
           widget.topicTitle,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             shadows: [
               Shadow(
@@ -198,7 +184,7 @@ class _TopicScreenState extends State<TopicScreen> {
             ],
           ),
         ),
-        backgroundColor: Color(0xFF2F642D),
+        backgroundColor: const Color(0xFF2F642D),
         iconTheme: const IconThemeData(
           color: Colors.white,
           shadows: [
@@ -211,11 +197,14 @@ class _TopicScreenState extends State<TopicScreen> {
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            colors: [Color(0xFF2F642D), Color(0xFF5A9647)],
-            focal: Alignment.topRight,
-            radius: 3.0,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/bioChap1.jpeg'),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.5),
+              BlendMode.darken,
+            ),
           ),
         ),
         child: Center(
@@ -262,18 +251,15 @@ class _TopicScreenState extends State<TopicScreen> {
                     ],
                   ),
                 ),
-              // Перемещаем кнопку настроек в начало Column
               Align(
                 alignment: Alignment.topRight,
                 child: IconButton(
-                  icon: Icon(Icons.settings),
+                  icon: const Icon(Icons.settings),
                   onPressed: () {
-                    // Show the sliding menu from the bottom
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
-                      // Make background transparent for blur effect
                       builder: (BuildContext context) {
                         return _SettingsMenu(
                           onTimerCheckedChanged: _handleTimerCheckedChanged,
@@ -283,12 +269,11 @@ class _TopicScreenState extends State<TopicScreen> {
                     );
                   },
                   iconSize: 40,
-                  // Icon size
                   color: Colors.white,
                   splashColor: Colors.white.withOpacity(0.3),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (isTimerEnabled) {
@@ -296,14 +281,12 @@ class _TopicScreenState extends State<TopicScreen> {
                   } else {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => TestScreen(
-                          topicId: widget.topicId,
-                          topicTitle: widget.topicTitle,
-                          isTimerEnabled: false,
-                          timePerQuestion: 0,
-                        ),
-                      ),
+                      _createRoute(TestScreen(
+                        topicId: widget.topicId,
+                        topicTitle: widget.topicTitle,
+                        isTimerEnabled: false,
+                        timePerQuestion: 0,
+                      )),
                     ).then((_) {
                       // Обновляем информацию о прохождении теста при возвращении
                       _loadTestProgress();
@@ -312,8 +295,7 @@ class _TopicScreenState extends State<TopicScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2F642D),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shadowColor: Colors.black,
                   elevation: 4,
                 ),
@@ -328,7 +310,6 @@ class _TopicScreenState extends State<TopicScreen> {
                         blurRadius: 10,
                       ),
                     ],
-                    fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
@@ -341,7 +322,7 @@ class _TopicScreenState extends State<TopicScreen> {
   }
 }
 
-class _SettingsMenu extends StatefulWidget {
+class _SettingsMenu extends StatelessWidget {
   final Function(bool) onTimerCheckedChanged;
   final bool isTimerEnabled;
 
@@ -350,11 +331,6 @@ class _SettingsMenu extends StatefulWidget {
     required this.isTimerEnabled,
   });
 
-  @override
-  State<_SettingsMenu> createState() => _SettingsMenuState();
-}
-
-class _SettingsMenuState extends State<_SettingsMenu> {
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -369,9 +345,9 @@ class _SettingsMenuState extends State<_SettingsMenu> {
         ),
         Container(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
           ),
           height: MediaQuery.of(context).size.height * 0.4,
           child: Column(
@@ -383,9 +359,9 @@ class _SettingsMenuState extends State<_SettingsMenu> {
               ),
               CheckboxListTile(
                 title: const Text('Таймер'),
-                value: widget.isTimerEnabled,
+                value: isTimerEnabled,
                 onChanged: (bool? value) {
-                  widget.onTimerCheckedChanged(value ?? false);
+                  onTimerCheckedChanged(value ?? false);
                   Navigator.pop(context);
                 },
                 controlAffinity: ListTileControlAffinity.leading,
