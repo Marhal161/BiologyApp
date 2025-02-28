@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'categories_screen.dart'; // Импортируем CategoriesScreen
+import 'topic_screen.dart'; // Импортируем TopicScreen
 
 class ResultsScreen extends StatelessWidget {
   final String topicTitle;
@@ -27,11 +27,8 @@ class ResultsScreen extends StatelessWidget {
 
     return WillPopScope(
       onWillPop: () async {
-        // При нажатии кнопки "Назад" переходим на экран категорий с анимацией
-        Navigator.pushReplacement(
-          context,
-          _createRoute(),
-        );
+        // При нажатии кнопки "Назад" переходим на экран темы с анимацией
+        _navigateToTopicScreen(context);
         // Возвращаем false, чтобы стандартное поведение кнопки "Назад" не происходило
         return false;
       },
@@ -52,9 +49,7 @@ class ResultsScreen extends StatelessWidget {
           ),
           backgroundColor: const Color(0xFF2F642D),
           iconTheme: const IconThemeData(color: Colors.white),
-          actions: [
-
-          ],
+          actions: [],
         ),
         body: Container(
           decoration: const BoxDecoration(
@@ -144,11 +139,8 @@ class ResultsScreen extends StatelessWidget {
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      // Переход на экран категорий с анимацией
-                      Navigator.pushReplacement(
-                        context,
-                        _createRoute(),
-                      );
+                      // Переход на экран темы с анимацией
+                      _navigateToTopicScreen(context);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF2F642D), // Цвет кнопки
@@ -157,7 +149,7 @@ class ResultsScreen extends StatelessWidget {
                       shadowColor: Colors.black, // Цвет тени
                     ),
                     child: const Text(
-                      'Перейти к категориям',
+                      'Перейти к теме',
                       style: TextStyle(
                         shadows: [
                           Shadow(
@@ -178,26 +170,28 @@ class ResultsScreen extends StatelessWidget {
     );
   }
 
-  // Функция для создания маршрута с анимацией перехода
-  Route _createRoute() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => CategoriesScreen(
-        chapterId: 1, // Пример ID главы
-        chapterTitle: 'Название главы', // Пример названия главы
-        chapterImage: 'assets/images/bioChap1.jpeg', // Пример изображения главы
+  // Метод для навигации на TopicScreen
+  void _navigateToTopicScreen(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => TopicScreen(
+          topicId: 1, // Пример ID темы
+          topicTitle: 'Название темы', // Пример названия темы
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.ease;
+
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
       ),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.ease;
-
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
-      },
     );
   }
 }

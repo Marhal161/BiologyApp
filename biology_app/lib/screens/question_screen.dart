@@ -42,7 +42,7 @@ class QuestionScreen extends StatelessWidget {
                 // Логика для проверки ответа
 
                 // Переход на следующий экран с анимацией
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   _createRoute(),
                 );

@@ -144,7 +144,7 @@ class _TopicScreenState extends State<TopicScreen> {
               onPressed: () {
                 if (timePerQuestion <= 300 && timePerQuestion >= 1) {
                   Navigator.pop(context);
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     _createRoute(TestScreen(
                       topicId: widget.topicId,
@@ -285,7 +285,7 @@ class _TopicScreenState extends State<TopicScreen> {
                     if (isTimerEnabled) {
                       _showTimePickerDialog();
                     } else {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         _createRoute(TestScreen(
                           topicId: widget.topicId,

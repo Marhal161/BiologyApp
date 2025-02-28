@@ -109,7 +109,7 @@ class _TestScreenState extends State<TestScreen> {
     
     TestProgressService.saveTestResult(widget.topicId, score);
     
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       _createRoute(),
     );
