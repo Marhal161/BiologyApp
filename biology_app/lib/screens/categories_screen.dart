@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'topic_screen.dart';
 import '../database.dart';
+import '../services/test_progress_service.dart';
 
 class CategoriesScreen extends StatelessWidget {
   final int chapterId;
@@ -73,15 +74,14 @@ class CategoriesScreen extends StatelessWidget {
               itemCount: topics.length,
               itemBuilder: (context, index) {
                 final topic = topics[index];
-                return Column(
+                return Stack(
                   children: [
-                    _buildCategoryCard(
-                      topic['title'],
-                      topic['image_path'],
-                      topic['id'],
-                      context,
+                    _buildTopicCard(context, topic),
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: _buildTestIndicator(topic['id']),
                     ),
-                    const SizedBox(height: 16),
                   ],
                 );
               },
@@ -92,7 +92,7 @@ class CategoriesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryCard(String title, String imageUrl, int topicId, BuildContext context) {
+  Widget _buildTopicCard(BuildContext context, Map<String, dynamic> topic) {
     return Card(
       elevation: 4,
       clipBehavior: Clip.antiAlias,
@@ -102,8 +102,8 @@ class CategoriesScreen extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => TopicScreen(
-                topicTitle: title,
-                topicId: topicId,
+                topicTitle: topic['title'],
+                topicId: topic['id'],
               ),
             ),
           );
@@ -114,7 +114,7 @@ class CategoriesScreen extends StatelessWidget {
             SizedBox(
               height: 200,
               child: Image.asset(
-                imageUrl,
+                topic['image_path'],
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   print('Ошибка загрузки изображения: $error');
@@ -134,7 +134,7 @@ class CategoriesScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Тема ${topicId}',
+                    'Тема ${topic['id']}',
                     style: const TextStyle(
                       fontSize: 18,
                       color: Colors.grey,
@@ -142,7 +142,7 @@ class CategoriesScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    title,
+                    topic['title'],
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -160,6 +160,42 @@ class CategoriesScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTestIndicator(int topicId) {
+    return FutureBuilder<double?>(
+      future: TestProgressService.getTestScore(topicId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return _buildIndicator(Colors.red); // Не пройден
+        }
+        
+        double score = snapshot.data!;
+        if (score >= 90) {
+          return _buildIndicator(Colors.green); // Пройден на 90% и выше
+        } else {
+          return _buildIndicator(Colors.orange); // Пройден, но менее 90%
+        }
+      },
+    );
+  }
+
+  Widget _buildIndicator(Color color) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black45,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
     );
   }

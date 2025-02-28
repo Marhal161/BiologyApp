@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui'; // For the BackdropFilter
 import 'test_screen.dart';
+import '../services/test_progress_service.dart';
 
 class TopicScreen extends StatefulWidget {
   final String topicTitle;
@@ -19,6 +20,24 @@ class TopicScreen extends StatefulWidget {
 class _TopicScreenState extends State<TopicScreen> {
   bool isTimerEnabled = false;
   int timePerQuestion = 30;
+  double? testScore;
+  bool isTestCompleted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTestProgress();
+  }
+
+  Future<void> _loadTestProgress() async {
+    final completed = await TestProgressService.isTestCompleted(widget.topicId);
+    final score = await TestProgressService.getTestScore(widget.topicId);
+    
+    setState(() {
+      isTestCompleted = completed;
+      testScore = score;
+    });
+  }
 
   void _handleTimerCheckedChanged(bool value) {
     setState(() {
@@ -203,6 +222,46 @@ class _TopicScreenState extends State<TopicScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Информация о прохождении теста
+              if (isTestCompleted)
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: testScore! >= 90 
+                        ? Colors.green.withOpacity(0.7) 
+                        : Colors.orange.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        testScore! >= 90 ? Icons.check_circle : Icons.info,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Тест пройден с результатом: ${testScore!.toStringAsFixed(1)}%',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        testScore! >= 90 
+                            ? 'Отличный результат!' 
+                            : 'Вы можете пройти тест еще раз для улучшения результата.',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               // Перемещаем кнопку настроек в начало Column
               Align(
                 alignment: Alignment.topRight,
@@ -245,7 +304,10 @@ class _TopicScreenState extends State<TopicScreen> {
                           timePerQuestion: 0,
                         ),
                       ),
-                    );
+                    ).then((_) {
+                      // Обновляем информацию о прохождении теста при возвращении
+                      _loadTestProgress();
+                    });
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -255,9 +317,9 @@ class _TopicScreenState extends State<TopicScreen> {
                   shadowColor: Colors.black,
                   elevation: 4,
                 ),
-                child: const Text(
-                  'Начать тестирование',
-                  style: TextStyle(
+                child: Text(
+                  isTestCompleted ? 'Пройти тест снова' : 'Начать тестирование',
+                  style: const TextStyle(
                     fontSize: 24,
                     shadows: [
                       Shadow(

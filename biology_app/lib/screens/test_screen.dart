@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../database.dart';
 import 'results_screen.dart';
 import 'dart:async';
+import '../services/test_progress_service.dart';
 
 class TestScreen extends StatefulWidget {
   final int topicId;
@@ -91,19 +92,33 @@ class _TestScreenState extends State<TestScreen> {
         }
       });
     } else {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              ResultsScreen(
-                topicTitle: widget.topicTitle,
-                questions: questions,
-                userAnswers: userAnswers,
-              ),
-        ),
-            (route) => route.settings.name == '/categories',
-      );
+      _finishTest();
     }
+  }
+
+  void _finishTest() {
+    int correctAnswers = 0;
+    for (int i = 0; i < questions.length; i++) {
+      if (userAnswers[i]?.toUpperCase() == 
+          questions[i]['correct_answer'].toString().toUpperCase()) {
+        correctAnswers++;
+      }
+    }
+    
+    double score = (correctAnswers / questions.length) * 100;
+    
+    TestProgressService.saveTestResult(widget.topicId, score);
+    
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultsScreen(
+          topicTitle: widget.topicTitle,
+          questions: questions,
+          userAnswers: userAnswers,
+        ),
+      ),
+    );
   }
 
   Widget _buildQuestion(Map<String, dynamic> question) {
