@@ -30,7 +30,7 @@ class DBProvider {
       // Если файл не существует, создаем базу данных
       return await openDatabase(
         path, 
-        version: 3,
+        version: 6,
         onCreate: (Database db, int version) async {
           await db.execute("""
             CREATE TABLE Chapters (
@@ -55,31 +55,104 @@ class DBProvider {
           await db.execute("""
             CREATE TABLE Questions (
               id INTEGER PRIMARY KEY,
-              topic_id INTEGER,
-              question_text TEXT,
+              topic_id INTEGER NOT NULL,
+              part TEXT NOT NULL,
+              question_text TEXT NOT NULL,
+              question_type TEXT NOT NULL,
               correct_answer TEXT,
-              wrong_answer1 TEXT,
-              wrong_answer2 TEXT,
-              wrong_answer3 TEXT,
-              wrong_answer4 TEXT,
-              is_open_ended INTEGER,
-              options TEXT,
+              max_words INTEGER DEFAULT 1,
+              image_path TEXT,
               FOREIGN KEY (topic_id) REFERENCES Topics (id)
+            )
+          """);
+
+          await db.execute("""
+            CREATE TABLE MatchingOptions (
+              id INTEGER PRIMARY KEY,
+              question_id INTEGER NOT NULL,
+              item_text TEXT NOT NULL,
+              item_group TEXT NOT NULL,
+              item_index TEXT NOT NULL,
+              FOREIGN KEY (question_id) REFERENCES Questions (id)
+            )
+          """);
+
+          await db.execute("""
+            CREATE TABLE MatchingAnswers (
+              id INTEGER PRIMARY KEY,
+              question_id INTEGER NOT NULL,
+              left_item_index TEXT NOT NULL,
+              right_item_index TEXT NOT NULL,
+              FOREIGN KEY (question_id) REFERENCES Questions (id)
             )
           """);
         },
         onUpgrade: (Database db, int oldVersion, int newVersion) async {
-          if (oldVersion < 3) {
+          if (oldVersion < 6) {
+            // Добавляем новое поле в существующую таблицу
+            await db.execute('ALTER TABLE Questions ADD COLUMN image_path TEXT');
+          }
+          if (oldVersion < 5) {
+            // Сохраняем старые данные если нужно
+            final oldQuestions = await db.query('Questions');
+            
+            // Удаляем старые таблицы
+            await db.execute('DROP TABLE IF EXISTS Questions');
+            await db.execute('DROP TABLE IF EXISTS MatchingOptions');
+            await db.execute('DROP TABLE IF EXISTS MatchingAnswers');
+            
+            // Создаем новые таблицы
             await db.execute("""
-              CREATE TABLE Chapters (
+              CREATE TABLE Questions (
                 id INTEGER PRIMARY KEY,
-                title TEXT,
-                order_number INTEGER,
-                image_path TEXT
+                topic_id INTEGER NOT NULL,
+                part TEXT NOT NULL,
+                question_text TEXT NOT NULL,
+                question_type TEXT NOT NULL,
+                correct_answer TEXT,
+                max_words INTEGER DEFAULT 1,
+                image_path TEXT,
+                FOREIGN KEY (topic_id) REFERENCES Topics (id) ON DELETE CASCADE
               )
             """);
-            await db.execute("ALTER TABLE Topics ADD COLUMN chapter_id INTEGER REFERENCES Chapters (id)");
-            await db.execute("ALTER TABLE Topics ADD COLUMN order_number INTEGER");
+
+            await db.execute("""
+              CREATE TABLE MatchingOptions (
+                id INTEGER PRIMARY KEY,
+                question_id INTEGER NOT NULL,
+                item_text TEXT NOT NULL,
+                item_group TEXT NOT NULL,
+                item_index TEXT NOT NULL,
+                FOREIGN KEY (question_id) REFERENCES Questions (id) ON DELETE CASCADE
+              )
+            """);
+
+            await db.execute("""
+              CREATE TABLE MatchingAnswers (
+                id INTEGER PRIMARY KEY,
+                question_id INTEGER NOT NULL,
+                left_item_index TEXT NOT NULL,
+                right_item_index TEXT NOT NULL,
+                FOREIGN KEY (question_id) REFERENCES Questions (id) ON DELETE CASCADE
+              )
+            """);
+
+            // Создаем индексы
+            await db.execute('CREATE INDEX idx_questions_topic_part ON Questions(topic_id, part)');
+            await db.execute('CREATE INDEX idx_matching_options_question ON MatchingOptions(question_id)');
+            await db.execute('CREATE INDEX idx_matching_answers_question ON MatchingAnswers(question_id)');
+
+            // Мигрируем старые данные в новую структуру если нужно
+            for (var oldQuestion in oldQuestions) {
+              await db.insert('Questions', {
+                'topic_id': oldQuestion['topic_id'],
+                'part': 'A', // Предполагаем, что все старые вопросы относятся к части A
+                'question_text': oldQuestion['question_text'],
+                'question_type': 'single_word',
+                'correct_answer': oldQuestion['correct_answer'],
+                'max_words': 1,
+              });
+            }
           }
         },
       );
@@ -204,6 +277,120 @@ class DBProvider {
       where: 'chapter_id = ?',
       whereArgs: [chapterId],
       orderBy: 'order_number ASC',
+    );
+  }
+
+  Future<int> insertPartAQuestion(
+      int topicId, 
+      String questionText, 
+      String questionType, 
+      String correctAnswer, 
+      {int maxWords = 1, String? imagePath}) async {
+    final db = await database;
+    return await db.insert(
+      'Questions',
+      {
+        'topic_id': topicId,
+        'part': 'A',
+        'question_text': questionText,
+        'question_type': questionType,
+        'correct_answer': correctAnswer,
+        'max_words': maxWords,
+        'image_path': imagePath,
+      },
+    );
+  }
+
+  Future<void> insertPartBQuestion(
+      int topicId,
+      String questionText,
+      List<Map<String, String>> leftItems,
+      List<Map<String, String>> rightItems,
+      List<Map<String, String>> answers,
+      {String? imagePath}) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      // Вставляем вопрос с изображением
+      final questionId = await txn.insert(
+        'Questions',
+        {
+          'topic_id': topicId,
+          'part': 'B',
+          'question_text': questionText,
+          'question_type': 'matching',
+          'image_path': imagePath,
+        },
+      );
+
+      // Вставляем элементы левой колонки
+      for (var item in leftItems) {
+        await txn.insert(
+          'MatchingOptions',
+          {
+            'question_id': questionId,
+            'item_text': item['text'],
+            'item_group': 'left',
+            'item_index': item['index'],
+          },
+        );
+      }
+
+      // Вставляем элементы правой колонки
+      for (var item in rightItems) {
+        await txn.insert(
+          'MatchingOptions',
+          {
+            'question_id': questionId,
+            'item_text': item['text'],
+            'item_group': 'right',
+            'item_index': item['index'],
+          },
+        );
+      }
+
+      // Вставляем правильные соответствия
+      for (var answer in answers) {
+        await txn.insert(
+          'MatchingAnswers',
+          {
+            'question_id': questionId,
+            'left_item_index': answer['left'],
+            'right_item_index': answer['right'],
+          },
+        );
+      }
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getQuestionsByPart(int topicId, String part) async {
+    final db = await database;
+    return await db.query(
+      'Questions',
+      where: 'topic_id = ? AND part = ?',
+      whereArgs: [topicId, part],
+    );
+  }
+
+  Future<Map<String, List<Map<String, dynamic>>>> getMatchingOptions(int questionId) async {
+    final db = await database;
+    final options = await db.query(
+      'MatchingOptions',
+      where: 'question_id = ?',
+      whereArgs: [questionId],
+    );
+
+    return {
+      'left': options.where((o) => o['item_group'] == 'left').toList(),
+      'right': options.where((o) => o['item_group'] == 'right').toList(),
+    };
+  }
+
+  Future<List<Map<String, dynamic>>> getMatchingAnswers(int questionId) async {
+    final db = await database;
+    return await db.query(
+      'MatchingAnswers',
+      where: 'question_id = ?',
+      whereArgs: [questionId],
     );
   }
 }
