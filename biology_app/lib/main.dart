@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'database.dart';
 import 'screens/chapters_screen.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
+    
+    // Устанавливаем только портретную ориентацию
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
 
     // Импортируем готовую базу данных из файла
     await DBProvider.db.importFromDatabaseFile();
