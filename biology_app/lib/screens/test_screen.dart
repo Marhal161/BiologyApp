@@ -279,7 +279,6 @@ class _TestScreenState extends State<TestScreen> {
 
           final options = snapshot.data!;
           
-          // Полностью перерабатываем структуру для лучшей адаптивности
           return Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -478,21 +477,27 @@ class _TestScreenState extends State<TestScreen> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-            question['question_text'] ?? 'Вопрос без текста',
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.white,
-                shadows: [
-                  Shadow(
-                    color: Colors.black26,
-                    offset: Offset(0, 2),
-                    blurRadius: 10,
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  Text(
+                    question['question_text'] ?? 'Вопрос без текста',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 2),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
                   ),
+                  if (questionImage != null) questionImage,
                 ],
               ),
             ),
-          if (questionImage != null) questionImage,
             const SizedBox(height: 10),
             Center(
               child: Container(
@@ -514,6 +519,14 @@ class _TestScreenState extends State<TestScreen> {
                         _buildSequenceButton('Г', 3),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildSequenceButton('Д', 4),
+                        _buildSequenceButton('Е', 5),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -523,7 +536,7 @@ class _TestScreenState extends State<TestScreen> {
               Text(
                 'Ваша последовательность: $sequenceAnswer',
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Colors.white,
                   shadows: [
                     Shadow(
@@ -801,9 +814,9 @@ class _TestScreenState extends State<TestScreen> {
               sequenceAnswer = sequenceAnswer.replaceAll(letter, '');
               selectedAnswer = sequenceAnswer.isEmpty ? null : sequenceAnswer;
             } else {
-              if (sequenceAnswer.length < 4) {
+              if (sequenceAnswer.length < 6) {
                 sequenceAnswer += letter;
-                if (sequenceAnswer.length == 4) {
+                if (sequenceAnswer.length == 6) {
                   selectedAnswer = sequenceAnswer;
                 }
               }
