@@ -474,82 +474,93 @@ class _TestScreenState extends State<TestScreen> {
         ],
       );
     } else if (questionType == 'sequence') {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SingleChildScrollView(
+      // Получаем текст вопроса, который содержит варианты ответов
+      final questionText = question['question_text'] as String? ?? 'Вопрос без текста';
+      
+      // Разделяем вопрос и варианты ответов
+      List<String> questionParts = questionText.split('\n');
+      String mainQuestion = questionParts[0];
+      List<String> options = [];
+      
+      // Извлекаем варианты ответов из текста вопроса
+      for (int i = 1; i < questionParts.length; i++) {
+        final line = questionParts[i].trim();
+        if (line.startsWith('А)') || line.startsWith('Б)') || 
+            line.startsWith('В)') || line.startsWith('Г)') || 
+            line.startsWith('Д)') || line.startsWith('Е)') ||
+            line.startsWith('Ж)') || line.startsWith('З)')) {
+          options.add(line.substring(0, 1)); // Берем только букву
+        }
+      }
+      
+      // Если варианты не найдены в тексте, создаем стандартный набор
+      if (options.isEmpty) {
+        options = ['А', 'Б', 'В', 'Г', 'Д', 'Е'];
+      }
+      
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                Text(
+                  mainQuestion,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        offset: Offset(0, 2),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                ),
+                if (questionImage != null) questionImage,
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 180),
               child: Column(
                 children: [
-                  Text(
-                    question['question_text'] ?? 'Вопрос без текста',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 2),
-                          blurRadius: 10,
-                        ),
+                  for (int i = 0; i < options.length; i += 2) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildSequenceButton(options[i], i),
+                        if (i + 1 < options.length) _buildSequenceButton(options[i + 1], i + 1),
                       ],
                     ),
-                  ),
-                  if (questionImage != null) questionImage,
+                    if (i + 1 < options.length) const SizedBox(height: 8),
+                  ],
                 ],
               ),
             ),
+          ),
+          if (sequenceAnswer.isNotEmpty) ...[
             const SizedBox(height: 10),
-            Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 180),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildSequenceButton('А', 0),
-                        _buildSequenceButton('Б', 1),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildSequenceButton('В', 2),
-                        _buildSequenceButton('Г', 3),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildSequenceButton('Д', 4),
-                        _buildSequenceButton('Е', 5),
-                      ],
-                    ),
-                  ],
-                ),
+            Text(
+              'Ваша последовательность: $sequenceAnswer',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black26,
+                    offset: Offset(0, 2),
+                    blurRadius: 10,
+                  ),
+                ],
               ),
             ),
-            if (sequenceAnswer.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(
-                'Ваша последовательность: $sequenceAnswer',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
-        );
+        ],
+      );
     } else if (question['options'] != null) {
       try {
         var options = json.decode(question['options'] as String);
@@ -646,25 +657,26 @@ class _TestScreenState extends State<TestScreen> {
           ],
         );
     } else if (questionType == 'multi_choice') {
-      // Получаем текст вопроса, который содержит варианты ответов A, Б, В и т.д.
+      // Получаем текст вопроса, который содержит варианты ответов
       final questionText = question['question_text'] as String? ?? 'Вопрос без текста';
       
-      // Разделяем вопрос и варианты ответов (если они есть в тексте вопроса)
+      // Разделяем вопрос и варианты ответов
       List<String> questionParts = questionText.split('\n');
       String mainQuestion = questionParts[0];
       List<String> options = [];
       
-      // Если в тексте вопроса были варианты, извлекаем их
+      // Извлекаем варианты ответов из текста вопроса
       for (int i = 1; i < questionParts.length; i++) {
         final line = questionParts[i].trim();
         if (line.startsWith('А)') || line.startsWith('Б)') || 
             line.startsWith('В)') || line.startsWith('Г)') || 
-            line.startsWith('Д)') || line.startsWith('Е)')) {
+            line.startsWith('Д)') || line.startsWith('Е)') ||
+            line.startsWith('Ж)') || line.startsWith('З)')) {
           options.add(line);
         }
       }
       
-      // Если варианты ответов не найдены в тексте вопроса, создаем заглушки
+      // Если варианты не найдены в тексте, создаем стандартный набор
       if (options.isEmpty) {
         options = ['А) Вариант А', 'Б) Вариант Б', 'В) Вариант В', 'Г) Вариант Г'];
       }
@@ -693,9 +705,8 @@ class _TestScreenState extends State<TestScreen> {
           ),
           if (questionImage != null) questionImage,
           const SizedBox(height: 10),
-          // Отображаем варианты ответов из текста вопроса
+          // Отображаем варианты ответов
           ...options.map((option) {
-            // Получаем букву варианта ответа (А, Б, В, Г, Д, Е)
             String letter = option.substring(0, 1);
             bool isSelected = selectedLetters.contains(letter);
             
@@ -703,7 +714,6 @@ class _TestScreenState extends State<TestScreen> {
               padding: const EdgeInsets.symmetric(vertical: 4.0),
               child: Row(
                 children: [
-                  // Кнопка выбора
                   SizedBox(
                     width: 50,
                     height: 50,
@@ -711,13 +721,10 @@ class _TestScreenState extends State<TestScreen> {
                       onPressed: () {
                         setState(() {
                           if (isSelected) {
-                            // Если буква уже выбрана, убираем ее
                             selectedLetters.remove(letter);
                           } else {
-                            // Иначе добавляем букву
                             selectedLetters.add(letter);
                           }
-                          // Обновляем selectedAnswer
                           selectedAnswer = selectedLetters.join('');
                         });
                       },
@@ -738,7 +745,6 @@ class _TestScreenState extends State<TestScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // Текст варианта ответа
                   Expanded(
                     child: Text(
                       option,
@@ -752,8 +758,6 @@ class _TestScreenState extends State<TestScreen> {
               ),
             );
           }).toList(),
-          
-          // Отображаем выбранные буквы
           if (selectedLetters.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
@@ -814,12 +818,9 @@ class _TestScreenState extends State<TestScreen> {
               sequenceAnswer = sequenceAnswer.replaceAll(letter, '');
               selectedAnswer = sequenceAnswer.isEmpty ? null : sequenceAnswer;
             } else {
-              if (sequenceAnswer.length < 6) {
-                sequenceAnswer += letter;
-                if (sequenceAnswer.length == 6) {
-                  selectedAnswer = sequenceAnswer;
-                }
-              }
+              // Убираем ограничение на количество букв
+              sequenceAnswer += letter;
+              selectedAnswer = sequenceAnswer;
             }
           });
         },
