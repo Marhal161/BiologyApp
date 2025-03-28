@@ -6,11 +6,13 @@ import '../services/test_progress_service.dart';
 class TopicScreen extends StatefulWidget {
   final String topicTitle;
   final int topicId;
+  final String chapterImage; // Добавляем параметр для фонового изображения
 
   const TopicScreen({
     super.key,
     required this.topicTitle,
     required this.topicId,
+    required this.chapterImage, // Обязательный параметр
   });
 
   @override
@@ -198,10 +200,10 @@ class _TopicScreenState extends State<TopicScreen> {
       ),
       body: Stack(
         children: [
-          // Фоновое изображение
+          // Фоновое изображение (теперь используем переданное изображение)
           Positioned.fill(
             child: Image.asset(
-              'assets/images/bioChap1.jpeg',
+              widget.chapterImage, // Используем переданный параметр
               fit: BoxFit.cover,
             ),
           ),

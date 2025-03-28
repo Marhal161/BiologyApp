@@ -6,6 +6,7 @@ import '../services/test_progress_service.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:ui' show PointerDeviceKind;
 import 'dart:math' as math;
 
 class TestScreen extends StatefulWidget {
@@ -79,13 +80,13 @@ class _TestScreenState extends State<TestScreen> {
   void _saveAnswer() {
     final question = questions[currentQuestionIndex];
     final questionType = question['question_type'] as String?;
-    
+
     if (questionType == 'matching') {
       userAnswers[currentQuestionIndex] = selectedAnswer;
-    } 
+    }
     else if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
       userAnswers[currentQuestionIndex] = answerController.text.trim();
-    } 
+    }
     else if (questionType == 'sequence') {
       userAnswers[currentQuestionIndex] = sequenceAnswer;
     }
@@ -119,17 +120,17 @@ class _TestScreenState extends State<TestScreen> {
     int correctAnswers = 0;
     for (int i = 0; i < questions.length; i++) {
       final question = questions[i];
-      
+
       final questionType = question['question_type'] as String?;
-      
+
       if (questionType == 'matching') {
         try {
           final userAnswer = userAnswers[i];
           if (userAnswer == null) continue;
-          
+
           final userMatchingAnswers = json.decode(userAnswer) as Map<String, dynamic>;
           final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(question['id']);
-          
+
           bool isCorrect = true;
           if (correctMatchingAnswers.isEmpty || correctMatchingAnswers.length != userMatchingAnswers.length) {
             isCorrect = false;
@@ -137,12 +138,12 @@ class _TestScreenState extends State<TestScreen> {
             for (var answer in correctMatchingAnswers) {
               final leftIndex = answer['left_item_index'] as String?;
               final rightIndex = answer['right_item_index'] as String?;
-              
+
               if (leftIndex == null || rightIndex == null || !userMatchingAnswers.containsKey(leftIndex)) {
                 isCorrect = false;
                 break;
               }
-              
+
               if (userMatchingAnswers[leftIndex] != rightIndex) {
                 isCorrect = false;
                 break;
@@ -156,8 +157,8 @@ class _TestScreenState extends State<TestScreen> {
       } else if (questionType == 'sequence') {
         final userAnswer = userAnswers[i];
         final correctAnswer = question['correct_answer'];
-        
-        if (userAnswer != null && correctAnswer != null && 
+
+        if (userAnswer != null && correctAnswer != null &&
             userAnswer.toUpperCase() == correctAnswer.toString().toUpperCase()) {
         correctAnswers++;
       }
@@ -165,12 +166,12 @@ class _TestScreenState extends State<TestScreen> {
         // Для multi_choice просто сравниваем строки букв (без учета порядка)
         final userAnswer = userAnswers[i];
         final correctAnswer = question['correct_answer'];
-        
+
         if (userAnswer != null && correctAnswer != null) {
           // Преобразуем ответы в наборы букв для сравнения без учета порядка
           final userLetters = userAnswer.split('')..sort();
           final correctLetters = correctAnswer.toString().split('')..sort();
-          
+
           // Сравниваем отсортированные наборы букв
           if (userLetters.join() == correctLetters.join()) {
             correctAnswers++;
@@ -179,17 +180,17 @@ class _TestScreenState extends State<TestScreen> {
       } else {
         final userAnswer = userAnswers[i];
         final correctAnswer = question['correct_answer'];
-        
+
         if (userAnswer != null && correctAnswer != null) {
           // Проверка на несколько правильных ответов
           if (correctAnswer.toString().contains('/')) {
             // Разбиваем правильный ответ на несколько вариантов
             final acceptableAnswers = correctAnswer.toString().split('/');
-            
+
             // Проверяем, соответствует ли ответ пользователя любому из вариантов
-            bool isAnyMatch = acceptableAnswers.any((answer) => 
+            bool isAnyMatch = acceptableAnswers.any((answer) =>
                 userAnswer.trim().toUpperCase() == answer.trim().toUpperCase());
-                
+
             if (isAnyMatch) correctAnswers++;
           } else {
             // Обычная проверка для одного правильного ответа
@@ -200,13 +201,13 @@ class _TestScreenState extends State<TestScreen> {
         }
       }
     }
-    
+
     double score = questions.isEmpty ? 0 : (correctAnswers / questions.length) * 100;
-    
+
     await TestProgressService.saveTestResult(widget.topicId, score);
-    
+
     if (!mounted) return;
-    
+
     Navigator.pushReplacement(
       context,
       _createRoute(),
@@ -238,7 +239,7 @@ class _TestScreenState extends State<TestScreen> {
 
   Widget _buildQuestion(Map<String, dynamic> question) {
     final questionType = question['question_type'] as String?;
-    
+
     Widget? questionImage;
     if (question['image_path'] != null && question['image_path'] is String) {
       questionImage = Container(
@@ -278,7 +279,7 @@ class _TestScreenState extends State<TestScreen> {
           }
 
           final options = snapshot.data!;
-          
+
           return Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,14 +300,14 @@ class _TestScreenState extends State<TestScreen> {
                             color: Colors.white,
                           ),
                         ),
-                        if (questionImage != null) 
+                        if (questionImage != null)
                           Container(
                             margin: const EdgeInsets.only(top: 8),
                             height: 100, // Минимальная высота
                             width: double.infinity,
                             child: questionImage,
                           ),
-                        
+
                         // Инструкция в более компактном виде
                         Container(
                           margin: const EdgeInsets.only(top: 8),
@@ -328,7 +329,7 @@ class _TestScreenState extends State<TestScreen> {
                     ),
                   ),
                 ),
-                
+
                 // Выделяем больше места для самого сопоставления
                 Expanded(
                   flex: 5, // Выделяем больше места для сопоставления
@@ -344,7 +345,7 @@ class _TestScreenState extends State<TestScreen> {
                     currentMatches: matchingAnswers,
                   ),
                 ),
-                
+
                 // Показываем текущие соответствия, если они есть
                 if (matchingAnswers.isNotEmpty)
                   Container(
@@ -372,7 +373,7 @@ class _TestScreenState extends State<TestScreen> {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        // Используем Wrap вместо ListView для компактного размещения 
+                        // Используем Wrap вместо ListView для компактного размещения
                         Wrap(
                           spacing: 8,
                           runSpacing: 4,
@@ -380,7 +381,7 @@ class _TestScreenState extends State<TestScreen> {
                             // Находим соответствующие тексты для визуальной ясности
                             String leftText = '';
                             String rightText = '';
-                            
+
                             for (var item in options['left']!) {
                               if (item['item_index'] == entry.key) {
                                 leftText = item['item_text'].toString();
@@ -390,7 +391,7 @@ class _TestScreenState extends State<TestScreen> {
                                 break;
                               }
                             }
-                            
+
                             for (var item in options['right']!) {
                               if (item['item_index'] == entry.value) {
                                 rightText = item['item_text'].toString();
@@ -400,7 +401,7 @@ class _TestScreenState extends State<TestScreen> {
                                 break;
                               }
                             }
-                            
+
                             return Container(
                               margin: const EdgeInsets.only(bottom: 4),
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
@@ -467,7 +468,7 @@ class _TestScreenState extends State<TestScreen> {
             ),
             style: const TextStyle(color: Colors.white),
             cursorColor: Colors.white,
-            inputFormatters: questionType == 'number' 
+            inputFormatters: questionType == 'number'
               ? [FilteringTextInputFormatter.digitsOnly]
               : null,
           ),
@@ -476,28 +477,28 @@ class _TestScreenState extends State<TestScreen> {
     } else if (questionType == 'sequence') {
       // Получаем текст вопроса, который содержит варианты ответов
       final questionText = question['question_text'] as String? ?? 'Вопрос без текста';
-      
+
       // Разделяем вопрос и варианты ответов
       List<String> questionParts = questionText.split('\n');
       String mainQuestion = questionParts[0];
       List<String> options = [];
-      
+
       // Извлекаем варианты ответов из текста вопроса
       for (int i = 1; i < questionParts.length; i++) {
         final line = questionParts[i].trim();
-        if (line.startsWith('А)') || line.startsWith('Б)') || 
-            line.startsWith('В)') || line.startsWith('Г)') || 
+        if (line.startsWith('А)') || line.startsWith('Б)') ||
+            line.startsWith('В)') || line.startsWith('Г)') ||
             line.startsWith('Д)') || line.startsWith('Е)') ||
             line.startsWith('Ж)') || line.startsWith('З)')) {
           options.add(line.substring(0, 1)); // Берем только букву
         }
       }
-      
+
       // Если варианты не найдены в тексте, создаем стандартный набор
       if (options.isEmpty) {
         options = ['А', 'Б', 'В', 'Г', 'Д', 'Е'];
       }
-      
+
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -603,23 +604,23 @@ class _TestScreenState extends State<TestScreen> {
       } catch (e) {
         debugPrint('Ошибка при разборе options: $e');
       }
-      
+
       List<String> answers = [];
-      
+
       if (question['correct_answer'] != null) {
         answers.add(question['correct_answer'].toString());
       }
-      
+
       for (String field in ['wrong_answer1', 'wrong_answer2', 'wrong_answer3', 'wrong_answer4']) {
         if (question[field] != null) {
           answers.add(question[field].toString());
         }
       }
-      
+
       if (answers.isEmpty) {
         answers.add('Ответ недоступен');
       }
-      
+
       answers.shuffle();
 
         return Column(
@@ -659,34 +660,34 @@ class _TestScreenState extends State<TestScreen> {
     } else if (questionType == 'multi_choice') {
       // Получаем текст вопроса, который содержит варианты ответов
       final questionText = question['question_text'] as String? ?? 'Вопрос без текста';
-      
+
       // Разделяем вопрос и варианты ответов
       List<String> questionParts = questionText.split('\n');
       String mainQuestion = questionParts[0];
       List<String> options = [];
-      
+
       // Извлекаем варианты ответов из текста вопроса
       for (int i = 1; i < questionParts.length; i++) {
         final line = questionParts[i].trim();
-        if (line.startsWith('А)') || line.startsWith('Б)') || 
-            line.startsWith('В)') || line.startsWith('Г)') || 
+        if (line.startsWith('А)') || line.startsWith('Б)') ||
+            line.startsWith('В)') || line.startsWith('Г)') ||
             line.startsWith('Д)') || line.startsWith('Е)') ||
             line.startsWith('Ж)') || line.startsWith('З)')) {
           options.add(line);
         }
       }
-      
+
       // Если варианты не найдены в тексте, создаем стандартный набор
       if (options.isEmpty) {
         options = ['А) Вариант А', 'Б) Вариант Б', 'В) Вариант В', 'Г) Вариант Г'];
       }
-      
+
       // Получаем выбранные пользователем буквы
       List<String> selectedLetters = [];
       if (selectedAnswer != null && selectedAnswer!.isNotEmpty) {
         selectedLetters = selectedAnswer!.split('');
       }
-      
+
       return Column(
         children: [
           Text(
@@ -709,7 +710,7 @@ class _TestScreenState extends State<TestScreen> {
           ...options.map((option) {
             String letter = option.substring(0, 1);
             bool isSelected = selectedLetters.contains(letter);
-            
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),
               child: Row(
@@ -1011,6 +1012,7 @@ class _TestScreenState extends State<TestScreen> {
   }
 }
 
+
 class MatchingDragDrop extends StatefulWidget {
   final List<Map<String, dynamic>> leftItems;
   final List<Map<String, dynamic>> rightItems;
@@ -1030,198 +1032,247 @@ class MatchingDragDrop extends StatefulWidget {
 }
 
 class _MatchingDragDropState extends State<MatchingDragDrop> {
+  final ScrollController _leftController = ScrollController();
+  final ScrollController _rightController = ScrollController();
+
+  @override
+  void dispose() {
+    _leftController.dispose();
+    _rightController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Создаем более компактную структуру
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        // Левая колонка (элементы, которые можно перетаскивать)
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: ListView.builder(
-              itemCount: widget.leftItems.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                final item = widget.leftItems[index];
-                final itemIndex = item['item_index'] as String? ?? '';
-                final itemText = item['item_text'] as String? ?? '';
-                
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8), // Увеличиваем отступ
-                  child: _buildDraggableItem(
-                    itemIndex,
-                    itemText,
-                    const Color(0xFF245020),
-                    isLeft: true,
-                  ),
-                );
-              },
+        if (widget.currentMatches.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              onPressed: () => widget.onMatchesChanged({}),
+              child: const Text('Сбросить все', style: TextStyle(color: Colors.white)),
             ),
           ),
-        ),
-        
-        const SizedBox(width: 6),
-        
-        // Правая колонка (целевые элементы)
+
         Expanded(
-          child: ListView.builder(
-            itemCount: widget.rightItems.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              final item = widget.rightItems[index];
-              final itemIndex = item['item_index'] as String? ?? '';
-              final itemText = item['item_text'] as String? ?? '';
-              
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8), // Увеличиваем отступ
-                child: _buildDropTarget(
-                  itemIndex,
-                  itemText,
-                  const Color(0xFF3d82b4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Левая колонка
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: Text('Элементы', style: TextStyle(fontWeight: FontWeight.bold, color:Colors.white60)),
+                      ),
+                      Expanded(
+                        child: RawScrollbar(
+                          controller: _leftController,
+                          thumbVisibility: true,
+                          child: ListView.separated(
+                            controller: _leftController,
+                            physics: const ClampingScrollPhysics(),
+                            itemCount: widget.leftItems.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 8),
+                            itemBuilder: (context, index) {
+                              final itemIndex = String.fromCharCode(65 + index);
+                              final itemText = widget.leftItems[index]['item_text'] as String;
+                              final isMatched = widget.currentMatches.containsKey(itemIndex);
+
+                              return Draggable<String>(
+                                data: itemIndex,
+                                feedback: _buildDragFeedback(itemIndex, itemText),
+                                childWhenDragging: _buildItem(itemIndex, itemText, isMatched: true, isDragging: true),
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onVerticalDragUpdate: (details) {
+                                    _leftController.jumpTo(_leftController.offset - details.delta.dy);
+                                  },
+                                  child: _buildItem(itemIndex, itemText, isMatched: isMatched),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              );
-            },
+              ),
+
+              // Правая колонка
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: Text('Цели', style: TextStyle(fontWeight: FontWeight.bold, color:Colors.white60)),
+                      ),
+                      Expanded(
+                        child: RawScrollbar(
+                          controller: _rightController,
+                          thumbVisibility: true,
+                          child: ListView.separated(
+                            controller: _rightController,
+                            physics: const ClampingScrollPhysics(),
+                            itemCount: widget.rightItems.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 8),
+                            itemBuilder: (context, index) {
+                              final itemIndex = (index + 1).toString();
+                              final itemText = widget.rightItems[index]['item_text'] as String;
+                              final matchedLeftItem = widget.currentMatches.entries
+                                  .firstWhere((e) => e.value == itemIndex, orElse: () => const MapEntry('', ''));
+
+                              return DragTarget<String>(
+                                builder: (context, _, __) {
+                                  return GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onVerticalDragUpdate: (details) {
+                                      _rightController.jumpTo(_rightController.offset - details.delta.dy);
+                                    },
+                                    child: _buildTargetItem(itemIndex, itemText, isMatched: matchedLeftItem.key.isNotEmpty),
+                                  );
+                                },
+                                onAccept: (leftItemIndex) {
+                                  final newMatches = {...widget.currentMatches};
+                                  newMatches.remove(leftItemIndex);
+                                  newMatches.removeWhere((_, v) => v == itemIndex);
+                                  newMatches[leftItemIndex] = itemIndex;
+                                  widget.onMatchesChanged(newMatches);
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDraggableItem(String itemIndex, String itemText, Color color, {required bool isLeft}) {
-    // Элемент, который можно перетаскивать
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Draggable<String>(
-          data: itemIndex,
-          feedback: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: constraints.maxWidth,
-              padding: const EdgeInsets.all(10), // Увеличиваем отступы
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8), // Увеличиваем отступы
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      itemIndex,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16, // Увеличиваем размер шрифта
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      itemText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          childWhenDragging: Opacity(
-            opacity: 0.5,
-            child: _buildItemCard(itemIndex, itemText, color),
-          ),
-          child: _buildItemCard(itemIndex, itemText, color),
-        );
-      },
+  Widget _buildDragFeedback(String index, String text) {
+    return Material(
+      child: Container(
+        width: 200,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.green.shade600,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: _buildItemContent(index, text),
+      ),
     );
   }
 
-  Widget _buildDropTarget(String itemIndex, String itemText, Color color) {
-    // Целевой элемент, на который можно перетащить
-    return DragTarget<String>(
-      builder: (context, candidateData, rejectedData) {
-        final hasMatch = widget.currentMatches.values.contains(itemIndex);
-        
-        return _buildItemCard(
-          itemIndex, 
-          itemText, 
-          hasMatch ? color.withOpacity(0.7) : color,
-          isTarget: true,
-          isMatched: hasMatch,
-        );
-      },
-      onAccept: (String leftItemIndex) {
-        // Удаляем предыдущее соответствие для этого leftItemIndex, если оно есть
-        final newMatches = Map<String, String>.from(widget.currentMatches);
-        newMatches[leftItemIndex] = itemIndex;
-        
-        widget.onMatchesChanged(newMatches);
-      },
-    );
-  }
-
-  Widget _buildItemCard(String itemIndex, String itemText, Color color, {bool isTarget = false, bool isMatched = false}) {
+  Widget _buildItem(String index, String text, {bool isMatched = false, bool isDragging = false}) {
     return Container(
-      padding: const EdgeInsets.all(8), // Увеличиваем отступы
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8), // Увеличиваем скругление
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 3,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: isMatched ? Border.all(color: Colors.yellow, width: 2) : null, // Изменяем цвет рамки
+        color: isMatched
+            ? Colors.green.shade800 // Цвет когда элемент уже сопоставлен
+            : Colors.green.shade500, // Основной цвет элементов левой колонки
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isMatched ? Colors.grey : Colors.green.shade700,
+          width: 1,
+        ),
       ),
-      child: Row(
+      child: _buildItemContent(index, text, faded: isDragging),
+    );
+  }
+
+  Widget _buildTargetItem(String index, String text, {bool isMatched = false}) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isMatched ? Colors.blue.shade600 : Colors.blue.shade400,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isMatched ? Colors.yellow : Colors.blue.shade700,
+          width: 1,
+        ),
+      ),
+      child: Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.all(6), // Увеличиваем отступы
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              itemIndex,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14, // Увеличиваем размер шрифта
+          _buildItemContent(index, text),
+          if (isMatched)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: GestureDetector(
+                onTap: () {
+                  final newMatches = {...widget.currentMatches};
+                  newMatches.removeWhere((_, v) => v == index);
+                  widget.onMatchesChanged(newMatches);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, size: 16, color: Colors.white),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              itemText,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13, // Увеличиваем размер шрифта
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildItemContent(String index, String text, {bool faded = false}) {
+    return Row(
+      children: [
+        Container(
+          width: 20,
+          height: 20,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: faded ? Colors.grey.shade400 : Colors.black.withOpacity(0.3),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 1),
+          ),
+          child: Text(
+            index,
+            style: TextStyle(
+              color: faded ? Colors.grey.shade700 : Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: faded ? Colors.grey.shade700 : Colors.white,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

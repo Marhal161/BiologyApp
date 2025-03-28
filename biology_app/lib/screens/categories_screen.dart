@@ -29,7 +29,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   void initState() {
     super.initState();
     _loadTopics();
-    _searchController.addListener(_onSearchChanged); // Слушаем изменения в поле поиска
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
@@ -99,7 +99,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
             child: Container(
-              color: Colors.black.withOpacity(0.5), // Затемнение фона
+              color: Colors.black.withOpacity(0.5),
             ),
           ),
           // Основной контент
@@ -110,21 +110,21 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.transparent, // Полностью прозрачный фон
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.5), // Белая обводка
+                      color: Colors.white.withOpacity(0.5),
                       width: 1,
                     ),
                   ),
                   child: TextField(
                     controller: _searchController,
-                    style: const TextStyle(color: Colors.white), // Белый текст
+                    style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Поиск по темам...',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)), // Прозрачный текст подсказки
-                      prefixIcon: Icon(Icons.search, color: Colors.white), // Белая иконка
-                      border: InputBorder.none, // Убираем стандартную границу
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                      prefixIcon: Icon(Icons.search, color: Colors.white),
+                      border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                   ),
@@ -162,7 +162,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       elevation: 4,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12), // Закругление карточки
+        borderRadius: BorderRadius.circular(12),
       ),
       child: ExpansionTile(
         title: Column(
@@ -176,7 +176,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 4), // Отступ между номером темы и названием
+            const SizedBox(height: 4),
             Text(
               topic['title'],
               style: const TextStyle(
@@ -195,7 +195,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         ),
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(12), // Закругление картинки
+            borderRadius: BorderRadius.circular(12),
             child: SizedBox(
               height: 200,
               child: Image.asset(
@@ -227,7 +227,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
-                  width: double.infinity, // Кнопка на всю ширину
+                  width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -237,6 +237,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           pageBuilder: (context, animation, secondaryAnimation) => TopicScreen(
                             topicTitle: topic['title'],
                             topicId: topic['id'],
+                            chapterImage: widget.chapterImage, // Передаем фоновое изображение
                           ),
                           transitionsBuilder: (context, animation, secondaryAnimation, child) {
                             const begin = Offset(1.0, 0.0);
@@ -255,12 +256,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF2F642D), // Цвет кнопки
+                      backgroundColor: Color(0xFF2F642D),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8), // Закругление кнопки
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 16), // Отступы
-                      elevation: 0, // Убираем тень
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
                     ),
                     child: const Text(
                       'Перейти к теме',
@@ -284,14 +285,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       future: TestProgressService.getTestScore(topicId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return _buildIndicator(Colors.red); // Не пройден
+          return _buildIndicator(Colors.red);
         }
 
         double score = snapshot.data!;
         if (score >= 90) {
-          return _buildIndicator(Colors.green); // Пройден на 90% и выше
+          return _buildIndicator(Colors.green);
         } else {
-          return _buildIndicator(Colors.orange); // Пройден, но менее 90%
+          return _buildIndicator(Colors.orange);
         }
       },
     );
