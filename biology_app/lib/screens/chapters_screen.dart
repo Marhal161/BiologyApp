@@ -95,14 +95,13 @@ class ChaptersScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Ваш вариант: растягивается по ширине, сохраняя пропорции
-                        SizedBox(
-                          width: double.infinity,
+                        AspectRatio(
+                          aspectRatio: 16 / 9, // Соотношение сторон (можно изменить на нужное)
                           child: Image.asset(
                             chapter['image_path'],
-                            fit: BoxFit.fitWidth,
+                            fit: BoxFit.cover, // Обрежет лишнее, сохраняя пропорции
                             errorBuilder: (context, error, stackTrace) {
-                              print('Ошибка загрузки изображения: $error');
+                              print('Ошибка загрузки изображения главы: $error');
                               return const Center(
                                 child: Icon(
                                   Icons.image_not_supported,

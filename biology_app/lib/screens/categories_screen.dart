@@ -88,14 +88,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
       body: Stack(
         children: [
-          // Фоновое изображение
+          // Фоновое изображение с размытием
           Positioned.fill(
             child: Image.asset(
               widget.chapterImage,
               fit: BoxFit.cover,
             ),
           ),
-          // Размытие фона
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
             child: Container(
@@ -119,7 +118,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   ),
                   child: TextField(
                     controller: _searchController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Поиск по темам...',
                       hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
@@ -133,7 +132,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               // Список тем
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16.0),
                   itemCount: _filteredTopics.length,
                   itemBuilder: (context, index) {
                     final topic = _filteredTopics[index];
@@ -170,16 +169,16 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           children: [
             Text(
               'Тема ${topic['id']}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               topic['title'],
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 shadows: [
@@ -197,13 +196,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: SizedBox(
-              height: 200,
+              width: double.infinity, // Занимает всю ширину
               child: Image.asset(
                 topic['image_path'],
-                fit: BoxFit.cover,
+                fit: BoxFit.fitWidth, // Растягивается по ширине, сохраняя пропорции
                 errorBuilder: (context, error, stackTrace) {
                   print('Ошибка загрузки изображения: $error');
-                  return const Center(
+                  return Center(
                     child: Icon(
                       Icons.image_not_supported,
                       size: 50,
@@ -215,17 +214,17 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Дополнительная информация о теме...',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -237,7 +236,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           pageBuilder: (context, animation, secondaryAnimation) => TopicScreen(
                             topicTitle: topic['title'],
                             topicId: topic['id'],
-                            chapterImage: widget.chapterImage, // Передаем фоновое изображение
+                            chapterImage: widget.chapterImage,
                           ),
                           transitionsBuilder: (context, animation, secondaryAnimation, child) {
                             const begin = Offset(1.0, 0.0);
@@ -260,10 +259,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: EdgeInsets.symmetric(vertical: 16),
                       elevation: 0,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Перейти к теме',
                       style: TextStyle(
                         fontSize: 18,
