@@ -115,12 +115,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
           // Проверяем, содержит ли правильный ответ символ "/"
           if (correctAnswer.toString().contains('/')) {
             // Разбиваем правильный ответ на несколько вариантов
-            final acceptableAnswers = correctAnswer.toString().split('/');
+            final acceptableAnswers = correctAnswer.toString().split('/')
+                .map((answer) => answer.trim().toUpperCase())
+                .toList();
 
             // Проверяем, соответствует ли ответ пользователя любому из вариантов
-            bool isAnyMatch = acceptableAnswers.any((answer) =>
-            userAnswer.trim().toUpperCase() == answer.trim().toUpperCase());
-
+            bool isAnyMatch = acceptableAnswers.contains(userAnswer.trim().toUpperCase());
             results.add(isAnyMatch);
           } else {
             // Обычная проверка для одного правильного ответа
