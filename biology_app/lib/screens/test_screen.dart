@@ -507,20 +507,20 @@ class _TestScreenState extends State<TestScreen> {
       String mainQuestion = questionParts[0];
       List<String> options = [];
 
-      // Извлекаем варианты ответов из текста вопроса
+      // Обрабатываем варианты ответов
       for (int i = 1; i < questionParts.length; i++) {
         final line = questionParts[i].trim();
         if (line.startsWith('А)') || line.startsWith('Б)') ||
             line.startsWith('В)') || line.startsWith('Г)') ||
             line.startsWith('Д)') || line.startsWith('Е)') ||
             line.startsWith('Ж)') || line.startsWith('З)')) {
-          options.add(line.substring(0, 1)); // Берем только букву
+          options.add(line);
         }
       }
 
       // Если варианты не найдены в тексте, создаем стандартный набор
       if (options.isEmpty) {
-        options = ['А', 'Б', 'В', 'Г', 'Д', 'Е'];
+        options = ['А) Вариант А', 'Б) Вариант Б', 'В) Вариант В', 'Г) Вариант Г'];
       }
 
       return SingleChildScrollView(
@@ -546,6 +546,54 @@ class _TestScreenState extends State<TestScreen> {
                     ),
                   ),
                   if (questionImage != null) questionImage,
+                  const SizedBox(height: 16),
+                  // Отображаем варианты ответов
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: options.map((option) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 1),
+                              ),
+                              child: Text(
+                                option.substring(0, 1),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                option.substring(2), // Убираем букву и скобку
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )).toList(),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -559,8 +607,8 @@ class _TestScreenState extends State<TestScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildSequenceButton(options[i], i),
-                          if (i + 1 < options.length) _buildSequenceButton(options[i + 1], i + 1),
+                          _buildSequenceButton(options[i].substring(0, 1), i),
+                          if (i + 1 < options.length) _buildSequenceButton(options[i + 1].substring(0, 1), i + 1),
                         ],
                       ),
                       if (i + 1 < options.length) const SizedBox(height: 8),
