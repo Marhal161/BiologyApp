@@ -95,6 +95,39 @@ class DBProvider {
     );
   }
 
+  Future<void> importFromDatabaseFile() async {
+    try {
+      // Получаем путь к директории приложения
+      Directory documentsDirectory = await getApplicationDocumentsDirectory();
+      String dbPath = join(documentsDirectory.path, "BiologyDB.db");
+      
+      // Закрываем текущее соединение с базой данных, если оно открыто
+      if (_database != null) {
+        await _database!.close();
+        _database = null;
+      }
+      
+      // Удаляем существующий файл базы данных, если он есть
+      if (await File(dbPath).exists()) {
+        await File(dbPath).delete();
+      }
+      
+      // Копируем файл базы данных из assets
+      ByteData data = await rootBundle.load("assets/database.db");
+      List<int> bytes = data.buffer.asUint8List();
+      await File(dbPath).writeAsBytes(bytes);
+      
+      // Открываем скопированную базу данных
+      _database = await openDatabase(dbPath);
+      
+      print('База данных успешно импортирована из файла');
+    } catch (e) {
+      print('Ошибка при импорте базы данных из файла: $e');
+    }
+  }
+
+  // Методы для получения данных из базы данных
+  
   Future<List<Map<String, dynamic>>> getQuestionsByTopicId(int topicId) async {
     try {
       final db = await database;
@@ -135,147 +168,6 @@ class DBProvider {
       print('Ошибка при получении вопросов: $e');
       return [];
     }
-  }
-
-  Future<void> insertTopic(String title, String imagePath, {int? chapterId, int? orderNumber}) async {
-    final db = await database;
-    await db.insert(
-      'Topics',
-      {
-        'title': title,
-        'image_path': imagePath,
-        'chapter_id': chapterId,
-        'order_number': orderNumber,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<void> insertQuestion(int topicId, String questionText, String correctAnswer, List<String> wrongAnswers, bool isOpenEnded, {List<String>? options}) async {
-    final db = await database;
-    await db.insert(
-      'Questions',
-      {
-        'topic_id': topicId,
-        'question_text': questionText,
-        'correct_answer': correctAnswer,
-        'wrong_answer1': wrongAnswers[0],
-        'wrong_answer2': wrongAnswers[1],
-        'wrong_answer3': wrongAnswers[2],
-        'wrong_answer4': wrongAnswers[3],
-        'is_open_ended': isOpenEnded ? 1 : 0,
-        'options': options != null ? json.encode(options) : null,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<void> clearDatabase() async {
-    final db = await database;
-    await db.delete('Chapters');
-    await db.delete('Topics');
-    await db.delete('Questions');
-  }
-
-  Future<void> importFromJSON() async {
-    final jsonString = await rootBundle.loadString('assets/data/database.json');
-    final data = json.decode(jsonString);
-
-    // Импорт тем
-    for (var topic in data['topics']) {
-      await insertTopic(
-        topic['title'],
-        topic['image_path'],
-      );
-    }
-
-    // Импорт вопросов
-    for (var question in data['questions']) {
-      await insertQuestion(
-        question['topic_id'],
-        question['question_text'],
-        question['correct_answer'],
-        List<String>.from(question['wrong_answers']),
-        question['is_open_ended'],
-      );
-    }
-  }
-
-  Future<void> copyDatabase() async {
-    // Путь к базе данных в приложении
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "BiologyDB.db");
-
-    // Проверяем, существует ли база данных
-    if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
-      // Копируем базу данных из assets
-      ByteData data = await rootBundle.load("assets/database/biology.db");
-      List<int> bytes = data.buffer.asUint8List();
-      await File(path).writeAsBytes(bytes);
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> getTopics() async {
-    final db = await database;
-    final topics = await db.query('Topics');
-    print('Получены темы: $topics');
-    return topics;
-  }
-
-  Future<void> importTopicFromJSON(int topicNumber) async {
-    try {
-      final jsonString = await rootBundle.loadString('assets/data/topic$topicNumber.json');
-      final data = json.decode(jsonString);
-      
-      // Импорт главы, если она указана
-      final chapter = data['chapter'];
-      if (chapter != null) {
-        await insertChapter(
-          chapter['title'],
-          chapter['order_number'],
-          chapter['image_path'],
-        );
-      }
-      
-      // Импорт темы
-      final topic = data['topic'];
-      await insertTopic(
-        topic['title'],
-        topic['image_path'],
-        chapterId: topic['chapter_id'],
-        orderNumber: topic['order_number'],
-      );
-      
-      // Импорт вопросов
-      final questions = data['questions'] as List;
-      for (var question in questions) {
-        await insertQuestion(
-          topic['id'],
-          question['question_text'],
-          question['correct_answer'],
-          List<String>.from(question['wrong_answers']),
-          question['is_open_ended'],
-          options: question['options'] != null ? List<String>.from(question['options']) : null,
-        );
-      }
-      
-      print('Тема $topicNumber импортирована успешно');
-    } catch (e) {
-      print('Ошибка при импорте темы $topicNumber: $e');
-    }
-  }
-
-  Future<void> insertChapter(String title, int orderNumber, String imagePath) async {
-    final db = await database;
-    await db.insert(
-      'Chapters',
-      {
-        'title': title,
-        'order_number': orderNumber,
-        'image_path': imagePath,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
   }
 
   Future<List<Map<String, dynamic>>> getChapters() async {

@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'database.dart';
 import 'screens/chapters_screen.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    await DBProvider.db.initDB();
+    
+    // Устанавливаем только портретную ориентацию
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    // Импортируем готовую базу данных из файла
+    await DBProvider.db.importFromDatabaseFile();
+    print('База данных импортирована из файла');
+
     runApp(const MainApp());
   } catch (e) {
     print('Ошибка при запуске: $e');
@@ -93,11 +104,9 @@ class StartScreen extends StatelessWidget {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChaptersScreen(),
-                      ),
+                      _createRoute(),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -129,6 +138,24 @@ class StartScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => const ChaptersScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
     );
   }
 }

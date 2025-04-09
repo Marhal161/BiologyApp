@@ -12,8 +12,7 @@ dependencies:
   sqflite: ^2.3.2
   path_provider: ^2.1.2
   path: ^1.9.1
-  csv: ^5.1.1
-  shared_preferences: ^2.0.15
+  shared_preferences: ^2.2.0
   
 
 dev_dependencies:
@@ -25,6 +24,10 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+<<<<<<< HEAD
+=======
+    - assets/images/q_img/
+>>>>>>> develop
     - assets/database.db
 
 fonts:
