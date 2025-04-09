@@ -15,12 +15,9 @@ void main() async {
 
     // Импортируем готовую базу данных из файла
     await DBProvider.db.importFromDatabaseFile();
-    print('База данных импортирована из файла');
 
     runApp(const MainApp());
-  } catch (e) {
-    print('Ошибка при запуске: $e');
-  }
+  } catch (e) {}
 }
 
 class MainApp extends StatelessWidget {

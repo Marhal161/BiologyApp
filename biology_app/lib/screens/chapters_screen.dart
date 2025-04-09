@@ -101,7 +101,6 @@ class ChaptersScreen extends StatelessWidget {
                             chapter['image_path'],
                             fit: BoxFit.cover, // Обрежет лишнее, сохраняя пропорции
                             errorBuilder: (context, error, stackTrace) {
-                              print('Ошибка загрузки изображения главы: $error');
                               return const Center(
                                 child: Icon(
                                   Icons.image_not_supported,

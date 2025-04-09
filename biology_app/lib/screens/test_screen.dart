@@ -164,9 +164,7 @@ class _TestScreenState extends State<TestScreen> {
     }
 
     if (isCorrect) correctAnswers++;
-    } catch (e) {
-    debugPrint('Ошибка при проверке ответа на вопрос с сопоставлением: $e');
-    }
+    } catch (e) {}
     }
       else if (questionType == 'sequence') {
         final userAnswer = userAnswers[i];
@@ -685,9 +683,7 @@ class _TestScreenState extends State<TestScreen> {
             ),
           );
         }
-      } catch (e) {
-        debugPrint('Ошибка при разборе options: $e');
-      }
+      } catch (e) {}
 
       List<String> answers = [];
 

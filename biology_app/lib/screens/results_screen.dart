@@ -88,7 +88,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
           }
           results.add(isCorrect);
         } catch (e) {
-          print('Ошибка при проверке ответа на вопрос с сопоставлением: $e');
           results.add(false);
         }
       } else if (questionType == 'multi_choice') {
@@ -522,11 +521,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       // Парсим ответ пользователя с защитой от ошибок
       Map<String, dynamic> userAnswersMap = {};
       if (userAnswer != null && userAnswer.isNotEmpty) {
-        try {
-          userAnswersMap = json.decode(userAnswer) as Map<String, dynamic>;
-        } catch (e) {
-          debugPrint('Ошибка декодирования ответа: $e');
-        }
+        userAnswersMap = json.decode(userAnswer) as Map<String, dynamic>;
       }
 
       return Column(
@@ -558,7 +553,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
         ],
       );
     } catch (e) {
-      debugPrint('Ошибка построения соответствий: $e');
       return _buildErrorWidget('Ошибка загрузки данных');
     }
   }

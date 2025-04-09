@@ -17,10 +17,10 @@ class CategoriesScreen extends StatefulWidget {
   });
 
   @override
-  _CategoriesScreenState createState() => _CategoriesScreenState();
+  CategoriesScreenState createState() => CategoriesScreenState();
 }
 
-class _CategoriesScreenState extends State<CategoriesScreen> {
+class CategoriesScreenState extends State<CategoriesScreen> {
   List<Map<String, dynamic>> _topics = [];
   List<Map<String, dynamic>> _filteredTopics = [];
   final TextEditingController _searchController = TextEditingController();
@@ -201,7 +201,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 topic['image_path'],
                 fit: BoxFit.fitWidth, // Растягивается по ширине, сохраняя пропорции
                 errorBuilder: (context, error, stackTrace) {
-                  print('Ошибка загрузки изображения: $error');
                   return Center(
                     child: Icon(
                       Icons.image_not_supported,
