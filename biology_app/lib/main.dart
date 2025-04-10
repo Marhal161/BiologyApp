@@ -6,7 +6,7 @@ import 'screens/chapters_screen.dart';
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     // Устанавливаем только портретную ориентацию
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -15,9 +15,12 @@ void main() async {
 
     // Импортируем готовую базу данных из файла
     await DBProvider.db.importFromDatabaseFile();
+    print('База данных импортирована из файла');
 
     runApp(const MainApp());
-  } catch (e) {}
+  } catch (e) {
+    print('Ошибка при запуске: $e');
+  }
 }
 
 class MainApp extends StatelessWidget {
@@ -29,10 +32,11 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Montserrat',
+        scaffoldBackgroundColor: Colors.white,
         textSelectionTheme: const TextSelectionThemeData(
-          selectionHandleColor: Colors.white,
-          selectionColor: Colors.white54,
-          cursorColor: Colors.white,
+          selectionHandleColor: Colors.black,
+          selectionColor: Colors.black12,
+          cursorColor: Colors.black,
         ),
       ),
       home: const StartScreen(),
@@ -47,91 +51,74 @@ class StartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            colors: [Color(0xFF2F642D), Color(0xFF5A9647)],
-            focal: Alignment.topRight,
-            radius: 3.0,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 60),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Добро пожаловать!',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 10,
-                    ),
-                  ],
+        color: Colors.white,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Картинка с округлёнными краями
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    'assets/images/biolgo.jpg',
+                    height: 150,
+                    width: 240,
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40),
-                child: Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-                  textAlign: TextAlign.center,
+                const SizedBox(height: 30),
+                const Text(
+                  'Добро пожаловать!',
                   style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black26,
-                        offset: Offset(0, 2),
-                        blurRadius: 10,
-                      ),
-                    ],
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
-              ),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: 250,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      _createRoute(),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2F642D),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    shadowColor: Colors.black, // Цвет тени
-                    elevation: 4, // Высота тени
-                  ),
-                  child: const Text(
-                    'Начать',
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 40),
+                  child: Text(
+                    'В приложении Вы можете подкрепить знания и подготовиться к экзаменам!',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 2),
-                          blurRadius: 10,
-                        ),
-                      ],
+                      fontSize: 16,
+                      color: Colors.black87,
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 40),
+                SizedBox(
+                  width: 250,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        _createRoute(),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green[700],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 4,
+                    ),
+                    child: const Text(
+                      'Начать',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

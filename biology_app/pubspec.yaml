@@ -19,13 +19,29 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-
+  flutter_launcher_icons: 0.14.3
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
     - assets/images/q_img/
     - assets/database.db
+
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/icon/logobio.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/images/icon/logobio.png"
+  windows:
+    generate: true
+    image_path: "assets/images/icon/logobio.png"
+  macos:
+    generate: true
+    image_path: "assets/images/icon/logobio.png"
 
 fonts:
   - family: Montserrat
