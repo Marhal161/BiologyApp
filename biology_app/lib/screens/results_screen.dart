@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'topic_screen.dart'; // Импортируем TopicScreen
 import 'dart:convert';
 import '../database.dart';
+import 'dart:math' show min;
 
 class ResultsScreen extends StatefulWidget {
   final String topicTitle;
@@ -117,14 +118,25 @@ class _ResultsScreenState extends State<ResultsScreen> {
             final acceptableAnswers = correctAnswer.toString().split('/')
                 .map((answer) => answer.trim().toUpperCase())
                 .toList();
-
-            // Проверяем, соответствует ли ответ пользователя любому из вариантов
-            bool isAnyMatch = acceptableAnswers.contains(userAnswer.trim().toUpperCase());
+            
+            // Проверяем, является ли ответ пользователя формой любого из вариантов
+            bool isAnyMatch = false;
+            final userAnswerUpper = userAnswer.trim().toUpperCase();
+            
+            for (var answer in acceptableAnswers) {
+              if (_isWordFormMatch(userAnswerUpper, answer)) {
+                isAnyMatch = true;
+                break;
+              }
+            }
             results.add(isAnyMatch);
           } else {
             // Обычная проверка для одного правильного ответа
-            results.add(userAnswer.trim().toUpperCase() ==
-                correctAnswer.toString().trim().toUpperCase());
+            final userAnswerUpper = userAnswer.trim().toUpperCase();
+            final correctAnswerUpper = correctAnswer.toString().trim().toUpperCase();
+            
+            // Используем улучшенный алгоритм для проверки падежей
+            results.add(_isWordFormMatch(userAnswerUpper, correctAnswerUpper));
           }
         } else {
           results.add(false);
@@ -234,6 +246,35 @@ class _ResultsScreenState extends State<ResultsScreen> {
                             color: Colors.black26,
                             offset: Offset(0, 2),
                             blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    // Добавляем мотивационное сообщение
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _getMotivationColor(percentage),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _getMotivationIcon(percentage),
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              _getMotivationMessage(percentage),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -660,5 +701,91 @@ class _ResultsScreenState extends State<ResultsScreen> {
             )),
       ],
     );
+  }
+
+  // Добавляем новый метод для проверки форм слова
+  bool _isWordFormMatch(String userWord, String correctWord) {
+    // Нормализуем слова для обработки "е" и "ё"
+    String normalizedUserWord = _normalizeWord(userWord);
+    String normalizedCorrectWord = _normalizeWord(correctWord);
+    
+    // Точное совпадение после нормализации
+    if (normalizedUserWord == normalizedCorrectWord) {
+      return true;
+    }
+    
+    // Проверка на разные формы слова
+    if (normalizedUserWord.length >= 5 && normalizedCorrectWord.length >= 5) {
+      // Количество букв корня для сравнения (от 5 до 7 в зависимости от длины слова)
+      int rootLength = min(min(7, normalizedUserWord.length), normalizedCorrectWord.length);
+      
+      // Корни слов должны совпадать
+      String userRoot = normalizedUserWord.substring(0, rootLength);
+      String correctRoot = normalizedCorrectWord.substring(0, rootLength);
+      
+      if (userRoot == correctRoot) {
+        // Разница в длине не должна быть слишком большой для форм одного слова
+        int lengthDiff = (normalizedUserWord.length - normalizedCorrectWord.length).abs();
+        
+        // Обычно разница в длине падежных форм не превышает 3-4 символа
+        if (lengthDiff <= 4) {
+          // Дополнительная проверка: у слов должно быть достаточно общих букв (более 75%)
+          int minLength = min(normalizedUserWord.length, normalizedCorrectWord.length);
+          int commonRootPercentage = (100 * rootLength) ~/ minLength;
+          
+          return commonRootPercentage >= 75;
+        }
+      }
+    }
+    
+    return false;
+  }
+
+  // Метод для нормализации слова (замена 'ё' на 'е')
+  String _normalizeWord(String word) {
+    return word.replaceAll('Ё', 'Е').replaceAll('ё', 'е');
+  }
+  
+  // Получаем мотивационное сообщение в зависимости от процента правильных ответов
+  String _getMotivationMessage(double percentage) {
+    if (percentage == 0) {
+      return 'Не отчаивайся! В следующий раз получится лучше.';
+    } else if (percentage < 30) {
+      return 'Ты можешь лучше! Повтори материал и попробуй снова.';
+    } else if (percentage < 50) {
+      return 'Неплохое начало! Еще немного усилий, и будет хороший результат.';
+    } else if (percentage < 70) {
+      return 'Хороший результат! Ты на верном пути.';
+    } else if (percentage < 90) {
+      return 'Отличная работа! Ты почти у цели!';
+    } else if (percentage < 100) {
+      return 'Превосходно! Ты очень хорошо разбираешься в теме!';
+    } else {
+      return 'Великолепно! Ты настоящий знаток биологии!';
+    }
+  }
+  
+  // Получаем цвет для мотивационного сообщения
+  Color _getMotivationColor(double percentage) {
+    if (percentage < 30) {
+      return Colors.red.shade700.withOpacity(0.8);
+    } else if (percentage < 70) {
+      return Colors.orange.shade700.withOpacity(0.8);
+    } else {
+      return Colors.green.shade700.withOpacity(0.8);
+    }
+  }
+  
+  // Получаем иконку для мотивационного сообщения
+  IconData _getMotivationIcon(double percentage) {
+    if (percentage < 30) {
+      return Icons.sentiment_dissatisfied;
+    } else if (percentage < 70) {
+      return Icons.sentiment_neutral;
+    } else if (percentage < 100) {
+      return Icons.sentiment_satisfied;
+    } else {
+      return Icons.emoji_events;
+    }
   }
 }
