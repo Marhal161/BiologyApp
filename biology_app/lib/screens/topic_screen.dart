@@ -24,6 +24,7 @@ class _TopicScreenState extends State<TopicScreen> {
   int timePerQuestion = 30;
   double? testScore;
   bool isTestCompleted = false;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -32,13 +33,21 @@ class _TopicScreenState extends State<TopicScreen> {
   }
 
   Future<void> _loadTestProgress() async {
-    final completed = await TestProgressService.isTestCompleted(widget.topicId);
-    final score = await TestProgressService.getTestScore(widget.topicId);
+    try {
+      final completed = await TestProgressService.isTestCompleted(widget.topicId);
+      final score = await TestProgressService.getTestScore(widget.topicId);
 
-    setState(() {
-      isTestCompleted = completed;
-      testScore = score;
-    });
+      setState(() {
+        isTestCompleted = completed;
+        testScore = score;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Ошибка загрузки прогресса: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Route _createRoute(Widget screen) {
@@ -200,131 +209,133 @@ class _TopicScreenState extends State<TopicScreen> {
       ),
       body: Stack(
         children: [
-          // Фоновое изображение (теперь используем переданное изображение)
+          // Фоновое изображение
           Positioned.fill(
             child: Image.asset(
-              widget.chapterImage, // Используем переданный параметр
+              widget.chapterImage,
               fit: BoxFit.cover,
             ),
           ),
           // Размытие фона
           BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Уменьшено размытие для повышения производительности
             child: Container(
               color: Colors.black.withOpacity(0.5), // Затемнение фона
             ),
           ),
           // Основной контент
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Информация о прохождении теста
-                if (isTestCompleted)
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: testScore! >= 90
-                          ? Colors.green.withOpacity(0.7)
-                          : Colors.orange.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          testScore! >= 90 ? Icons.check_circle : Icons.info,
-                          color: Colors.white,
-                          size: 40,
+          isLoading
+            ? const Center(child: CircularProgressIndicator(color: Colors.white))
+            : Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Информация о прохождении теста
+                    if (isTestCompleted)
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: testScore! >= 90
+                              ? Colors.green.withOpacity(0.7)
+                              : Colors.orange.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Тест пройден с результатом: ${testScore!.toStringAsFixed(1)}%',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              testScore! >= 90 ? Icons.check_circle : Icons.info,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Тест пройден с результатом: ${testScore!.toStringAsFixed(1)}%',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              testScore! >= 90
+                                  ? 'Отличный результат!'
+                                  : 'Вы можете пройти тест еще раз для улучшения результата.',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          testScore! >= 90
-                              ? 'Отличный результат!'
-                              : 'Вы можете пройти тест еще раз для улучшения результата.',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.settings),
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (BuildContext context) {
-                          return _SettingsMenu(
-                            onTimerCheckedChanged: _handleTimerCheckedChanged,
-                            isTimerEnabled: isTimerEnabled,
+                      ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        icon: const Icon(Icons.settings),
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (BuildContext context) {
+                              return _SettingsMenu(
+                                onTimerCheckedChanged: _handleTimerCheckedChanged,
+                                isTimerEnabled: isTimerEnabled,
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                    iconSize: 40,
-                    color: Colors.white,
-                    splashColor: Colors.white.withOpacity(0.3),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    if (isTimerEnabled) {
-                      _showTimePickerDialog();
-                    } else {
-                      Navigator.pushReplacement(
-                        context,
-                        _createRoute(TestScreen(
-                          topicId: widget.topicId,
-                          topicTitle: widget.topicTitle,
-                          isTimerEnabled: false,
-                          timePerQuestion: 0,
-                        )),
-                      ).then((_) {
-                        // Обновляем информацию о прохождении теста при возвращении
-                        _loadTestProgress();
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2F642D),
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                    shadowColor: Colors.black,
-                    elevation: 4,
-                  ),
-                  child: Text(
-                    isTestCompleted ? 'Пройти тест снова' : 'Начать тестирование',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 2),
-                          blurRadius: 10,
-                        ),
-                      ],
-                      color: Colors.white,
+                        iconSize: 40,
+                        color: Colors.white,
+                        splashColor: Colors.white.withOpacity(0.3),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (isTimerEnabled) {
+                          _showTimePickerDialog();
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            _createRoute(TestScreen(
+                              topicId: widget.topicId,
+                              topicTitle: widget.topicTitle,
+                              isTimerEnabled: false,
+                              timePerQuestion: 0,
+                            )),
+                          ).then((_) {
+                            // Обновляем информацию о прохождении теста при возвращении
+                            _loadTestProgress();
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2F642D),
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        shadowColor: Colors.black,
+                        elevation: 4,
+                      ),
+                      child: Text(
+                        isTestCompleted ? 'Пройти тест снова' : 'Начать тестирование',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black26,
+                              offset: Offset(0, 2),
+                              blurRadius: 10,
+                            ),
+                          ],
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
         ],
       ),
     );
@@ -346,7 +357,7 @@ class _SettingsMenu extends StatelessWidget {
       children: [
         Positioned.fill(
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Уменьшено размытие для повышения производительности
             child: Container(
               color: Colors.black.withOpacity(0),
             ),

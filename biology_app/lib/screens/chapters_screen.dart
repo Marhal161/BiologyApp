@@ -2,8 +2,37 @@ import 'package:flutter/material.dart';
 import '../database.dart';
 import 'categories_screen.dart';
 
-class ChaptersScreen extends StatelessWidget {
+class ChaptersScreen extends StatefulWidget {
   const ChaptersScreen({super.key});
+
+  @override
+  State<ChaptersScreen> createState() => _ChaptersScreenState();
+}
+
+class _ChaptersScreenState extends State<ChaptersScreen> {
+  List<Map<String, dynamic>> _chapters = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadChapters();
+  }
+  
+  Future<void> _loadChapters() async {
+    try {
+      final chapters = await DBProvider.db.getChapters();
+      setState(() {
+        _chapters = chapters;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Ошибка при загрузке глав: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,25 +71,13 @@ class ChaptersScreen extends StatelessWidget {
             radius: 3.0,
           ),
         ),
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: DBProvider.db.getChapters(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(child: Text('Ошибка: ${snapshot.error}'));
-            }
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('Нет доступных глав'));
-            }
-
-            final chapters = snapshot.data!;
-            return ListView.builder(
+        child: _isLoading 
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          : ListView.builder(
               padding: const EdgeInsets.all(16.0),
-              itemCount: chapters.length,
+              itemCount: _chapters.length,
               itemBuilder: (context, index) {
-                final chapter = chapters[index];
+                final chapter = _chapters[index];
                 return Card(
                   elevation: 4,
                   clipBehavior: Clip.antiAlias,
@@ -96,10 +113,10 @@ class ChaptersScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         AspectRatio(
-                          aspectRatio: 16 / 9, // Соотношение сторон (можно изменить на нужное)
+                          aspectRatio: 16 / 9,
                           child: Image.asset(
                             chapter['image_path'],
-                            fit: BoxFit.cover, // Обрежет лишнее, сохраняя пропорции
+                            fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return const Center(
                                 child: Icon(
@@ -146,9 +163,7 @@ class ChaptersScreen extends StatelessWidget {
                   ),
                 );
               },
-            );
-          },
-        ),
+            ),
       ),
     );
   }

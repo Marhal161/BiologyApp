@@ -144,10 +144,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
       }
     }
 
-    setState(() {
-      answerResults = results;
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        answerResults = results;
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -168,9 +170,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
             color: Colors.white,
             shadows: [
               Shadow(
-                color: Colors.black26,
-                offset: Offset(0, 2),
-                blurRadius: 10,
+                color: Colors.black38,
+                offset: Offset(0, 1),
+                blurRadius: 3,
               ),
             ],
           ),
@@ -180,10 +182,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
       ),
       body: Container(
         decoration: const BoxDecoration(
-          gradient: RadialGradient(
+          gradient: LinearGradient(
             colors: [Color(0xFF2F642D), Color(0xFF5A9647)],
-            focal: Alignment.topRight,
-            radius: 3.0,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: isLoading
@@ -209,13 +211,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 2),
-                            blurRadius: 10,
-                          ),
-                        ],
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -225,13 +220,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 2),
-                            blurRadius: 10,
-                          ),
-                        ],
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -241,13 +229,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 2),
-                            blurRadius: 10,
-                          ),
-                        ],
                       ),
                     ),
                     const SizedBox(height: 15),
@@ -290,9 +271,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
                   itemBuilder: (context, index) {
                     final question = widget.questions[index];
                     final userAnswer = widget.userAnswers[index];
-                    final isCorrect = answerResults[index];
+                    final isCorrect = index < answerResults.length ? answerResults[index] : false;
                     final questionType = question['question_type'] as String?;
 
+                    // Упрощенная версия карточки вопроса
                     return Card(
                       color: Colors.white.withOpacity(0.1),
                       margin: const EdgeInsets.only(bottom: 10),
@@ -453,13 +435,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     'Вернуться к вопросам',
                     style: TextStyle(
                       fontSize: 18,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 2),
-                          blurRadius: 10,
-                        ),
-                      ],
                     ),
                   ),
                 ),
@@ -520,14 +495,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
   Future<Widget> _buildMatchingDetails(Map<String, dynamic> question,
       String? userAnswer) async {
     try {
-      // Асинхронно загружаем данные
-      final optionsFuture = DBProvider.db.getMatchingOptions(question['id']);
-      final correctAnswersFuture = DBProvider.db.getMatchingAnswers(
-          question['id']);
+      // Оптимизация: загружаем данные более эффективно
+      final questionId = question['id'];
+      // Одновременно запускаем оба запроса
+      final optionsFuture = DBProvider.db.getMatchingOptions(questionId);
+      final correctAnswersFuture = DBProvider.db.getMatchingAnswers(questionId);
 
-      final results = await Future.wait([optionsFuture, correctAnswersFuture]);
-      final options = results[0] as Map<String, List<Map<String, dynamic>>>;
-      final correctAnswers = results[1] as List<Map<String, dynamic>>;
+      // Ждем завершения обоих запросов
+      final options = await optionsFuture;
+      final correctAnswers = await correctAnswersFuture;
 
       // Быстрая проверка на пустые данные
       if (options['left'] == null || options['right'] == null ||

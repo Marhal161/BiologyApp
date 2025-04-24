@@ -24,6 +24,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
   List<Map<String, dynamic>> _topics = [];
   List<Map<String, dynamic>> _filteredTopics = [];
   final TextEditingController _searchController = TextEditingController();
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -40,11 +41,20 @@ class CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Future<void> _loadTopics() async {
-    final topics = await DBProvider.db.getTopicsByChapter(widget.chapterId);
-    setState(() {
-      _topics = topics;
-      _filteredTopics = topics;
-    });
+    try {
+      final topics = await DBProvider.db.getTopicsByChapter(widget.chapterId);
+      
+      setState(() {
+        _topics = topics;
+        _filteredTopics = topics;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Ошибка при загрузке тем: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _onSearchChanged() {
@@ -130,25 +140,31 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                 ),
               ),
               // Список тем
-              Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.all(16.0),
-                  itemCount: _filteredTopics.length,
-                  itemBuilder: (context, index) {
-                    final topic = _filteredTopics[index];
-                    return Stack(
-                      children: [
-                        _buildTopicCard(context, topic),
-                        Positioned(
-                          top: 10,
-                          right: 10,
-                          child: _buildTestIndicator(topic['id']),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+              _isLoading
+                ? Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    ),
+                  )
+                : Expanded(
+                    child: ListView.builder(
+                      padding: EdgeInsets.all(16.0),
+                      itemCount: _filteredTopics.length,
+                      itemBuilder: (context, index) {
+                        final topic = _filteredTopics[index];
+                        return Stack(
+                          children: [
+                            _buildTopicCard(context, topic),
+                            Positioned(
+                              top: 10,
+                              right: 10,
+                              child: _buildTestIndicator(topic['id']),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
             ],
           ),
         ],
@@ -157,6 +173,9 @@ class CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Widget _buildTopicCard(BuildContext context, Map<String, dynamic> topic) {
+    // Проверяем наличие изображения темы
+    final hasImage = topic['image_path'] != null && topic['image_path'].toString().isNotEmpty;
+    
     return Card(
       elevation: 4,
       clipBehavior: Clip.antiAlias,
@@ -193,25 +212,26 @@ class CategoriesScreenState extends State<CategoriesScreen> {
           ],
         ),
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
-              width: double.infinity, // Занимает всю ширину
-              child: Image.asset(
-                topic['image_path'],
-                fit: BoxFit.fitWidth, // Растягивается по ширине, сохраняя пропорции
-                errorBuilder: (context, error, stackTrace) {
-                  return Center(
-                    child: Icon(
-                      Icons.image_not_supported,
-                      size: 50,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
+          if (hasImage) 
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                width: double.infinity,
+                child: Image.asset(
+                  topic['image_path'],
+                  fit: BoxFit.fitWidth,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(
+                      child: Icon(
+                        Icons.image_not_supported,
+                        size: 50,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
           Padding(
             padding: EdgeInsets.all(16.0),
             child: Column(
