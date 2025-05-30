@@ -118,11 +118,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
             final acceptableAnswers = correctAnswer.toString().split('/')
                 .map((answer) => answer.trim().toUpperCase())
                 .toList();
-            
+
             // Проверяем, является ли ответ пользователя формой любого из вариантов
             bool isAnyMatch = false;
             final userAnswerUpper = userAnswer.trim().toUpperCase();
-            
+
             for (var answer in acceptableAnswers) {
               if (_isWordFormMatch(userAnswerUpper, answer)) {
                 isAnyMatch = true;
@@ -134,7 +134,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             // Обычная проверка для одного правильного ответа
             final userAnswerUpper = userAnswer.trim().toUpperCase();
             final correctAnswerUpper = correctAnswer.toString().trim().toUpperCase();
-            
+
             // Используем улучшенный алгоритм для проверки падежей
             results.add(_isWordFormMatch(userAnswerUpper, correctAnswerUpper));
           }
@@ -163,44 +163,65 @@ class _ResultsScreenState extends State<ResultsScreen> {
         : (correctAnswers / widget.questions.length) * 100;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.topicTitle,
-          style: const TextStyle(
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black38,
-                offset: Offset(0, 1),
-                blurRadius: 3,
-              ),
-            ],
-          ),
-        ),
-        backgroundColor: const Color(0xFF2F642D),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      appBar: null, //
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF2F642D), Color(0xFF5A9647)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF8F8F8),
+              Color(0xFFF0F0F0),
+              Color(0xFFFFE0E1),
+              Color(0xFFFF989A),
+              Color(0xFFA5D5FF),
+              Color(0xFF42A5F5),
+            ],
+            stops: [0.0, 0.1, 0.3, 0.5, 0.7, 1.0],
           ),
         ),
         child: isLoading
             ? const Center(
-            child: CircularProgressIndicator(color: Colors.white))
+            child: CircularProgressIndicator(color: Color(0xFF42A5F5)))
             : Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              // Заголовок и кнопка возврата
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  Expanded(
+                    child: Text(
+                      widget.topicTitle,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black38,
+                            offset: Offset(0, 1),
+                            blurRadius: 3,
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 48), // Для симметрии
+                ],
+              ),
+              const SizedBox(height: 10),
               // Результаты теста
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
@@ -210,25 +231,23 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Правильных ответов: $correctAnswers из ${widget.questions
-                          .length}',
+                      'Правильных ответов: $correctAnswers из ${widget.questions.length}',
                       style: const TextStyle(
                         fontSize: 18,
-                        color: Colors.white,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      'Процент правильных ответов: ${percentage.toStringAsFixed(
-                          1)}%',
+                      'Процент правильных ответов: ${percentage.toStringAsFixed(1)}%',
                       style: const TextStyle(
                         fontSize: 18,
-                        color: Colors.white,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 15),
@@ -276,11 +295,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
                     // Упрощенная версия карточки вопроса
                     return Card(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withOpacity(0.7),
                       margin: const EdgeInsets.only(bottom: 10),
                       child: ExpansionTile(
-                        collapsedIconColor: Colors.white,
-                        iconColor: Colors.white,
+                        collapsedIconColor: Colors.black87,
+                        iconColor: Colors.black87,
                         leading: Icon(
                           isCorrect ? Icons.check_circle : Icons.cancel,
                           color: isCorrect ? Colors.green : Colors.red,
@@ -289,15 +308,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         title: Text(
                           'Вопрос ${index + 1}',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Colors.black87,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         subtitle: Text(
-                          _getShortQuestionText(
-                              question['question_text'] ?? ''),
+                          _getShortQuestionText(question['question_text'] ?? ''),
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: Colors.black54,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -310,24 +328,21 @@ class _ResultsScreenState extends State<ResultsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  question['question_text'] ??
-                                      'Вопрос без текста',
+                                  question['question_text'] ?? 'Вопрос без текста',
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.white,
+                                    color: Colors.black87,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
                                 // Добавляем проверку на тип вопроса
                                 if (questionType == 'matching')
                                   FutureBuilder(
-                                    future: _buildMatchingDetails(
-                                        question, userAnswer),
+                                    future: _buildMatchingDetails(question, userAnswer),
                                     builder: (context, snapshot) {
                                       if (!snapshot.hasData) {
                                         return const Center(
-                                          child: CircularProgressIndicator(
-                                              color: Colors.white),
+                                          child: CircularProgressIndicator(color: Color(0xFF42A5F5)),
                                         );
                                       }
                                       return snapshot.data!;
@@ -335,35 +350,28 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                   )
                                 else
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment
-                                        .start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Ваш ответ:',
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.white70,
+                                          color: Colors.black54,
                                         ),
                                       ),
                                       Container(
                                         width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: isCorrect ? Colors.green
-                                              .withOpacity(0.2) : Colors.red
-                                              .withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(
-                                              4),
+                                          color: isCorrect ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(4),
                                         ),
                                         child: Text(
                                           userAnswer ?? 'Нет ответа',
                                           style: TextStyle(
                                             fontSize: 14,
-                                            color: isCorrect
-                                                ? Colors.green
-                                                : Colors.red,
+                                            color: isCorrect ? Colors.green : Colors.red,
                                             fontWeight: FontWeight.bold,
                                           ),
                                           softWrap: true,
@@ -373,27 +381,22 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                       const SizedBox(height: 5),
                                       if (!isCorrect)
                                         Column(
-                                          crossAxisAlignment: CrossAxisAlignment
-                                              .start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             const Text(
                                               'Правильный ответ:',
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,
-                                                color: Colors.white70,
+                                                color: Colors.black54,
                                               ),
                                             ),
                                             Container(
                                               width: double.infinity,
-                                              padding: const EdgeInsets
-                                                  .symmetric(
-                                                  horizontal: 8, vertical: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                               decoration: BoxDecoration(
-                                                color: Colors.green.withOpacity(
-                                                    0.2),
-                                                borderRadius: BorderRadius
-                                                    .circular(4),
+                                                color: Colors.green.withOpacity(0.2),
+                                                borderRadius: BorderRadius.circular(4),
                                               ),
                                               child: Text(
                                                 _formatCorrectAnswer(question),
@@ -427,7 +430,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2F642D),
+                    backgroundColor: const Color(0xFF42A5F5),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
@@ -483,17 +486,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
   String _getShortQuestionText(String text) {
     // Если текст содержит переносы строк, берем только первую строку
     if (text.contains('\n')) {
-      return text
-          .split('\n')
-          .first;
+      return text.split('\n').first;
     }
     // Иначе ограничиваем длину текста
     return text.length > 50 ? '${text.substring(0, 47)}...' : text;
   }
 
   // Отображение деталей для вопросов с сопоставлением
-  Future<Widget> _buildMatchingDetails(Map<String, dynamic> question,
-      String? userAnswer) async {
+  Future<Widget> _buildMatchingDetails(Map<String, dynamic> question, String? userAnswer) async {
     try {
       // Оптимизация: загружаем данные более эффективно
       final questionId = question['id'];
@@ -506,22 +506,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
       final correctAnswers = await correctAnswersFuture;
 
       // Быстрая проверка на пустые данные
-      if (options['left'] == null || options['right'] == null ||
-          correctAnswers.isEmpty) {
+      if (options['left'] == null || options['right'] == null || correctAnswers.isEmpty) {
         return _buildErrorWidget('Данные вопроса повреждены');
       }
 
       // Создаем словари для быстрого доступа
       final leftOptions = {
         for (var item in options['left']!)
-          item['item_index']?.toString() ?? '?': item['item_text']
-              ?.toString() ?? ''
+          item['item_index']?.toString() ?? '?': item['item_text']?.toString() ?? ''
       };
 
       final rightOptions = {
         for (var item in options['right']!)
-          item['item_index']?.toString() ?? '?': item['item_text']
-              ?.toString() ?? ''
+          item['item_index']?.toString() ?? '?': item['item_text']?.toString() ?? ''
       };
 
       // Карта правильных ответов (учитываем множественные соответствия)
@@ -549,7 +546,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Colors.white70,
+              color: Colors.black54,
             ),
           ),
           const SizedBox(height: 8),
@@ -574,7 +571,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     }
   }
 
-// Вспомогательные методы:
+  // Вспомогательные методы:
 
   Widget _buildErrorWidget(String message) {
     return Padding(
@@ -614,7 +611,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             '$leftKey) $leftText',
             style: const TextStyle(
               fontSize: 14,
-              color: Colors.white,
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 6),
@@ -651,7 +648,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           title,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.black.withOpacity(0.6),
           ),
         ),
         ...keys.map((key) =>
@@ -685,65 +682,65 @@ class _ResultsScreenState extends State<ResultsScreen> {
     if (_isSpecificCase(userWord, correctWord)) {
       return true;
     }
-    
+
     // Нормализуем слова и приводим к нижнему регистру
     String normalizedUserWord = _normalizeWord(userWord.toLowerCase());
     String normalizedCorrectWord = _normalizeWord(correctWord.toLowerCase());
-    
+
     // Специальная обработка для сочетаний слов с аббревиатурами (гладкая ЭПС/гладкой ЭПС)
     if (_containsAbbreviation(userWord) && _containsAbbreviation(correctWord)) {
       // Извлекаем аббревиатуры (сохраняем регистр для точного сравнения)
       List<String> abbrsUser = _extractAbbreviations(userWord);
       List<String> abbrsCorrect = _extractAbbreviations(correctWord);
-      
+
       // Проверяем совпадение аббревиатур
       bool abbrsMatch = _listsHaveCommonElements(abbrsUser, abbrsCorrect);
-      
+
       if (abbrsMatch) {
         // Удаляем аббревиатуры из текста и проверяем остальную часть
         String userWithoutAbbrs = _removeAbbreviations(normalizedUserWord, abbrsUser.map((a) => a.toLowerCase()).toList());
         String correctWithoutAbbrs = _removeAbbreviations(normalizedCorrectWord, abbrsCorrect.map((a) => a.toLowerCase()).toList());
-        
+
         // Очищаем от пробелов, запятых и т.д.
         userWithoutAbbrs = userWithoutAbbrs.replaceAll(RegExp(r'[,\s\.\-]'), '');
         correctWithoutAbbrs = correctWithoutAbbrs.replaceAll(RegExp(r'[,\s\.\-]'), '');
-        
+
         // Проверяем на точное совпадение после удаления аббревиатур
         if (userWithoutAbbrs == correctWithoutAbbrs) {
           return true;
         }
-        
+
         // Проверяем на разные падежи оставшейся части
         if (_checkWordForms(userWithoutAbbrs, correctWithoutAbbrs)) {
           return true;
         }
-        
+
         // Специальная проверка для прилагательных перед аббревиатурами
         if (_checkAdjectiveWithAbbreviation(userWord, correctWord)) {
           return true;
         }
       }
     }
-    
+
     // Удаляем пробелы, запятые и другие знаки пунктуации
     normalizedUserWord = normalizedUserWord.replaceAll(RegExp(r'[,\s\.\-]'), '');
     normalizedCorrectWord = normalizedCorrectWord.replaceAll(RegExp(r'[,\s\.\-]'), '');
-    
+
     // 1. Точное совпадение после нормализации
     if (normalizedUserWord == normalizedCorrectWord) {
       return true;
     }
-    
+
     // 2. Универсальная проверка на различные формы слов
     return _checkWordForms(normalizedUserWord, normalizedCorrectWord);
   }
-  
+
   // Проверка для конкретных частых случаев
   bool _isSpecificCase(String userAnswer, String correctAnswer) {
     // Нормализуем регистр, но сохраняем пробелы и структуру
     String userLower = userAnswer.toLowerCase();
     String correctLower = correctAnswer.toLowerCase();
-    
+
     // Создаем набор известных пар "правильный ответ" <-> "допустимый вариант"
     Map<String, List<String>> knownPairs = {
       'гладкой эпс': ['гладкая эпс', 'гладкая епс', 'гладкий эпс'],
@@ -755,7 +752,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       'красная кровь': ['красной крови', 'красной кровью'],
       'красной крови': ['красная кровь', 'красной кровью'],
     };
-    
+
     // Проверяем, есть ли правильный ответ в нашем словаре
     if (knownPairs.containsKey(correctLower)) {
       // Проверяем, является ли ответ пользователя допустимым вариантом
@@ -763,19 +760,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
         return true;
       }
     }
-    
+
     // И в обратном порядке
     if (knownPairs.containsKey(userLower)) {
       if (knownPairs[userLower]!.contains(correctLower)) {
         return true;
       }
     }
-    
+
     // Универсальная проверка для пар вида "прилагательное + аббревиатура"
     if (_containsAbbreviation(userAnswer) && _containsAbbreviation(correctAnswer)) {
       List<String> userWords = userLower.split(RegExp(r'\s+'));
       List<String> correctWords = correctLower.split(RegExp(r'\s+'));
-      
+
       // Если в обоих ответах по 2 слова
       if (userWords.length == 2 && correctWords.length == 2) {
         // Если второе слово совпадает (вероятно, это аббревиатура)
@@ -783,7 +780,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           // Проверяем первое слово на известные окончания прилагательных
           String userAdj = userWords[0];
           String correctAdj = correctWords[0];
-          
+
           // Известные пары окончаний для прилагательных женского рода
           List<List<String>> relatedEndings = [
             ['ая', 'ой', 'ую', 'ой'],     // красная/красной/красную
@@ -791,7 +788,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ['ой', 'ая', 'ую', 'ой'],     // красной/красная/красную
             ['ей', 'яя', 'юю', 'ей'],     // синей/синяя/синюю
           ];
-          
+
           // Проверяем, заканчивается ли прилагательное на известные окончания
           for (var pair in relatedEndings) {
             if (userAdj.endsWith(pair[0]) && correctAdj.endsWith(pair[1])) {
@@ -804,22 +801,22 @@ class _ResultsScreenState extends State<ResultsScreen> {
         }
       }
     }
-    
+
     return false;
   }
-  
+
   // Проверяет соответствие прилагательного перед аббревиатурой
   bool _checkAdjectiveWithAbbreviation(String userAnswer, String correctAnswer) {
     // Разбиваем ответы на слова
     List<String> userWords = userAnswer.split(RegExp(r'\s+'));
     List<String> correctWords = correctAnswer.split(RegExp(r'\s+'));
-    
+
     // Если оба ответа содержат минимум по 2 слова
     if (userWords.length >= 2 && correctWords.length >= 2) {
       // Проверяем только первое слово (обычно прилагательное) и аббревиатуру
       String userFirstWord = userWords[0].toLowerCase();
       String correctFirstWord = correctWords[0].toLowerCase();
-      
+
       // Проверяем, что второе слово (аббревиатура) совпадает
       bool abbrMatch = false;
       for (int i = 1; i < min(userWords.length, correctWords.length); i++) {
@@ -828,7 +825,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           break;
         }
       }
-      
+
       if (abbrMatch) {
         // Проверяем падежи прилагательного
         // Группы связанных окончаний для женского рода
@@ -836,7 +833,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           ['ая', 'ой', 'ую'],    // красная, красной, красную
           ['яя', 'ей', 'юю'],    // синяя, синей, синюю
         ];
-        
+
         // Проверяем на соответствие известным формам
         for (var endings in femEndings) {
           for (String ending1 in endings) {
@@ -851,7 +848,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         }
       }
     }
-    
+
     return false;
   }
 
@@ -860,19 +857,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
     // Ищем группы из 2+ заглавных букв
     return RegExp(r'[А-ЯA-Z]{2,}').hasMatch(text);
   }
-  
+
   // Извлекает все аббревиатуры из строки
   List<String> _extractAbbreviations(String text) {
     List<String> result = [];
     RegExp regExp = RegExp(r'[А-ЯA-Z]{2,}');
-    
+
     for (Match match in regExp.allMatches(text)) {
       result.add(match.group(0)!);
     }
-    
+
     return result;
   }
-  
+
   // Удаляет все аббревиатуры из строки
   String _removeAbbreviations(String text, List<String> abbreviations) {
     String result = text;
@@ -882,7 +879,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     // Удаляем лишние пробелы
     return result.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
-  
+
   // Проверяет, есть ли общие элементы в двух списках
   bool _listsHaveCommonElements(List<String> list1, List<String> list2) {
     for (String item in list1) {
@@ -892,21 +889,21 @@ class _ResultsScreenState extends State<ResultsScreen> {
     }
     return false;
   }
-  
+
   // Универсальный метод для проверки различных форм слов (существительных, прилагательных, причастий)
   bool _checkWordForms(String word1, String word2) {
     // Слишком короткие слова не сравниваем
     if (word1.length < 3 || word2.length < 3) return false;
-    
+
     // Слишком разные по длине слова скорее всего не связаны
     if ((word1.length - word2.length).abs() > 5) return false;
-    
+
     // 0. Специальная проверка для существительных множественного числа (надпочечники/надпочечниками)
     if (word1.length > 8 && word2.length > 8) {
       // Определяем минимальную длину общей основы для длинных слов
       int commonLength = min(word1.length, word2.length) - 5;
       commonLength = max(6, commonLength); // Не менее 6 символов для основы
-      
+
       // Проверяем, совпадает ли основа
       if (word1.substring(0, commonLength) == word2.substring(0, commonLength)) {
         // Проверяем известные окончания множественного числа существительных
@@ -918,7 +915,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           'ами', 'ями', 'ьми',       // Творительный (надпочечниками)
           'ах', 'ях'                 // Предложный (надпочечниках)
         ];
-        
+
         // Группы связанных окончаний существительных множественного числа
         List<List<String>> relatedPluralEndings = [
           ['и', 'ов', 'ам', 'ами', 'ах'],    // твердая основа (надпочечники, надпочечников...)
@@ -926,60 +923,60 @@ class _ResultsScreenState extends State<ResultsScreen> {
           ['и', 'ей', 'ям', 'ями', 'ях'],    // мягкая основа (кости, костей...)
           ['ы', 'ей', 'ам', 'ами', 'ах']     // смешанная (цепи, цепей...)
         ];
-        
+
         // Проверяем окончания
         String ending1 = word1.substring(word1.length - min(4, word1.length));
         String ending2 = word2.substring(word2.length - min(4, word2.length));
-        
+
         // Проверяем основные окончания
         for (String ending in pluralNounEndings) {
           if (word1.endsWith(ending) && word2.endsWith(ending)) {
             return true; // Одинаковые окончания
           }
         }
-        
+
         // Проверяем связанные окончания одной группы
         for (var group in relatedPluralEndings) {
           bool ending1InGroup = false;
           bool ending2InGroup = false;
-          
+
           for (String ending in group) {
             if (word1.endsWith(ending)) ending1InGroup = true;
             if (word2.endsWith(ending)) ending2InGroup = true;
           }
-          
+
           if (ending1InGroup && ending2InGroup) {
             return true; // Оба окончания из одной группы
           }
         }
-        
+
         // Специальная проверка для именительного/творительного падежа (надпочечники/надпочечниками)
-        if ((word1.endsWith('и') || word1.endsWith('ы')) && 
+        if ((word1.endsWith('и') || word1.endsWith('ы')) &&
             (word2.endsWith('ами') || word2.endsWith('ями'))) {
           return true;
         }
-        
+
         // И в обратном порядке
-        if ((word2.endsWith('и') || word2.endsWith('ы')) && 
+        if ((word2.endsWith('и') || word2.endsWith('ы')) &&
             (word1.endsWith('ами') || word1.endsWith('ями'))) {
           return true;
         }
       }
     }
-    
+
     // 1. Прилагательные и причастия (длинные слова)
     if (word1.length >= 5 && word2.length >= 5) {
       // Основа должна быть минимум 5 символов
       int stemLength = min(min(word1.length, word2.length) - 2, word1.length - 2);
       stemLength = max(5, stemLength);
-      
+
       if (stemLength <= word1.length && stemLength <= word2.length) {
         // Проверяем совпадение основы
         if (word1.substring(0, stemLength) == word2.substring(0, stemLength)) {
           // Извлекаем окончания
           String ending1 = word1.length > stemLength ? word1.substring(stemLength) : "";
           String ending2 = word2.length > stemLength ? word2.substring(stemLength) : "";
-          
+
           // Все возможные окончания прилагательных и причастий
           List<String> adjEndings = [
             'ый', 'ой', 'ий', 'ая', 'яя', 'ое', 'ее',   // именительный

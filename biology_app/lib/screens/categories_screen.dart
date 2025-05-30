@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // Для использования ImageFilter.blur
+import 'dart:ui';
 import 'topic_screen.dart';
 import '../database.dart';
 import '../services/test_progress_service.dart';
@@ -43,7 +43,6 @@ class CategoriesScreenState extends State<CategoriesScreen> {
   Future<void> _loadTopics() async {
     try {
       final topics = await DBProvider.db.getTopicsByChapter(widget.chapterId);
-      
       setState(() {
         _topics = topics;
         _filteredTopics = topics;
@@ -70,101 +69,117 @@ class CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.chapterTitle,
-          style: TextStyle(
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black26,
-                offset: Offset(0, 2),
-                blurRadius: 10,
-              ),
-            ],
-          ),
-        ),
-        backgroundColor: Color(0xFF2F642D),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-          shadows: [
-            Shadow(
-              color: Colors.black26,
-              offset: Offset(0, 2),
-              blurRadius: 10,
-            ),
-          ],
-        ),
-      ),
       body: Stack(
         children: [
-          // Фоновое изображение с размытием
-          Positioned.fill(
-            child: Image.asset(
-              widget.chapterImage,
-              fit: BoxFit.cover,
+          // Новый градиентный фон
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFF8F8F8),
+                  Color(0xFFF0F0F0),
+                  Color(0xFFFFE0E1),
+                  Color(0xFFFF989A),
+                  Color(0xFFA5D5FF),
+                  Color(0xFF42A5F5),
+                ],
+                stops: [0.0, 0.1, 0.3, 0.5, 0.7, 1.0],
+              ),
             ),
           ),
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: Container(
-              color: Colors.black.withOpacity(0.5),
-            ),
-          ),
+
           // Основной контент
           Column(
             children: [
+              // Кнопка возврата и заголовок
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    Expanded(
+                      child: Text(
+                        widget.chapterTitle,
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              color: Colors.white.withOpacity(0.5),
+                              offset: const Offset(0, 2),
+                              blurRadius: 10,
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(width: 48),
+                  ],
+                ),
+              ),
+
               // Поле поиска
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.transparent,
+                    color: Colors.white.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.5),
-                      width: 1,
-                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: TextField(
                     controller: _searchController,
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
                       hintText: 'Поиск по темам...',
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-                      prefixIcon: Icon(Icons.search, color: Colors.white),
+                      hintStyle: TextStyle(color: Colors.black54),
+                      prefixIcon: const Icon(Icons.search, color: Colors.black54),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                   ),
                 ),
               ),
+
               // Список тем
               _isLoading
-                ? Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    ),
-                  )
-                : Expanded(
-                    child: ListView.builder(
-                      padding: EdgeInsets.all(16.0),
-                      itemCount: _filteredTopics.length,
-                      itemBuilder: (context, index) {
-                        final topic = _filteredTopics[index];
-                        return Stack(
-                          children: [
-                            _buildTopicCard(context, topic),
-                            Positioned(
-                              top: 10,
-                              right: 10,
-                              child: _buildTestIndicator(topic['id']),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
+                  ? Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(color: Colors.black87),
+                ),
+              )
+                  : Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: _filteredTopics.length,
+                  itemBuilder: (context, index) {
+                    final topic = _filteredTopics[index];
+                    return Stack(
+                      children: [
+                        _buildTopicCard(context, topic),
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: _buildTestIndicator(topic['id']),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ],
@@ -173,127 +188,131 @@ class CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Widget _buildTopicCard(BuildContext context, Map<String, dynamic> topic) {
-    // Проверяем наличие изображения темы
     final hasImage = topic['image_path'] != null && topic['image_path'].toString().isNotEmpty;
-    
+
     return Card(
-      elevation: 4,
+      elevation: 6,
+      margin: const EdgeInsets.only(bottom: 16),
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(24),
       ),
-      child: ExpansionTile(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () {
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              settings: const RouteSettings(name: '/topic'),
+              pageBuilder: (context, animation, secondaryAnimation) => TopicScreen(
+                topicTitle: topic['title'],
+                topicId: topic['id'],
+                chapterImage: widget.chapterImage,
+              ),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                const begin = Offset(1.0, 0.0);
+                const end = Offset.zero;
+                const curve = Curves.ease;
+
+                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                var offsetAnimation = animation.drive(tween);
+
+                return SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                );
+              },
+            ),
+          );
+        },
+        child: Stack(
           children: [
-            Text(
-              'Тема ${topic['id']}',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              topic['title'],
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    color: Colors.black26,
-                    offset: Offset(0, 2),
-                    blurRadius: 15,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        children: [
-          if (hasImage) 
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: SizedBox(
+            if (hasImage)
+              Container(
+                height: 150,
                 width: double.infinity,
                 child: Image.asset(
                   topic['image_path'],
-                  fit: BoxFit.fitWidth,
+                  fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return Center(
-                      child: Icon(
-                        Icons.image_not_supported,
-                        size: 50,
-                        color: Colors.grey,
+                    return Container(
+                      color: Colors.grey[200],
+                      child: Center(
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
                       ),
                     );
                   },
                 ),
+              )
+            else
+              Container(
+                height: 150,
+                width: double.infinity,
+                color: Colors.white.withOpacity(0.8),
+                child: Center(
+                  child: Icon(
+                    Icons.menu_book,
+                    size: 50,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
+
+            Positioned(
+              right: 20,
+              bottom: 20,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.6,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Тема ${topic['id']}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        topic['title'],
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        textAlign: TextAlign.right,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Дополнительная информация о теме...',
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-                SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          settings: RouteSettings(name: '/topic'),
-                          pageBuilder: (context, animation, secondaryAnimation) => TopicScreen(
-                            topicTitle: topic['title'],
-                            topicId: topic['id'],
-                            chapterImage: widget.chapterImage,
-                          ),
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            const begin = Offset(1.0, 0.0);
-                            const end = Offset.zero;
-                            const curve = Curves.ease;
-
-                            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                            var offsetAnimation = animation.drive(tween);
-
-                            return SlideTransition(
-                              position: offsetAnimation,
-                              child: child,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF2F642D),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Перейти к теме',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -323,6 +342,14 @@ class CategoriesScreenState extends State<CategoriesScreen> {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
     );
   }

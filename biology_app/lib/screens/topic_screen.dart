@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'dart:ui'; // For the BackdropFilter
+import 'dart:ui';
 import 'test_screen.dart';
 import '../services/test_progress_service.dart';
 
 class TopicScreen extends StatefulWidget {
   final String topicTitle;
   final int topicId;
-  final String chapterImage; // Добавляем параметр для фонового изображения
+  final String chapterImage;
 
   const TopicScreen({
     super.key,
     required this.topicTitle,
     required this.topicId,
-    required this.chapterImage, // Обязательный параметр
+    required this.chapterImage,
   });
 
   @override
@@ -81,7 +81,7 @@ class _TopicScreenState extends State<TopicScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF2F642D),
+          backgroundColor: const Color(0xFF42A5F5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -168,7 +168,7 @@ class _TopicScreenState extends State<TopicScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF2F642D),
+                foregroundColor: const Color(0xFF42A5F5),
               ),
               child: const Text('Начать', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
@@ -181,56 +181,75 @@ class _TopicScreenState extends State<TopicScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.topicTitle,
-          style: const TextStyle(
-            color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.black26,
-                offset: Offset(0, 2),
-                blurRadius: 10,
-              ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF8F8F8),
+              Color(0xFFF0F0F0),
+              Color(0xFFFFE0E1),
+              Color(0xFFFF989A),
+              Color(0xFFA5D5FF),
+              Color(0xFF42A5F5),
             ],
+            stops: [0.0, 0.1, 0.3, 0.5, 0.7, 1.0],
           ),
         ),
-        backgroundColor: const Color(0xFF2F642D),
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-          shadows: [
-            Shadow(
-              color: Colors.black26,
-              offset: Offset(0, 2),
-              blurRadius: 10,
+        child: Column(
+          children: [
+            // Кастомный заголовок вместо AppBar
+            Padding(
+              padding: const EdgeInsets.only(top: 40.0, left: 16.0, right: 16.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.pop(context),
+                    color: Colors.black87,
+                    iconSize: 30,
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        widget.topicTitle,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.settings),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return _SettingsMenu(
+                            onTimerCheckedChanged: _handleTimerCheckedChanged,
+                            isTimerEnabled: isTimerEnabled,
+                          );
+                        },
+                      );
+                    },
+                    color: Colors.black87,
+                    iconSize: 30,
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
-      body: Stack(
-        children: [
-          // Фоновое изображение
-          Positioned.fill(
-            child: Image.asset(
-              widget.chapterImage,
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Размытие фона
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Уменьшено размытие для повышения производительности
-            child: Container(
-              color: Colors.black.withOpacity(0.5), // Затемнение фона
-            ),
-          ),
-          // Основной контент
-          isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.white))
-            : Center(
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator(color: Colors.black87))
+                  : Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Информация о прохождении теста
                     if (isTestCompleted)
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -240,6 +259,13 @@ class _TopicScreenState extends State<TopicScreen> {
                               ? Colors.green.withOpacity(0.7)
                               : Colors.orange.withOpacity(0.7),
                           borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Column(
                           children: [
@@ -270,28 +296,6 @@ class _TopicScreenState extends State<TopicScreen> {
                           ],
                         ),
                       ),
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: IconButton(
-                        icon: const Icon(Icons.settings),
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (BuildContext context) {
-                              return _SettingsMenu(
-                                onTimerCheckedChanged: _handleTimerCheckedChanged,
-                                isTimerEnabled: isTimerEnabled,
-                              );
-                            },
-                          );
-                        },
-                        iconSize: 40,
-                        color: Colors.white,
-                        splashColor: Colors.white.withOpacity(0.3),
-                      ),
-                    ),
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
@@ -307,28 +311,20 @@ class _TopicScreenState extends State<TopicScreen> {
                               timePerQuestion: 0,
                             )),
                           ).then((_) {
-                            // Обновляем информацию о прохождении теста при возвращении
                             _loadTestProgress();
                           });
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2F642D),
+                        backgroundColor: const Color(0xFF42A5F5),
                         padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                        shadowColor: Colors.black,
+                        shadowColor: Colors.black12,
                         elevation: 4,
                       ),
                       child: Text(
                         isTestCompleted ? 'Пройти тест снова' : 'Начать тестирование',
                         style: const TextStyle(
                           fontSize: 24,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black26,
-                              offset: Offset(0, 2),
-                              blurRadius: 10,
-                            ),
-                          ],
                           color: Colors.white,
                         ),
                       ),
@@ -336,7 +332,9 @@ class _TopicScreenState extends State<TopicScreen> {
                   ],
                 ),
               ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -357,7 +355,7 @@ class _SettingsMenu extends StatelessWidget {
       children: [
         Positioned.fill(
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Уменьшено размытие для повышения производительности
+            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
             child: Container(
               color: Colors.black.withOpacity(0),
             ),
@@ -365,9 +363,16 @@ class _SettingsMenu extends StatelessWidget {
         ),
         Container(
           padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
           ),
           height: MediaQuery.of(context).size.height * 0.4,
           child: Column(
@@ -377,6 +382,7 @@ class _SettingsMenu extends StatelessWidget {
                 'Меню настроек',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: 20),
               CheckboxListTile(
                 title: const Text('Таймер'),
                 value: isTimerEnabled,
@@ -385,7 +391,7 @@ class _SettingsMenu extends StatelessWidget {
                   Navigator.pop(context);
                 },
                 controlAffinity: ListTileControlAffinity.leading,
-                activeColor: Colors.green,
+                activeColor: const Color(0xFF42A5F5),
                 checkColor: Colors.white,
               ),
             ],

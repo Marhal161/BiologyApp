@@ -3,7 +3,7 @@ import '../database.dart';
 import 'results_screen.dart';
 import 'dart:async';
 import '../services/test_progress_service.dart';
-import 'dart:convert';
+import 'dart:convert' as json; // Исправлено здесь
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:ui' show PointerDeviceKind;
@@ -128,7 +128,7 @@ class _TestScreenState extends State<TestScreen> {
           final userAnswer = userAnswers[i];
           if (userAnswer == null) continue;
 
-          final userMatchingAnswers = json.decode(userAnswer) as Map<String, dynamic>;
+          final userMatchingAnswers = json.jsonDecode(userAnswer) as Map<String, dynamic>;
           final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(question['id']);
 
           bool isCorrect = true;
@@ -154,18 +154,18 @@ class _TestScreenState extends State<TestScreen> {
             }
             // Проверяем, есть ли у пользователя это соответствие
             if (!userMatches.containsKey(leftIndex)) {
-            isCorrect = false;
-            break;
+              isCorrect = false;
+              break;
             }
             if (!userMatches[leftIndex]!.contains(rightIndex)) {
-    isCorrect = false;
-    break;
-    }
-    }
+              isCorrect = false;
+              break;
+            }
+          }
 
-    if (isCorrect) correctAnswers++;
-    } catch (e) {}
-    }
+          if (isCorrect) correctAnswers++;
+        } catch (e) {}
+      }
       else if (questionType == 'sequence') {
         final userAnswer = userAnswers[i];
         final correctAnswer = question['correct_answer'];
@@ -286,7 +286,7 @@ class _TestScreenState extends State<TestScreen> {
           if (!snapshot.hasData) {
             return const Center(
                 child: CircularProgressIndicator(
-                  color: Colors.white,
+                  color: Colors.black,
                 )
             );
           }
@@ -310,7 +310,7 @@ class _TestScreenState extends State<TestScreen> {
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Colors.black,
                           ),
                         ),
                         if (questionImage != null)
@@ -326,13 +326,15 @@ class _TestScreenState extends State<TestScreen> {
                           margin: const EdgeInsets.only(top: 8),
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.black.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
-                            'Перетащите элемент слева к соответствующему элементу справа',
+                            'Перетащите элемент слева к соответствующему элементу справа. '
+                                'Если передумали - просто перетащите ещё раз в нужный элемент. '
+                                'Для удаления соответствия нажмите на крестик.',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontStyle: FontStyle.italic,
                               fontSize: 11,
                             ),
@@ -353,7 +355,7 @@ class _TestScreenState extends State<TestScreen> {
                       setState(() {
                         matchingAnswers = matches;
                         // Преобразуем в формат: {"A": ["1"], "B": ["2", "3"]}
-                        selectedAnswer = json.encode(matches);
+                        selectedAnswer = json.jsonEncode(matches);
                       });
                     },
                     currentMatches: matchingAnswers,
@@ -367,7 +369,7 @@ class _TestScreenState extends State<TestScreen> {
                     margin: const EdgeInsets.only(top: 8),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2F642D),
+                      color: const Color(0xFFA5D5FF),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
@@ -375,12 +377,12 @@ class _TestScreenState extends State<TestScreen> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.check_circle, color: Colors.white, size: 14),
+                            Icon(Icons.check_circle, color: Colors.black, size: 14),
                             SizedBox(width: 4),
                             Text(
                               'Текущие соответствия:',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                               ),
@@ -421,13 +423,13 @@ class _TestScreenState extends State<TestScreen> {
                               margin: const EdgeInsets.only(bottom: 4),
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.black.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 '${entry.key} → ${entry.value}',
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.black,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -453,14 +455,7 @@ class _TestScreenState extends State<TestScreen> {
                 question['question_text'] ?? 'Вопрос без текста',
                 style: const TextStyle(
                   fontSize: 20,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 10,
-                    ),
-                  ],
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -468,30 +463,40 @@ class _TestScreenState extends State<TestScreen> {
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: TextField(
-                controller: answerController,
-                textInputAction: TextInputAction.done,
-                keyboardType: questionType == 'number' ? TextInputType.number : TextInputType.text,
-                enableSuggestions: true,
-                autocorrect: true,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: questionType == 'number' ? 'Введите число' : 'Ваш ответ',
-                  labelStyle: const TextStyle(color: Colors.white),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  hintText: questionType == 'two_words' ? 'Введите два слова через пробел' : null,
-                  hintStyle: const TextStyle(color: Colors.white70),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                style: const TextStyle(color: Colors.white),
-                cursorColor: Colors.white,
-                inputFormatters: questionType == 'number'
-                    ? [FilteringTextInputFormatter.digitsOnly]
-                    : null,
+                child: TextField(
+                  controller: answerController,
+                  textInputAction: TextInputAction.done,
+                  keyboardType: questionType == 'number' ? TextInputType.number : TextInputType.text,
+                  enableSuggestions: true,
+                  autocorrect: true,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: questionType == 'number' ? 'Введите число' : 'Ваш ответ',
+                    labelStyle: const TextStyle(color: Colors.black),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    hintText: questionType == 'two_words'
+                        ? 'Введите два слова через пробел'
+                        : 'Можно вводить ответ в любом падеже',
+                    hintStyle: const TextStyle(color: Colors.black54),
+                    filled: true,
+                    fillColor: Colors.transparent,
+                  ),
+                  style: const TextStyle(color: Colors.black),
+                  cursorColor: Colors.black,
+                  inputFormatters: questionType == 'number'
+                      ? [FilteringTextInputFormatter.digitsOnly]
+                      : null,
+                ),
               ),
             ),
           ],
@@ -534,14 +539,7 @@ class _TestScreenState extends State<TestScreen> {
                     mainQuestion,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 2),
-                          blurRadius: 10,
-                        ),
-                      ],
+                      color: Colors.black,
                     ),
                   ),
                   if (questionImage != null) questionImage,
@@ -550,7 +548,7 @@ class _TestScreenState extends State<TestScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.black.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
@@ -565,14 +563,14 @@ class _TestScreenState extends State<TestScreen> {
                               height: 24,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.black.withOpacity(0.2),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 1),
+                                border: Border.all(color: Colors.black, width: 1),
                               ),
                               child: Text(
                                 option.substring(0, 1),
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.black,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
                                 ),
@@ -584,7 +582,7 @@ class _TestScreenState extends State<TestScreen> {
                                 option.substring(2), // Убираем букву и скобку
                                 style: const TextStyle(
                                   fontSize: 14,
-                                  color: Colors.white,
+                                  color: Colors.black,
                                 ),
                               ),
                             ),
@@ -624,14 +622,7 @@ class _TestScreenState extends State<TestScreen> {
                   'Ваша последовательность: $sequenceAnswer',
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black26,
-                        offset: Offset(0, 2),
-                        blurRadius: 10,
-                      ),
-                    ],
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -641,7 +632,7 @@ class _TestScreenState extends State<TestScreen> {
       );
     } else if (question['options'] != null) {
       try {
-        var options = json.decode(question['options'] as String);
+        var options = json.jsonDecode(question['options'] as String);
         if (options is List && options.isNotEmpty) {
           return SingleChildScrollView(
             child: Column(
@@ -653,14 +644,7 @@ class _TestScreenState extends State<TestScreen> {
                     question['question_text'] ?? 'Вопрос без текста',
                     style: const TextStyle(
                       fontSize: 18,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 2),
-                          blurRadius: 10,
-                        ),
-                      ],
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -669,7 +653,7 @@ class _TestScreenState extends State<TestScreen> {
                 ...options.map((option) => RadioListTile<String>(
                   title: Text(
                     option.toString(),
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.black),
                   ),
                   value: option.toString(),
                   groupValue: selectedAnswer,
@@ -712,14 +696,7 @@ class _TestScreenState extends State<TestScreen> {
                 question['question_text'] ?? 'Вопрос без текста',
                 style: const TextStyle(
                   fontSize: 20,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 10,
-                    ),
-                  ],
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -729,7 +706,7 @@ class _TestScreenState extends State<TestScreen> {
                 RadioListTile<String>(
                   title: Text(
                     answer,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.black),
                   ),
                   value: answer,
                   groupValue: selectedAnswer,
@@ -782,14 +759,7 @@ class _TestScreenState extends State<TestScreen> {
                 mainQuestion,
                 style: const TextStyle(
                   fontSize: 18,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 10,
-                    ),
-                  ],
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -823,8 +793,8 @@ class _TestScreenState extends State<TestScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          backgroundColor: isSelected ? Colors.grey : const Color(0xFF2F642D),
-                          foregroundColor: Colors.white,
+                          backgroundColor: isSelected ? Colors.grey : const Color(0xFFA5D5FF),
+                          foregroundColor: Colors.black,
                           shadowColor: Colors.black26,
                           elevation: 4,
                         ),
@@ -839,7 +809,7 @@ class _TestScreenState extends State<TestScreen> {
                       child: Text(
                         option,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 16,
                         ),
                       ),
@@ -856,14 +826,7 @@ class _TestScreenState extends State<TestScreen> {
                   'Выбранные варианты: ${selectedLetters.join(', ')}',
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black26,
-                        offset: Offset(0, 2),
-                        blurRadius: 10,
-                      ),
-                    ],
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -881,7 +844,7 @@ class _TestScreenState extends State<TestScreen> {
                 question['question_text'] ?? 'Неизвестный тип вопроса',
                 style: const TextStyle(
                   fontSize: 20,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -891,7 +854,7 @@ class _TestScreenState extends State<TestScreen> {
               padding: EdgeInsets.all(8.0),
               child: Text(
                 'Неизвестный формат вопроса',
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: Colors.black54),
               ),
             ),
           ],
@@ -902,7 +865,7 @@ class _TestScreenState extends State<TestScreen> {
     return const Center(
       child: Text(
         'Неподдерживаемый тип вопроса',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: Colors.black),
       ),
     );
   }
@@ -931,8 +894,8 @@ class _TestScreenState extends State<TestScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          backgroundColor: isSelected ? Colors.grey : const Color(0xFF2F642D),
-          foregroundColor: Colors.white,
+          backgroundColor: isSelected ? Colors.grey : const Color(0xFFA5D5FF),
+          foregroundColor: Colors.black,
           shadowColor: Colors.black26,
           elevation: 4,
         ),
@@ -950,7 +913,7 @@ class _TestScreenState extends State<TestScreen> {
     String timeString = '${minutes.toString().padLeft(2, '0')}:${seconds
         .toString().padLeft(2, '0')}';
 
-    Color textColor = _timeLeft <= 30 ? Colors.red : Colors.white;
+    Color textColor = _timeLeft <= 30 ? Colors.red : Colors.black;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -960,13 +923,6 @@ class _TestScreenState extends State<TestScreen> {
           fontSize: 24,
           color: textColor,
           fontWeight: FontWeight.bold,
-          shadows: [
-            Shadow(
-              color: Colors.black26,
-              offset: Offset(0, 2),
-              blurRadius: 10,
-            ),
-          ],
         ),
       ),
     );
@@ -997,144 +953,167 @@ class _TestScreenState extends State<TestScreen> {
 
           return shouldExit ?? false;
         },
-    child: Scaffold(
-    appBar: AppBar(
-    title: Text(widget.topicTitle, style: const TextStyle(
-    color: Colors.white,
-    shadows: [
-    Shadow(
-    color: Colors.black26,
-    offset: Offset(0, 2),
-    blurRadius: 10,
-    ),
-    ],
-    )),
-    backgroundColor: const Color(0xFF2F642D),
-    iconTheme: const IconThemeData(color: Colors.white),
-    actions: [
-    if (widget.isTimerEnabled) _buildTimer(),
-    ],
-    ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            colors: [Color(0xFF2F642D), Color(0xFF5A9647)],
-            focal: Alignment.topRight,
-            radius: 3.0,
-          ),
-        ),
-        child: questions.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0, vertical: 8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween<double>(
-                    begin: 0,
-                    end: (currentQuestionIndex + 1) / questions.length,
-                  ),
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeInOut,
-                  builder: (context, value, _) {
-                    return LinearProgressIndicator(
-                      value: value,
-                      backgroundColor: Colors.grey[200],
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFF3d82b4)),
-                      minHeight: 10,
-                    );
-                  },
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Вопрос ${currentQuestionIndex + 1}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 2),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'из ${questions.length}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 2),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                  ),
+        child: Scaffold(
+          // Убрали AppBar
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFF8F8F8),
+                  Color(0xFFF0F0F0),
+                  Color(0xFFFFE0E1),
+                  Color(0xFFFF989A),
+                  Color(0xFFA5D5FF),
+                  Color(0xFF42A5F5),
                 ],
+                stops: [0.0, 0.1, 0.3, 0.5, 0.7, 1.0],
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: _buildQuestion(questions[currentQuestionIndex]),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        _moveToNextQuestion();
+            child: Column(
+              children: [
+                // Добавили кнопку возврата в верхний левый угол
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 40, left: 16),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                      onPressed: () async {
+                        final shouldExit = await showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Подтверждение выхода'),
+                            content: const Text('Вы уверены, что хотите выйти из теста? Все ваши ответы будут потеряны.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(false),
+                                child: const Text('Отмена'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(true),
+                                child: const Text('Выйти'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (shouldExit ?? false) {
+                          Navigator.of(context).pop();
+                        }
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF2F642D),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                // Добавили заголовок темы под кнопкой возврата
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+                  child: Text(
+                    widget.topicTitle,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                // Добавили таймер, если он включен
+                if (widget.isTimerEnabled) _buildTimer(),
+
+                questions.isEmpty
+                    ? const Expanded(child: Center(child: CircularProgressIndicator()))
+                    : Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: TweenAnimationBuilder<double>(
+                            tween: Tween<double>(
+                              begin: 0,
+                              end: (currentQuestionIndex + 1) / questions.length,
+                            ),
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeInOut,
+                            builder: (context, value, _) {
+                              return LinearProgressIndicator(
+                                value: value,
+                                backgroundColor: Colors.grey[200],
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF3d82b4)),
+                                minHeight: 10,
+                              );
+                            },
+                          ),
                         ),
-                        shadowColor: Colors.black26,
-                        elevation: 4,
                       ),
-                      child: Text(
-                        currentQuestionIndex < questions.length - 1
-                            ? 'Следующий вопрос'
-                            : 'Проверить результаты',
-                        style: const TextStyle(
-                          shadows: [
-                            Shadow(
-                              color: Colors.black26,
-                              offset: Offset(0, 2),
-                              blurRadius: 10,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Вопрос ${currentQuestionIndex + 1}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'из ${questions.length}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: _buildQuestion(questions[currentQuestionIndex]),
+                              ),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _moveToNextQuestion();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xFFA5D5FF),
+                                  foregroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  shadowColor: Colors.black26,
+                                  elevation: 4,
+                                ),
+                                child: Text(
+                                  currentQuestionIndex < questions.length - 1
+                                      ? 'Следующий вопрос'
+                                      : 'Проверить результаты',
+                                  style: const TextStyle(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-    )
+          ),
+        )
     );
   }
 }
