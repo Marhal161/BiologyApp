@@ -1190,8 +1190,10 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: Draggable<String>(
+          child: LongPressDraggable<String>(
             data: itemIndex,
+            delay: const Duration(milliseconds: 500), // Задержка для активации
+            hapticFeedbackOnStart: true, // Вибрация при начале перетаскивания
             feedback: Material(
               child: Container(
                 width: 200,
