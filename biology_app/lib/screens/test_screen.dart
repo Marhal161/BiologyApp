@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:ui' show PointerDeviceKind;
 import 'dart:math' as math;
+import '../widgets/resume_test_dialog.dart';
 
 class TestScreen extends StatefulWidget {
   final int topicId;
@@ -41,16 +42,94 @@ class _TestScreenState extends State<TestScreen> {
   @override
   void initState() {
     super.initState();
-    _loadQuestions();
-    if (widget.isTimerEnabled) {
-      _startTimer();
-    }
+    _checkForSavedState();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    // Сохраняем состояние при выходе, если тест не завершен
+    if (questions.isNotEmpty && currentQuestionIndex < questions.length) {
+      _saveTestState();
+    }
     super.dispose();
+  }
+
+  Future<void> _checkForSavedState() async {
+    // Проверяем, есть ли сохраненное состояние теста
+    if (await TestProgressService.hasTestState(widget.topicId)) {
+      final savedState = await TestProgressService.getTestState(widget.topicId);
+      if (savedState != null) {
+        // Показываем диалог выбора
+        await ResumeTestDialog.show(
+          context: context,
+          topicTitle: widget.topicTitle,
+          savedState: savedState,
+          onResumeTest: () => _resumeTest(savedState),
+          onStartNew: () => _startNewTest(),
+        );
+      } else {
+        _startNewTest();
+      }
+    } else {
+      _startNewTest();
+    }
+  }
+
+  void _startNewTest() async {
+    await _loadQuestions();
+    if (widget.isTimerEnabled) {
+      _startTimer();
+    }
+  }
+
+  void _resumeTest(TestState savedState) async {
+    await _loadQuestions();
+    
+    setState(() {
+      currentQuestionIndex = savedState.currentQuestionIndex;
+      userAnswers = List<String?>.from(savedState.userAnswers);
+      matchingAnswers = Map<String, List<String>>.from(
+        savedState.matchingAnswers?.map((key, value) => MapEntry(key, List<String>.from(value))) ?? {}
+      );
+      
+      // Восстанавливаем состояние текущего вопроса
+      if (currentQuestionIndex < questions.length) {
+        final question = questions[currentQuestionIndex];
+        final questionType = question['question_type'] as String?;
+        
+        // Восстанавливаем ответ для текущего вопроса
+        final currentAnswer = userAnswers[currentQuestionIndex];
+        if (currentAnswer != null) {
+          if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
+            answerController.text = currentAnswer;
+          } else if (questionType == 'sequence') {
+            sequenceAnswer = currentAnswer;
+          } else {
+            selectedAnswer = currentAnswer;
+          }
+        }
+      }
+      
+      if (widget.isTimerEnabled) {
+        _timeLeft = savedState.timeLeft ?? widget.timePerQuestion;
+        _startTimer();
+      }
+    });
+  }
+
+  Future<void> _saveTestState() async {
+    if (questions.isNotEmpty) {
+      final testState = TestState(
+        currentQuestionIndex: currentQuestionIndex,
+        userAnswers: userAnswers,
+        matchingAnswers: matchingAnswers,
+        timeLeft: _timeLeft,
+        savedAt: DateTime.now(),
+      );
+      
+      await TestProgressService.saveTestState(widget.topicId, testState);
+    }
   }
 
   void _startTimer() {
@@ -100,6 +179,10 @@ class _TestScreenState extends State<TestScreen> {
 
   void _moveToNextQuestion() {
     _saveAnswer();
+    
+    // Сохраняем состояние перед переходом к следующему вопросу
+    _saveTestState();
+    
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
@@ -117,6 +200,9 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   void _finishTest() async {
+    // Очищаем сохраненное состояние при завершении теста
+    await TestProgressService.clearTestState(widget.topicId);
+    
     int correctAnswers = 0;
     for (int i = 0; i < questions.length; i++) {
       final question = questions[i];
@@ -936,16 +1022,28 @@ class _TestScreenState extends State<TestScreen> {
           final shouldExit = await showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Подтверждение выхода'),
-              content: const Text('Вы уверены, что хотите выйти из теста? Все ваши ответы будут потеряны.'),
+              title: const Text('Выйти из теста'),
+              content: const Text('Что вы хотите сделать?'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: const Text('Отмена'),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Выйти'),
+                  onPressed: () async {
+                    // Сохраняем состояние и выходим
+                    await _saveTestState();
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text('Сохранить и выйти'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    // Очищаем состояние и выходим
+                    await TestProgressService.clearTestState(widget.topicId);
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text('Выйти без сохранения'),
                 ),
               ],
             ),
@@ -984,16 +1082,28 @@ class _TestScreenState extends State<TestScreen> {
                         final shouldExit = await showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Подтверждение выхода'),
-                            content: const Text('Вы уверены, что хотите выйти из теста? Все ваши ответы будут потеряны.'),
+                            title: const Text('Выйти из теста'),
+                            content: const Text('Что вы хотите сделать?'),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(false),
                                 child: const Text('Отмена'),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.of(context).pop(true),
-                                child: const Text('Выйти'),
+                                onPressed: () async {
+                                  // Сохраняем состояние и выходим
+                                  await _saveTestState();
+                                  Navigator.of(context).pop(true);
+                                },
+                                child: const Text('Сохранить и выйти'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  // Очищаем состояние и выходим
+                                  await TestProgressService.clearTestState(widget.topicId);
+                                  Navigator.of(context).pop(true);
+                                },
+                                child: const Text('Выйти без сохранения'),
                               ),
                             ],
                           ),
