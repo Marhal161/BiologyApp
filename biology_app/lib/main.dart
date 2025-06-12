@@ -31,7 +31,6 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        fontFamily: 'Montserrat',
         scaffoldBackgroundColor: Colors.white,
         textSelectionTheme: const TextSelectionThemeData(
           selectionHandleColor: Colors.black,
@@ -51,7 +50,12 @@ class StartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.white,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
+            fit: BoxFit.cover,
+          ),
+        ),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -71,22 +75,34 @@ class StartScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
                 const Text(
-                  'Добро пожаловать!',
+                  'Дорогой друг!',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Colors.black, // Изменил цвет текста на белый для лучшей видимости на фоне
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30),
+                  child: Text(
+                    'Это приложение поможет подготовиться к ЕГЭ, ОГЭ и по другим экзаменам по биологии, предлагая задания разных форматов для развития биологического мышления и выявления слабых тем',
+                    textAlign: TextAlign.justify,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black, // Изменил цвет текста на белый
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 40),
                   child: Text(
-                    'В приложении Вы можете подкрепить знания и подготовиться к экзаменам!',
-                    textAlign: TextAlign.center,
+                    'У тебя всё получится! Вперёд!',
+                    textAlign: TextAlign.justify,
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black87,
+                      color: Colors.black, // Изменил цвет текста на белый
                     ),
                   ),
                 ),
@@ -109,7 +125,7 @@ class StartScreen extends StatelessWidget {
                       elevation: 4,
                     ),
                     child: const Text(
-                      'Начать',
+                      'Вперёд!',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,

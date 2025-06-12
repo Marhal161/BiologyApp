@@ -73,19 +73,10 @@ class CategoriesScreenState extends State<CategoriesScreen> {
         children: [
           // Новый градиентный фон
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFF8F8F8),
-                  Color(0xFFF0F0F0),
-                  Color(0xFFFFE0E1),
-                  Color(0xFFFF989A),
-                  Color(0xFFA5D5FF),
-                  Color(0xFF42A5F5),
-                ],
-                stops: [0.0, 0.1, 0.3, 0.5, 0.7, 1.0],
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
+                fit: BoxFit.cover,
               ),
             ),
           ),
@@ -264,43 +255,31 @@ class CategoriesScreenState extends State<CategoriesScreen> {
 
             Positioned(
               right: 20,
-              bottom: 20,
+              bottom: 40, // Подняли текст выше
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: MediaQuery.of(context).size.width * 0.6,
                 ),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'Тема ${topic['id']}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
                       const SizedBox(height: 4),
                       Text(
                         topic['title'],
                         style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                            fontSize: 16,
+                            color: Colors.black87,
+                            fontFamily: 'Montserrat',
+                            shadows: [
+                              Shadow(
+                                color: Colors.white,
+                                offset: Offset(1, 1),
+                                blurRadius: 10,
+                              )
+                            ]
                         ),
                         textAlign: TextAlign.right,
                         maxLines: 2,
@@ -316,6 +295,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
       ),
     );
   }
+
 
   Widget _buildTestIndicator(int topicId) {
     return FutureBuilder<double?>(

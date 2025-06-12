@@ -38,18 +38,10 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFFFE0E1),  // Очень светлый розовый
-              Color(0xFFFF989A),  // Основной розовый
-              Color(0xFFA5D5FF),  // Светло-синий
-              Color(0xFF42A5F5),  // Основной синий
-            ],
-            stops: [ 0.3, 0.5, 0.7, 1.0],  // Более плавное распределение
-            tileMode: TileMode.clamp,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
+            fit: BoxFit.cover,
           ),
         ),
         child: _isLoading

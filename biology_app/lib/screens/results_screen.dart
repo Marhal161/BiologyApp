@@ -165,19 +165,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return Scaffold(
       appBar: null, //
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF8F8F8),
-              Color(0xFFF0F0F0),
-              Color(0xFFFFE0E1),
-              Color(0xFFFF989A),
-              Color(0xFFA5D5FF),
-              Color(0xFF42A5F5),
-            ],
-            stops: [0.0, 0.1, 0.3, 0.5, 0.7, 1.0],
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
+            fit: BoxFit.cover,
           ),
         ),
         child: isLoading

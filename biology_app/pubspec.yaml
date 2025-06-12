@@ -12,8 +12,8 @@ dependencies:
   sqflite: ^2.3.2
   path_provider: ^2.1.2
   path: ^1.9.1
-  shared_preferences: ^2.2.0
-  
+  shared_preferences: ^2.2.2
+
 
 dev_dependencies:
   flutter_test:
@@ -26,7 +26,11 @@ flutter:
     - assets/images/
     - assets/images/q_img/
     - assets/database.db
-
+    - assets/fonts/
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat-Medium.ttf
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -42,12 +46,4 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: "assets/images/icon/logobio.png"
-
-fonts:
-  - family: Montserrat
-    fonts:
-      - asset: fonts/Montserrat-Medium.ttf
-        weight: 400
-      - asset: fonts/Montserrat-Bold.ttf
-        style: bold
 
