@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'test_screen.dart';
 import '../services/test_progress_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TopicScreen extends StatefulWidget {
   final String topicTitle;
@@ -85,22 +86,28 @@ class _TopicScreenState extends State<TopicScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          title: const Text(
+          title: Text(
             'Установите время',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+            style: GoogleFonts.montserrat(
+              textStyle: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Укажите время на ответ (в секундах, максимум 300 секунд):',
-                style: TextStyle(color: Colors.white),
+                style: GoogleFonts.montserrat(
+                  textStyle: const TextStyle(color: Colors.white),
+                ),
               ),
               TextField(
-                style: const TextStyle(color: Colors.white),
+                style: GoogleFonts.montserrat(
+                  textStyle: const TextStyle(color: Colors.white),
+                ),
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   enabledBorder: UnderlineInputBorder(
@@ -117,10 +124,13 @@ class _TopicScreenState extends State<TopicScreen> {
                       if (!isSnackBarVisible) {
                         isSnackBarVisible = true;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Максимальное время - 300 секунд (5 минут)'),
+                          SnackBar(
+                            content: Text(
+                              'Максимальное время - 300 секунд (5 минут)',
+                              style: GoogleFonts.montserrat(),
+                            ),
                             backgroundColor: Colors.red,
-                            duration: Duration(seconds: 2),
+                            duration: const Duration(seconds: 2),
                           ),
                         ).closed.then((_) => isSnackBarVisible = false);
                       }
@@ -128,10 +138,13 @@ class _TopicScreenState extends State<TopicScreen> {
                       if (!isSnackBarVisible) {
                         isSnackBarVisible = true;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Минимальное время - 1 секунда'),
+                          SnackBar(
+                            content: Text(
+                              'Минимальное время - 1 секунда',
+                              style: GoogleFonts.montserrat(),
+                            ),
                             backgroundColor: Colors.red,
-                            duration: Duration(seconds: 2),
+                            duration: const Duration(seconds: 2),
                           ),
                         ).closed.then((_) => isSnackBarVisible = false);
                       }
@@ -149,7 +162,12 @@ class _TopicScreenState extends State<TopicScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Отмена', style: TextStyle(color: Colors.white70)),
+              child: Text(
+                'Отмена',
+                style: GoogleFonts.montserrat(
+                  textStyle: const TextStyle(color: Colors.white70),
+                ),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -170,7 +188,12 @@ class _TopicScreenState extends State<TopicScreen> {
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFF42A5F5),
               ),
-              child: const Text('Начать', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                'Начать',
+                style: GoogleFonts.montserrat(
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
           ],
         );
@@ -205,10 +228,12 @@ class _TopicScreenState extends State<TopicScreen> {
                     child: Center(
                       child: Text(
                         widget.topicTitle,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                        style: GoogleFonts.montserrat(
+                          textStyle: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
                     ),
@@ -268,10 +293,12 @@ class _TopicScreenState extends State<TopicScreen> {
                             const SizedBox(height: 8),
                             Text(
                               'Тест пройден с результатом: ${testScore!.toStringAsFixed(1)}%',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                              style: GoogleFonts.montserrat(
+                                textStyle: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -280,8 +307,10 @@ class _TopicScreenState extends State<TopicScreen> {
                                   ? 'Отличный результат!'
                                   : 'Вы можете пройти тест еще раз для улучшения результата.',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: GoogleFonts.montserrat(
+                                textStyle: const TextStyle(
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ],
@@ -314,9 +343,11 @@ class _TopicScreenState extends State<TopicScreen> {
                       ),
                       child: Text(
                         isTestCompleted ? 'Пройти тест снова' : 'Начать тестирование',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          color: Colors.white,
+                        style: GoogleFonts.montserrat(
+                          textStyle: const TextStyle(
+                            fontSize: 24,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -369,13 +400,18 @@ class _SettingsMenu extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Text(
+              Text(
                 'Меню настроек',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: GoogleFonts.montserrat(
+                  textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+                ),
               ),
               const SizedBox(height: 20),
               CheckboxListTile(
-                title: const Text('Таймер'),
+                title: Text(
+                  'Таймер',
+                  style: GoogleFonts.montserrat(),
+                ),
                 value: isTimerEnabled,
                 onChanged: (bool? value) {
                   onTimerCheckedChanged(value ?? false);

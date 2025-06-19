@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'topic_screen.dart';
 import '../database.dart';
 import '../services/test_progress_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final int chapterId;
@@ -96,17 +97,19 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                     Expanded(
                       child: Text(
                         widget.chapterTitle,
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(
-                              color: Colors.white.withOpacity(0.5),
-                              offset: const Offset(0, 2),
-                              blurRadius: 10,
-                            ),
-                          ],
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w400,
+                            shadows: [
+                              Shadow(
+                                color: Colors.white.withOpacity(0.5),
+                                offset: const Offset(0, 2),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -133,10 +136,14 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                   ),
                   child: TextField(
                     controller: _searchController,
-                    style: const TextStyle(color: Colors.black87),
+                    style: GoogleFonts.montserrat(
+                      textStyle: const TextStyle(color: Colors.black87),
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Поиск по темам...',
-                      hintStyle: TextStyle(color: Colors.black54),
+                      hintStyle: GoogleFonts.montserrat(
+                        textStyle: TextStyle(color: Colors.black54),
+                      ),
                       prefixIcon: const Icon(Icons.search, color: Colors.black54),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -255,7 +262,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
 
             Positioned(
               right: 20,
-              bottom: 40, // Подняли текст выше
+              bottom: 50,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: MediaQuery.of(context).size.width * 0.6,
@@ -269,21 +276,22 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                       const SizedBox(height: 4),
                       Text(
                         topic['title'],
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black87,
-                            fontFamily: 'Montserrat',
-                            shadows: [
-                              Shadow(
-                                color: Colors.white,
-                                offset: Offset(1, 1),
-                                blurRadius: 10,
-                              )
-                            ]
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.white,
+                                  offset: Offset(1, 1),
+                                  blurRadius: 10,
+                                )
+                              ]
+                          ),
                         ),
                         textAlign: TextAlign.right,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3,
+                        overflow: TextOverflow.clip,
                       ),
                     ],
                   ),
@@ -295,7 +303,6 @@ class CategoriesScreenState extends State<CategoriesScreen> {
       ),
     );
   }
-
 
   Widget _buildTestIndicator(int topicId) {
     return FutureBuilder<double?>(

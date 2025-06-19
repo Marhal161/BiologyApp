@@ -879,8 +879,8 @@ class _TestScreenState extends State<TestScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          backgroundColor: isSelected ? Colors.grey : const Color(0xFFA5D5FF),
-                          foregroundColor: Colors.black,
+                          backgroundColor: isSelected ? Colors.grey : const Color(0xFF42A5F5),
+                          foregroundColor: Colors.white,
                           shadowColor: Colors.black26,
                           elevation: 4,
                         ),
@@ -980,8 +980,8 @@ class _TestScreenState extends State<TestScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          backgroundColor: isSelected ? Colors.grey : const Color(0xFFA5D5FF),
-          foregroundColor: Colors.black,
+          backgroundColor: isSelected ? Color(0xFF3D82B4) : const Color(0xFF42A5F5),
+          foregroundColor: Colors.white,
           shadowColor: Colors.black26,
           elevation: 4,
         ),
@@ -1189,8 +1189,8 @@ class _TestScreenState extends State<TestScreen> {
                                   _moveToNextQuestion();
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFFA5D5FF),
-                                  foregroundColor: Colors.black,
+                                  backgroundColor: Color(0xFF42A5F5),
+                                  foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),

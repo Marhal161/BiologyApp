@@ -13,24 +13,37 @@ dependencies:
   path_provider: ^2.1.2
   path: ^1.9.1
   shared_preferences: ^2.2.2
-
+  google_fonts: ^6.2.1
+  url_launcher: ^6.1.11
+  video_player: ^2.7.0
+  chewie: ^1.4.0
+  path_provider_android: ^2.0.11
+  open_file: ^3.3.1
+  clipboard: ^0.1.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  flutter_launcher_icons: 0.14.3
+  flutter_launcher_icons: ^0.14.4
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/logotip.png
     - assets/images/q_img/
     - assets/database.db
-    - assets/fonts/
+    - fonts/
+    - assets/videos/intro.mp4
+    - assets/documents/politic.pdf
+    - assets/documents/processing_pd.pdf
   fonts:
     - family: Montserrat
       fonts:
-        - asset: assets/fonts/Montserrat-Medium.ttf
+        - asset: fonts/Montserrat-Medium.ttf
+          style: normal
+        - asset: fonts/Montserrat-Bold.ttf
+          weight: 600
 
 flutter_launcher_icons:
   android: "launcher_icon"
