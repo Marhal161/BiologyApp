@@ -300,6 +300,7 @@ class _TopicScreenState extends State<TopicScreen> {
                                   color: Colors.white,
                                 ),
                               ),
+                              textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             Text(

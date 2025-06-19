@@ -260,41 +260,32 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                 ),
               ),
 
+            // Текст прижат к правому краю с отступом
             Positioned(
-              right: 20,
-              bottom: 50,
-              child: ConstrainedBox(
+              right: 20, // Отступ от правого края
+              bottom: 50, // Отступ снизу
+              child: Container(
                 constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.6,
+                  maxWidth: MediaQuery.of(context).size.width * 0.5, // Макс. ширина 60% экрана
                 ),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 4),
-                      Text(
-                        topic['title'],
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.white,
-                                  offset: Offset(1, 1),
-                                  blurRadius: 10,
-                                )
-                              ]
-                          ),
-                        ),
-                        textAlign: TextAlign.right,
-                        maxLines: 3,
-                        overflow: TextOverflow.clip,
-                      ),
-                    ],
+                child: Text(
+                  topic['title'],
+                  style: GoogleFonts.montserrat(
+                    textStyle: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                      shadows: [
+                        Shadow(
+                          color: Colors.white,
+                          offset: Offset(1, 1),
+                          blurRadius: 10,
+                        )
+                      ],
+                    ),
                   ),
+                  textAlign: TextAlign.right, // Текст по правому краю
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis, // Многоточие если текст не помещается
                 ),
               ),
             ),
@@ -303,7 +294,6 @@ class CategoriesScreenState extends State<CategoriesScreen> {
       ),
     );
   }
-
   Widget _buildTestIndicator(int topicId) {
     return FutureBuilder<double?>(
       future: TestProgressService.getTestScore(topicId),

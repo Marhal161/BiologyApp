@@ -37,6 +37,15 @@ flutter:
     - assets/videos/intro.mp4
     - assets/documents/politic.pdf
     - assets/documents/processing_pd.pdf
+    - assets/images/resultImages/bad1.png
+    - assets/images/resultImages/bad2.png
+    - assets/images/resultImages/bad3.png
+    - assets/images/resultImages/normal1.png
+    - assets/images/resultImages/normal2.png
+    - assets/images/resultImages/normal3.png
+    - assets/images/resultImages/excellent1.png
+    - assets/images/resultImages/excellent2.png
+    - assets/images/resultImages/excellent3.png
   fonts:
     - family: Montserrat
       fonts:

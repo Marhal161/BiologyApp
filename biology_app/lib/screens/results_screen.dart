@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'topic_screen.dart'; // Импортируем TopicScreen
 import 'dart:convert';
 import '../database.dart';
-import 'dart:math' show min, max;
+import 'dart:math' show min, max, Random;
 
 class ResultsScreen extends StatefulWidget {
   final String topicTitle;
@@ -23,11 +23,14 @@ class ResultsScreen extends StatefulWidget {
 class _ResultsScreenState extends State<ResultsScreen> {
   List<bool> answerResults = [];
   bool isLoading = true;
+  late String motivationImagePath;
+  final Random _random = Random();
 
   @override
   void initState() {
     super.initState();
     _checkAnswers();
+    _setMotivationImage(0); // Инициализируем с нулевым процентом, потом обновим
   }
 
   Future<void> _checkAnswers() async {
@@ -148,8 +151,33 @@ class _ResultsScreenState extends State<ResultsScreen> {
       setState(() {
         answerResults = results;
         isLoading = false;
+
+        // Подсчет процента правильных ответов
+        int correctAnswers = answerResults.where((result) => result).length;
+        double percentage = widget.questions.isEmpty
+            ? 0
+            : (correctAnswers / widget.questions.length) * 100;
+
+        _setMotivationImage(percentage);
       });
     }
+  }
+
+  void _setMotivationImage(double percentage) {
+    String category;
+    if (percentage < 30) {
+      category = 'bad';
+    } else if (percentage < 70) {
+      category = 'normal';
+    } else {
+      category = 'excellent';
+    }
+
+    // Выбираем случайную картинку из категории (1, 2 или 3)
+    int imageNumber = _random.nextInt(3) + 1;
+    setState(() {
+      motivationImagePath = 'assets/images/resultImages/$category$imageNumber.png';
+    });
   }
 
   @override
@@ -212,7 +240,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withOpacity(0.6),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
@@ -240,34 +268,31 @@ class _ResultsScreenState extends State<ResultsScreen> {
                         fontSize: 18,
                         color: Colors.black87,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 15),
-                    // Добавляем мотивационное сообщение
+                    // Добавляем мотивационную картинку
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: _getMotivationColor(percentage),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            _getMotivationIcon(percentage),
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              _getMotivationMessage(percentage),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                        borderRadius: BorderRadius.circular(20), // Закругляем углы контейнера
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 4),
                           ),
                         ],
+                      ),
+                      child: ClipRRect( // Обрезаем изображение по границам
+                        borderRadius: BorderRadius.circular(15), // Закругляем углы изображения
+                        child: Image.asset(
+                          motivationImagePath,
+                          fit: BoxFit.cover, // Заполняет всю область с сохранением пропорций
+                          height: 180,
+                          width: double.infinity, // Растягиваем на всю доступную ширину
+                        ),
                       ),
                     ),
                   ],
@@ -286,7 +311,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
                     // Упрощенная версия карточки вопроса
                     return Card(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withOpacity(0.8),
                       margin: const EdgeInsets.only(bottom: 10),
                       child: ExpansionTile(
                         collapsedIconColor: Colors.black87,
@@ -439,7 +464,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
       ),
     );
   }
-
   // Улучшенный метод форматирования ответов
   String _formatCorrectAnswer(Map<String, dynamic> question) {
     final questionType = question['question_type'] as String?;
