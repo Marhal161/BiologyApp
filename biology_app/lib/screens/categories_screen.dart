@@ -260,32 +260,36 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                 ),
               ),
 
-            // Текст прижат к правому краю с отступом
+
             Positioned(
-              right: 20, // Отступ от правого края
-              bottom: 50, // Отступ снизу
+              right: 10,
+              bottom: 50,
+              left: 200,
               child: Container(
                 constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.5, // Макс. ширина 60% экрана
+                  maxWidth: MediaQuery.of(context).size.width * 0.5,
                 ),
-                child: Text(
-                  topic['title'],
-                  style: GoogleFonts.montserrat(
-                    textStyle: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                      shadows: [
-                        Shadow(
-                          color: Colors.white,
-                          offset: Offset(1, 1),
-                          blurRadius: 10,
-                        )
-                      ],
+                child: Align(
+                  alignment: Alignment.centerLeft, // Выравнивание текста по левому краю внутри контейнера
+                  child: Text(
+                    topic['title'],
+                    style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                        shadows: [
+                          Shadow(
+                            color: Colors.white,
+                            offset: Offset(1, 1),
+                            blurRadius: 10,
+                          )
+                        ],
+                      ),
                     ),
+                    textAlign: TextAlign.left, // Выравнивание текста по левому краю
+                    maxLines: 3,
+                    overflow: TextOverflow.fade,
                   ),
-                  textAlign: TextAlign.right, // Текст по правому краю
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis, // Многоточие если текст не помещается
                 ),
               ),
             ),
