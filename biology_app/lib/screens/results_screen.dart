@@ -8,12 +8,14 @@ class ResultsScreen extends StatefulWidget {
   final String topicTitle;
   final List<Map<String, dynamic>> questions;
   final List<String?> userAnswers;
+  final int chapterId;
 
   const ResultsScreen({
     super.key,
     required this.topicTitle,
     required this.questions,
     required this.userAnswers,
+    required this.chapterId,
   });
 
   @override
@@ -25,6 +27,17 @@ class _ResultsScreenState extends State<ResultsScreen> {
   bool isLoading = true;
   late String motivationImagePath;
   final Random _random = Random();
+
+
+  String _getBackgroundImage() {
+    switch (widget.chapterId) {
+      case 1: return "assets/images/backgroundfirstchapter.jpg";
+      case 2: return "assets/images/backgroundsecondchapter.jpg";
+      case 3: return "assets/images/backgroundthirdchapter.jpg";
+      case 4: return "assets/images/backgroundfourthchapter.jpg";
+      default: return "assets/images/backgrounddefault.jpg";
+    }
+  }
 
   @override
   void initState() {
@@ -195,7 +208,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
+            image: AssetImage(_getBackgroundImage()),
             fit: BoxFit.cover,
           ),
         ),

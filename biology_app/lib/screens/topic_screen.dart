@@ -8,12 +8,14 @@ class TopicScreen extends StatefulWidget {
   final String topicTitle;
   final int topicId;
   final String chapterImage;
+  final int chapterId;
 
   const TopicScreen({
     super.key,
     required this.topicTitle,
     required this.topicId,
     required this.chapterImage,
+    required this.chapterId,
   });
 
   @override
@@ -26,6 +28,16 @@ class _TopicScreenState extends State<TopicScreen> {
   double? testScore;
   bool isTestCompleted = false;
   bool isLoading = true;
+
+  String _getBackgroundImage() {
+    switch (widget.chapterId) {
+      case 1: return "assets/images/backgroundfirstchapter.jpg";
+      case 2: return "assets/images/backgroundsecondchapter.jpg";
+      case 3: return "assets/images/backgroundthirdchapter.jpg";
+      case 4: return "assets/images/backgroundfourthchapter.jpg";
+      default: return "assets/images/backgrounddefault.jpg";
+    }
+  }
 
   @override
   void initState() {
@@ -60,7 +72,6 @@ class _TopicScreenState extends State<TopicScreen> {
         const curve = Curves.ease;
 
         var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
         return SlideTransition(
           position: animation.drive(tween),
           child: child,
@@ -180,6 +191,7 @@ class _TopicScreenState extends State<TopicScreen> {
                       topicTitle: widget.topicTitle,
                       isTimerEnabled: true,
                       timePerQuestion: timePerQuestion,
+                      chapterId: widget.chapterId,
                     )),
                   );
                 }
@@ -204,160 +216,164 @@ class _TopicScreenState extends State<TopicScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
-            fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(_getBackgroundImage()),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            // Кастомный заголовок вместо AppBar
-            Padding(
-              padding: const EdgeInsets.only(top: 40.0, left: 16.0, right: 16.0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
-                    color: Colors.black87,
-                    iconSize: 30,
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        widget.topicTitle,
-                        style: GoogleFonts.montserrat(
-                          textStyle: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 40.0, left: 16.0, right: 16.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.pop(context),
+                      color: Colors.black87,
+                      iconSize: 30,
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          widget.topicTitle,
+                          style: GoogleFonts.montserrat(
+                            textStyle: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings),
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (BuildContext context) {
-                          return _SettingsMenu(
-                            onTimerCheckedChanged: _handleTimerCheckedChanged,
-                            isTimerEnabled: isTimerEnabled,
-                          );
-                        },
-                      );
-                    },
-                    color: Colors.black87,
-                    iconSize: 30,
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Colors.black87))
-                  : Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (isTestCompleted)
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: testScore! >= 90
-                              ? Colors.green.withOpacity(0.7)
-                              : Colors.orange.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              testScore! >= 90 ? Icons.check_circle : Icons.info,
-                              color: Colors.white,
-                              size: 40,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Тест пройден с результатом: ${testScore!.toStringAsFixed(1)}%',
-                              style: GoogleFonts.montserrat(
-                                textStyle: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              testScore! >= 90
-                                  ? 'Отличный результат!'
-                                  : 'Вы можете пройти тест еще раз для улучшения результата.',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                textStyle: const TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
+                    IconButton(
+                      icon: const Icon(Icons.settings),
                       onPressed: () {
-                        if (isTimerEnabled) {
-                          _showTimePickerDialog();
-                        } else {
-                          Navigator.pushReplacement(
-                            context,
-                            _createRoute(TestScreen(
-                              topicId: widget.topicId,
-                              topicTitle: widget.topicTitle,
-                              isTimerEnabled: false,
-                              timePerQuestion: 0,
-                            )),
-                          ).then((_) {
-                            _loadTestProgress();
-                          });
-                        }
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (BuildContext context) {
+                            return _SettingsMenu(
+                              onTimerCheckedChanged: _handleTimerCheckedChanged,
+                              isTimerEnabled: isTimerEnabled,
+                            );
+                          },
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF42A5F5),
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                        shadowColor: Colors.black12,
-                        elevation: 4,
-                      ),
-                      child: Text(
-                        isTestCompleted ? 'Пройти тест снова' : 'Начать тестирование',
-                        style: GoogleFonts.montserrat(
-                          textStyle: const TextStyle(
-                            fontSize: 24,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                      color: Colors.black87,
+                      iconSize: 30,
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
+              Expanded(
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator(color: Colors.black87))
+                    : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isTestCompleted)
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: testScore! >= 90
+                                ? Colors.green.withOpacity(0.7)
+                                : Colors.orange.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                testScore! >= 90 ? Icons.check_circle : Icons.info,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Тест пройден с результатом: ${testScore!.toStringAsFixed(1)}%',
+                                style: GoogleFonts.montserrat(
+                                  textStyle: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                testScore! >= 90
+                                    ? 'Отличный результат!'
+                                    : 'Вы можете пройти тест еще раз для улучшения результата.',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.montserrat(
+                                  textStyle: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (isTimerEnabled) {
+                            _showTimePickerDialog();
+                          } else {
+                            Navigator.pushReplacement(
+                              context,
+                              _createRoute(TestScreen(
+                                topicId: widget.topicId,
+                                topicTitle: widget.topicTitle,
+                                isTimerEnabled: false,
+                                timePerQuestion: 0,
+                                chapterId: widget.chapterId,
+                              )),
+                            ).then((_) {
+                              _loadTestProgress();
+                            });
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF42A5F5),
+                          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                          shadowColor: Colors.black12,
+                          elevation: 4,
+                        ),
+                        child: Text(
+                          isTestCompleted ? 'Пройти тест снова' : 'Начать тестирование',
+                          style: GoogleFonts.montserrat(
+                            textStyle: const TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

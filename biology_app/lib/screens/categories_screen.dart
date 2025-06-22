@@ -27,6 +27,16 @@ class CategoriesScreenState extends State<CategoriesScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isLoading = true;
 
+  String _getBackgroundImage() {
+    switch (widget.chapterId) {
+      case 1: return "assets/images/backgroundfirstchapter.jpg";
+      case 2: return "assets/images/backgroundsecondchapter.jpg";
+      case 3: return "assets/images/backgroundthirdchapter.jpg";
+      case 4: return "assets/images/backgroundfourthchapter.jpg";
+      default: return "assets/images/backgrounddefault.jpg";
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,8 +71,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
     final query = _searchController.text;
     setState(() {
       _filteredTopics = _topics
-          .where((topic) =>
-          topic['title'].toLowerCase().contains(query.toLowerCase()))
+          .where((topic) => topic['title'].toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
   }
@@ -72,20 +81,16 @@ class CategoriesScreenState extends State<CategoriesScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Новый градиентный фон
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
+                image: AssetImage(_getBackgroundImage()),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-
-          // Основной контент
           Column(
             children: [
-              // Кнопка возврата и заголовок
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
                 child: Row(
@@ -118,8 +123,6 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                   ],
                 ),
               ),
-
-              // Поле поиска
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Container(
@@ -151,8 +154,6 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                   ),
                 ),
               ),
-
-              // Список тем
               _isLoading
                   ? Expanded(
                 child: Center(
@@ -206,6 +207,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                 topicTitle: topic['title'],
                 topicId: topic['id'],
                 chapterImage: widget.chapterImage,
+                chapterId: widget.chapterId, // Передаем chapterId
               ),
               transitionsBuilder: (context, animation, secondaryAnimation, child) {
                 const begin = Offset(1.0, 0.0);
@@ -223,81 +225,80 @@ class CategoriesScreenState extends State<CategoriesScreen> {
             ),
           );
         },
-        child: Stack(
-          children: [
-            if (hasImage)
-              Container(
-                height: 150,
-                width: double.infinity,
-                child: Image.asset(
-                  topic['image_path'],
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[200],
-                      child: Center(
-                        child: Icon(
-                          Icons.image_not_supported,
-                          size: 50,
-                          color: Colors.grey,
+        child: SizedBox(
+          height: 150,
+          child: Stack(
+            children: [
+              if (hasImage)
+                Positioned.fill(
+                  child: Image.asset(
+                    topic['image_path'],
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[200],
+                        child: Center(
+                          child: Icon(
+                            Icons.image_not_supported,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              )
-            else
-              Container(
-                height: 150,
-                width: double.infinity,
-                color: Colors.white.withOpacity(0.8),
-                child: Center(
-                  child: Icon(
-                    Icons.menu_book,
-                    size: 50,
-                    color: Colors.black54,
+                      );
+                    },
                   ),
-                ),
-              ),
-
-
-            Positioned(
-              right: 10,
-              bottom: 50,
-              left: 200,
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.5,
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft, // Выравнивание текста по левому краю внутри контейнера
-                  child: Text(
-                    topic['title'],
-                    style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        shadows: [
-                          Shadow(
-                            color: Colors.white,
-                            offset: Offset(1, 1),
-                            blurRadius: 10,
-                          )
-                        ],
+                )
+              else
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.white.withOpacity(0.8),
+                    child: Center(
+                      child: Icon(
+                        Icons.menu_book,
+                        size: 50,
+                        color: Colors.black54,
                       ),
                     ),
-                    textAlign: TextAlign.left, // Выравнивание текста по левому краю
-                    maxLines: 3,
-                    overflow: TextOverflow.fade,
+                  ),
+                ),
+              Positioned(
+                right: 16,
+                top: 0,
+                bottom: 0,
+                width: MediaQuery.of(context).size.width * 0.5,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      topic['title'],
+                      style: GoogleFonts.montserrat(
+                        textStyle: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black87,
+                          shadows: [
+                            Shadow(
+                              color: Colors.white,
+                              offset: Offset(1, 1),
+                              blurRadius: 10,
+                            )
+                          ],
+                        ),
+                      ),
+                      textAlign: TextAlign.left,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
   Widget _buildTestIndicator(int topicId) {
     return FutureBuilder<double?>(
       future: TestProgressService.getTestScore(topicId),
