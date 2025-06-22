@@ -20,6 +20,27 @@ void main() async {
   }
 }
 
+class AppTheme {
+  static String getChapterBackground(chapterId) {
+    switch (chapterId) {
+      case 1: return "assets/images/backgroundfirstchapter.jpg";
+      case 2: return "assets/images/backgroundsecondchapter.jpg";
+      case 3: return "assets/images/backgroundthirdchapter.jpg";
+      case 4: return "assets/images/backgroundfourthchapter.jpg";
+      default: return "assets/images/backgroundfirstchapter.jpg";
+    }
+  }
+
+  static BoxDecoration chapterBackgroundDecoration(int chapterId) {
+    return BoxDecoration(
+      image: DecorationImage(
+        image: Image.asset(getChapterBackground(chapterId)).image,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+}
+
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
@@ -124,7 +145,6 @@ class _StartScreenState extends State<StartScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Видео с правильным масштабированием
           if (!_showMainContent && _isVideoInitialized)
             GestureDetector(
               onTap: _skipVideo,
@@ -140,22 +160,15 @@ class _StartScreenState extends State<StartScreen> {
               ),
             ),
 
-          // Заглушка при загрузке
           if (!_showMainContent && !_isVideoInitialized)
             const ColoredBox(color: Colors.black),
 
-          // Основной интерфейс с анимацией появления
           if (_showMainContent)
             AnimatedOpacity(
               opacity: _showMainContent ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 500),
               child: Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                decoration: AppTheme.chapterBackgroundDecoration(1), // Дефолтный фон
                 child: SafeArea(
                   child: Stack(
                     children: [

@@ -3,11 +3,9 @@ import '../database.dart';
 import 'results_screen.dart';
 import 'dart:async';
 import '../services/test_progress_service.dart';
-import 'dart:convert' as json; // Исправлено здесь
+import 'dart:convert' as json;
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:ui' show PointerDeviceKind;
-import 'dart:math' as math;
 import '../widgets/resume_test_dialog.dart';
 
 class TestScreen extends StatefulWidget {
@@ -15,6 +13,7 @@ class TestScreen extends StatefulWidget {
   final String topicTitle;
   final bool isTimerEnabled;
   final int timePerQuestion;
+  final int chapterId;
 
   const TestScreen({
     super.key,
@@ -22,6 +21,7 @@ class TestScreen extends StatefulWidget {
     required this.topicTitle,
     required this.isTimerEnabled,
     required this.timePerQuestion,
+    required this.chapterId,
   });
 
   @override
@@ -39,6 +39,16 @@ class _TestScreenState extends State<TestScreen> {
   int _timeLeft = 0;
   Map<String, List<String>> matchingAnswers = {};
 
+  String _getBackgroundImage() {
+    switch (widget.chapterId) {
+      case 1: return "assets/images/backgroundfirstchapter.jpg";
+      case 2: return "assets/images/backgroundsecondchapter.jpg";
+      case 3: return "assets/images/backgroundthirdchapter.jpg";
+      case 4: return "assets/images/backgroundfourthchapter.jpg";
+      default: return "assets/images/backgrounddefault.jpg";
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -48,7 +58,6 @@ class _TestScreenState extends State<TestScreen> {
   @override
   void dispose() {
     _timer?.cancel();
-    // Сохраняем состояние при выходе, если тест не завершен
     if (questions.isNotEmpty && currentQuestionIndex < questions.length) {
       _saveTestState();
     }
@@ -56,11 +65,9 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _checkForSavedState() async {
-    // Проверяем, есть ли сохраненное состояние теста
     if (await TestProgressService.hasTestState(widget.topicId)) {
       final savedState = await TestProgressService.getTestState(widget.topicId);
       if (savedState != null) {
-        // Показываем диалог выбора
         await ResumeTestDialog.show(
           context: context,
           topicTitle: widget.topicTitle,
@@ -85,20 +92,18 @@ class _TestScreenState extends State<TestScreen> {
 
   void _resumeTest(TestState savedState) async {
     await _loadQuestions();
-    
+
     setState(() {
       currentQuestionIndex = savedState.currentQuestionIndex;
       userAnswers = List<String?>.from(savedState.userAnswers);
       matchingAnswers = Map<String, List<String>>.from(
-        savedState.matchingAnswers?.map((key, value) => MapEntry(key, List<String>.from(value))) ?? {}
+          savedState.matchingAnswers?.map((key, value) => MapEntry(key, List<String>.from(value))) ?? {}
       );
-      
-      // Восстанавливаем состояние текущего вопроса
+
       if (currentQuestionIndex < questions.length) {
         final question = questions[currentQuestionIndex];
         final questionType = question['question_type'] as String?;
-        
-        // Восстанавливаем ответ для текущего вопроса
+
         final currentAnswer = userAnswers[currentQuestionIndex];
         if (currentAnswer != null) {
           if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
@@ -110,7 +115,7 @@ class _TestScreenState extends State<TestScreen> {
           }
         }
       }
-      
+
       if (widget.isTimerEnabled) {
         _timeLeft = savedState.timeLeft ?? widget.timePerQuestion;
         _startTimer();
@@ -127,7 +132,7 @@ class _TestScreenState extends State<TestScreen> {
         timeLeft: _timeLeft,
         savedAt: DateTime.now(),
       );
-      
+
       await TestProgressService.saveTestState(widget.topicId, testState);
     }
   }
@@ -148,8 +153,7 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadQuestions() async {
-    final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(
-        widget.topicId);
+    final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(widget.topicId);
     setState(() {
       questions = loadedQuestions;
       userAnswers = List.filled(loadedQuestions.length, null);
@@ -179,10 +183,8 @@ class _TestScreenState extends State<TestScreen> {
 
   void _moveToNextQuestion() {
     _saveAnswer();
-    
-    // Сохраняем состояние перед переходом к следующему вопросу
     _saveTestState();
-    
+
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
@@ -200,13 +202,11 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   void _finishTest() async {
-    // Очищаем сохраненное состояние при завершении теста
     await TestProgressService.clearTestState(widget.topicId);
-    
+
     int correctAnswers = 0;
     for (int i = 0; i < questions.length; i++) {
       final question = questions[i];
-
       final questionType = question['question_type'] as String?;
 
       if (questionType == 'matching') {
@@ -218,8 +218,6 @@ class _TestScreenState extends State<TestScreen> {
           final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(question['id']);
 
           bool isCorrect = true;
-
-          // Преобразуем userAnswer в удобный для проверки формат
           Map<String, List<String>> userMatches = {};
           userMatchingAnswers.forEach((key, value) {
             if (value is List) {
@@ -229,7 +227,6 @@ class _TestScreenState extends State<TestScreen> {
             }
           });
 
-          // Проверяем каждое правильное соответствие
           for (var answer in correctMatchingAnswers) {
             final leftIndex = answer['left_item_index'] as String?;
             final rightIndex = answer['right_item_index'] as String?;
@@ -238,7 +235,6 @@ class _TestScreenState extends State<TestScreen> {
               isCorrect = false;
               break;
             }
-            // Проверяем, есть ли у пользователя это соответствие
             if (!userMatches.containsKey(leftIndex)) {
               isCorrect = false;
               break;
@@ -261,16 +257,13 @@ class _TestScreenState extends State<TestScreen> {
           correctAnswers++;
         }
       } else if (questionType == 'multi_choice') {
-        // Для multi_choice просто сравниваем строки букв (без учета порядка)
         final userAnswer = userAnswers[i];
         final correctAnswer = question['correct_answer'];
 
         if (userAnswer != null && correctAnswer != null) {
-          // Преобразуем ответы в наборы букв для сравнения без учета порядка
           final userLetters = userAnswer.split('')..sort();
           final correctLetters = correctAnswer.toString().split('')..sort();
 
-          // Сравниваем отсортированные наборы букв
           if (userLetters.join() == correctLetters.join()) {
             correctAnswers++;
           }
@@ -280,19 +273,15 @@ class _TestScreenState extends State<TestScreen> {
         final correctAnswer = question['correct_answer'];
 
         if (userAnswer != null && correctAnswer != null) {
-          // Проверка на несколько правильных ответов
           if (correctAnswer.toString().contains('/')) {
-            // Разбиваем правильный ответ на несколько вариантов
             final acceptableAnswers = correctAnswer.toString().split('/')
                 .map((answer) => answer.trim().toUpperCase())
                 .toList();
 
-            // Проверяем, соответствует ли ответ пользователя любому из вариантов
             bool isAnyMatch = acceptableAnswers.contains(userAnswer.trim().toUpperCase());
 
             if (isAnyMatch) correctAnswers++;
           } else {
-            // Обычная проверка для одного правильного ответа
             if (userAnswer.trim().toUpperCase() == correctAnswer.toString().trim().toUpperCase()) {
               correctAnswers++;
             }
@@ -320,6 +309,7 @@ class _TestScreenState extends State<TestScreen> {
             topicTitle: widget.topicTitle,
             questions: questions,
             userAnswers: userAnswers,
+            chapterId: widget.chapterId,
           ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
@@ -383,14 +373,12 @@ class _TestScreenState extends State<TestScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Заголовок вопроса в ScrollView для обеспечения прокрутки
                 Expanded(
                   flex: 1,
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Заголовок вопроса
                         Text(
                           question['question_text'] ?? 'Вопрос без текста',
                           style: const TextStyle(
@@ -402,12 +390,11 @@ class _TestScreenState extends State<TestScreen> {
                         if (questionImage != null)
                           Container(
                             margin: const EdgeInsets.only(top: 8),
-                            height: 100, // Минимальная высота
+                            height: 100,
                             width: double.infinity,
                             child: questionImage,
                           ),
 
-                        // Инструкция в более компактном виде
                         Container(
                           margin: const EdgeInsets.only(top: 8),
                           padding: const EdgeInsets.all(4),
@@ -431,7 +418,6 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                 ),
 
-                // Выделяем больше места для самого сопоставления
                 Expanded(
                   flex: 5,
                   child: MatchingDragDrop(
@@ -440,7 +426,6 @@ class _TestScreenState extends State<TestScreen> {
                     onMatchesChanged: (Map<String, List<String>> matches) {
                       setState(() {
                         matchingAnswers = matches;
-                        // Преобразуем в формат: {"A": ["1"], "B": ["2", "3"]}
                         selectedAnswer = json.jsonEncode(matches);
                       });
                     },
@@ -448,8 +433,6 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                 ),
 
-
-                // Показываем текущие соответствия, если они есть
                 if (matchingAnswers.isNotEmpty)
                   Container(
                     margin: const EdgeInsets.only(top: 8),
@@ -476,12 +459,10 @@ class _TestScreenState extends State<TestScreen> {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        // Используем Wrap вместо ListView для компактного размещения
                         Wrap(
                           spacing: 8,
                           runSpacing: 4,
                           children: matchingAnswers.entries.map((entry) {
-                            // Находим соответствующие тексты для визуальной ясности
                             String leftText = '';
                             String rightText = '';
 
@@ -589,15 +570,11 @@ class _TestScreenState extends State<TestScreen> {
         ),
       );
     } else if (questionType == 'sequence') {
-      // Получаем текст вопроса, который содержит варианты ответов
       final questionText = question['question_text'] as String? ?? 'Вопрос без текста';
-
-      // Разделяем вопрос и варианты ответов
       List<String> questionParts = questionText.split('\n');
       String mainQuestion = questionParts[0];
       List<String> options = [];
 
-      // Обрабатываем варианты ответов
       for (int i = 1; i < questionParts.length; i++) {
         final line = questionParts[i].trim();
         if (line.startsWith('А)') || line.startsWith('Б)') ||
@@ -608,7 +585,6 @@ class _TestScreenState extends State<TestScreen> {
         }
       }
 
-      // Если варианты не найдены в тексте, создаем стандартный набор
       if (options.isEmpty) {
         options = ['А) Вариант А', 'Б) Вариант Б', 'В) Вариант В', 'Г) Вариант Г'];
       }
@@ -630,7 +606,6 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                   if (questionImage != null) questionImage,
                   const SizedBox(height: 16),
-                  // Отображаем варианты ответов
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -665,7 +640,7 @@ class _TestScreenState extends State<TestScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                option.substring(2), // Убираем букву и скобку
+                                option.substring(2),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.black,
@@ -806,15 +781,11 @@ class _TestScreenState extends State<TestScreen> {
         ),
       );
     } else if (questionType == 'multi_choice') {
-      // Получаем текст вопроса, который содержит варианты ответов
       final questionText = question['question_text'] as String? ?? 'Вопрос без текста';
-
-      // Разделяем вопрос и варианты ответов
       List<String> questionParts = questionText.split('\n');
       String mainQuestion = questionParts[0];
       List<String> options = [];
 
-      // Извлекаем варианты ответов из текста вопроса
       for (int i = 1; i < questionParts.length; i++) {
         final line = questionParts[i].trim();
         if (line.startsWith('А)') || line.startsWith('Б)') ||
@@ -825,12 +796,10 @@ class _TestScreenState extends State<TestScreen> {
         }
       }
 
-      // Если варианты не найдены в тексте, создаем стандартный набор
       if (options.isEmpty) {
         options = ['А) Вариант А', 'Б) Вариант Б', 'В) Вариант В', 'Г) Вариант Г'];
       }
 
-      // Получаем выбранные пользователем буквы
       List<String> selectedLetters = [];
       if (selectedAnswer != null && selectedAnswer!.isNotEmpty) {
         selectedLetters = selectedAnswer!.split('');
@@ -851,7 +820,6 @@ class _TestScreenState extends State<TestScreen> {
             ),
             if (questionImage != null) questionImage,
             const SizedBox(height: 10),
-            // Отображаем варианты ответов
             ...options.map((option) {
               String letter = option.substring(0, 1);
               bool isSelected = selectedLetters.contains(letter);
@@ -947,13 +915,6 @@ class _TestScreenState extends State<TestScreen> {
         ),
       );
     }
-
-    return const Center(
-      child: Text(
-        'Неподдерживаемый тип вопроса',
-        style: TextStyle(color: Colors.black),
-      ),
-    );
   }
 
   Widget _buildSequenceButton(String letter, int _) {
@@ -969,7 +930,6 @@ class _TestScreenState extends State<TestScreen> {
               sequenceAnswer = sequenceAnswer.replaceAll(letter, '');
               selectedAnswer = sequenceAnswer.isEmpty ? null : sequenceAnswer;
             } else {
-              // Убираем ограничение на количество букв
               sequenceAnswer += letter;
               selectedAnswer = sequenceAnswer;
             }
@@ -996,8 +956,7 @@ class _TestScreenState extends State<TestScreen> {
   Widget _buildTimer() {
     int minutes = _timeLeft ~/ 60;
     int seconds = _timeLeft % 60;
-    String timeString = '${minutes.toString().padLeft(2, '0')}:${seconds
-        .toString().padLeft(2, '0')}';
+    String timeString = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
     Color textColor = _timeLeft <= 30 ? Colors.red : Colors.black;
 
@@ -1017,52 +976,50 @@ class _TestScreenState extends State<TestScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: () async {
-          // Показываем диалог подтверждения выхода
-          final shouldExit = await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Выйти из теста'),
-              content: const Text('Что вы хотите сделать?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Отмена'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    // Сохраняем состояние и выходим
-                    await _saveTestState();
-                    Navigator.of(context).pop(true);
-                  },
-                  child: const Text('Сохранить и выйти'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    // Очищаем состояние и выходим
-                    await TestProgressService.clearTestState(widget.topicId);
-                    Navigator.of(context).pop(true);
-                  },
-                  child: const Text('Выйти без сохранения'),
-                ),
-              ],
-            ),
-          );
+      onWillPop: () async {
+        final shouldExit = await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Выйти из теста'),
+            content: const Text('Что вы хотите сделать?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await _saveTestState();
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('Сохранить и выйти'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await TestProgressService.clearTestState(widget.topicId);
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('Выйти без сохранения'),
+              ),
+            ],
+          ),
+        );
 
-          return shouldExit ?? false;
-        },
-        child: Scaffold(
-          // Убрали AppBar
-          body: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
-                fit: BoxFit.cover,
+        return shouldExit ?? false;
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(_getBackgroundImage()),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-            child: Column(
+            Column(
               children: [
-                // Добавили кнопку возврата в верхний левый угол
                 Align(
                   alignment: Alignment.topLeft,
                   child: Padding(
@@ -1082,7 +1039,6 @@ class _TestScreenState extends State<TestScreen> {
                               ),
                               TextButton(
                                 onPressed: () async {
-                                  // Сохраняем состояние и выходим
                                   await _saveTestState();
                                   Navigator.of(context).pop(true);
                                 },
@@ -1090,7 +1046,6 @@ class _TestScreenState extends State<TestScreen> {
                               ),
                               TextButton(
                                 onPressed: () async {
-                                  // Очищаем состояние и выходим
                                   await TestProgressService.clearTestState(widget.topicId);
                                   Navigator.of(context).pop(true);
                                 },
@@ -1106,7 +1061,6 @@ class _TestScreenState extends State<TestScreen> {
                     ),
                   ),
                 ),
-                // Добавили заголовок темы под кнопкой возврата
                 Padding(
                   padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
                   child: Text(
@@ -1118,7 +1072,6 @@ class _TestScreenState extends State<TestScreen> {
                     ),
                   ),
                 ),
-                // Добавили таймер, если он включен
                 if (widget.isTimerEnabled) _buildTimer(),
 
                 questions.isEmpty
@@ -1127,8 +1080,7 @@ class _TestScreenState extends State<TestScreen> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: TweenAnimationBuilder<double>(
@@ -1142,8 +1094,7 @@ class _TestScreenState extends State<TestScreen> {
                               return LinearProgressIndicator(
                                 value: value,
                                 backgroundColor: Colors.grey[200],
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                    Color(0xFF3d82b4)),
+                                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3d82b4)),
                                 minHeight: 10,
                               );
                             },
@@ -1213,8 +1164,9 @@ class _TestScreenState extends State<TestScreen> {
                 ),
               ],
             ),
-          ),
-        )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1251,24 +1203,19 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               onPressed: () => widget.onMatchesChanged({}),
-              child: const Text(
-                  'Сбросить все', style: TextStyle(color: Colors.white)),
+              child: const Text('Сбросить все', style: TextStyle(color: Colors.white)),
             ),
           ),
 
         Expanded(
           child: Row(
             children: [
-              // Левая колонка - перетаскиваемые элементы
               Expanded(
                 child: _buildDraggableItems(),
               ),
-
-              // Правая колонка - цели для перетаскивания
               Expanded(
                 child: _buildDropTargets(),
               ),
@@ -1293,8 +1240,8 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
           padding: const EdgeInsets.symmetric(vertical: 4.0),
           child: LongPressDraggable<String>(
             data: itemIndex,
-            delay: const Duration(milliseconds: 500), // Задержка для активации
-            hapticFeedbackOnStart: true, // Вибрация при начале перетаскивания
+            delay: const Duration(milliseconds: 500),
+            hapticFeedbackOnStart: true,
             feedback: Material(
               child: Container(
                 width: 200,
@@ -1352,7 +1299,6 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
         final itemIndex = item['item_index'] as String;
         final itemText = item['item_text'] as String;
 
-        // Проверяем, связана ли эта цель с каким-либо элементом
         bool isMatched = false;
         widget.currentMatches.forEach((key, values) {
           if (values.contains(itemIndex)) {
@@ -1378,23 +1324,18 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
               setState(() {
                 _hoveredTarget = itemIndex;
               });
-              return true; // Разрешаем всем элементам сопоставляться с этой целью
+              return true;
             },
             onAccept: (leftItemIndex) {
               final newMatches = {...widget.currentMatches};
-
-              // Инициализируем список, если его нет
               newMatches[leftItemIndex] ??= [];
 
-              // Если эта цель уже связана с этим элементом - удаляем связь
               if (newMatches[leftItemIndex]!.contains(itemIndex)) {
                 newMatches[leftItemIndex]!.remove(itemIndex);
-                // Если список целей стал пустым - удаляем элемент
                 if (newMatches[leftItemIndex]!.isEmpty) {
                   newMatches.remove(leftItemIndex);
                 }
               } else {
-                // Добавляем новую связь
                 newMatches[leftItemIndex]!.add(itemIndex);
               }
 
@@ -1415,8 +1356,7 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
     );
   }
 
-  Widget _buildItem(String index, String text,
-      {bool isMatched = false, bool isLeft = true}) {
+  Widget _buildItem(String index, String text, {bool isMatched = false, bool isLeft = true}) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1435,9 +1375,7 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
     );
   }
 
-  Widget _buildTargetItem(String index, String text,
-      {bool isMatched = false, bool isHighlighted = false}) {
-    // Более точная проверка на соответствие
+  Widget _buildTargetItem(String index, String text, {bool isMatched = false, bool isHighlighted = false}) {
     bool isActuallyMatched = false;
     widget.currentMatches.forEach((key, values) {
       if (values.contains(index)) {
@@ -1473,21 +1411,14 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
     );
   }
 
-
   Widget _buildRemoveMatchButton(String targetIndex) {
     return GestureDetector(
       onTap: () {
-        final newMatches = Map<String, List<String>>.from(
-            widget.currentMatches);
-
-        // Создаем копию ключей, чтобы избежать ошибок при изменении во время итерации
+        final newMatches = Map<String, List<String>>.from(widget.currentMatches);
         final keys = newMatches.keys.toList();
 
         for (final key in keys) {
-          // Удаляем цель из списка соответствий для этого элемента
           newMatches[key]!.remove(targetIndex);
-
-          // Если список стал пустым, удаляем элемент
           if (newMatches[key]!.isEmpty) {
             newMatches.remove(key);
           }
@@ -1519,7 +1450,7 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
             border: Border.all(color: Colors.white, width: 1),
           ),
           child: Text(
-            index ?? '?', // Добавлена проверка на null
+            index ?? '?',
             style: TextStyle(
               color: faded ? Colors.grey.shade700 : Colors.white,
               fontWeight: FontWeight.bold,
@@ -1530,7 +1461,7 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
         const SizedBox(width: 12),
         Expanded(
           child: Text(
-            text ?? '', // Добавлена проверка на null
+            text ?? '',
             style: TextStyle(
               color: faded ? Colors.grey.shade700 : Colors.white,
               fontSize: 14,
