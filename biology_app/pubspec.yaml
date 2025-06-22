@@ -20,6 +20,7 @@ dependencies:
   path_provider_android: ^2.0.11
   open_file: ^3.3.1
   clipboard: ^0.1.3
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -46,6 +47,10 @@ flutter:
     - assets/images/resultImages/excellent1.png
     - assets/images/resultImages/excellent2.png
     - assets/images/resultImages/excellent3.png
+    - assets/sounds/
+    - assets/sounds/bad.mp3
+    - assets/sounds/grate.mp3
+    - assets/sounds/normal.mp3
   fonts:
     - family: Montserrat
       fonts:

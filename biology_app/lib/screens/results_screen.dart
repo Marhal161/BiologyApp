@@ -3,6 +3,7 @@ import 'topic_screen.dart'; // Импортируем TopicScreen
 import 'dart:convert';
 import '../database.dart';
 import 'dart:math' show min, max, Random;
+import 'package:audioplayers/audioplayers.dart';
 
 class ResultsScreen extends StatefulWidget {
   final String topicTitle;
@@ -25,12 +26,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
   bool isLoading = true;
   late String motivationImagePath;
   final Random _random = Random();
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
     _checkAnswers();
     _setMotivationImage(0); // Инициализируем с нулевым процентом, потом обновим
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   Future<void> _checkAnswers() async {
@@ -159,6 +167,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
             : (correctAnswers / widget.questions.length) * 100;
 
         _setMotivationImage(percentage);
+        // Воспроизводим звук в зависимости от результата
+        _playResultSound(percentage);
       });
     }
   }
@@ -766,6 +776,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
       'шероховатый эпс': ['шероховатая эпс', 'шероховатой эпс'],
       'красная кровь': ['красной крови', 'красной кровью'],
       'красной крови': ['красная кровь', 'красной кровью'],
+      'генной': ['генная', 'генную', 'генной'],
+      'генная': ['генной', 'генную', 'генной'],
+      'генную': ['генная', 'генной', 'генной'],
     };
 
     // Проверяем, есть ли правильный ответ в нашем словаре
@@ -912,6 +925,47 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
     // Слишком разные по длине слова скорее всего не связаны
     if ((word1.length - word2.length).abs() > 5) return false;
+
+    // Специальная проверка для коротких прилагательных (например, "генной"/"генная")
+    if (word1.length >= 4 && word2.length >= 4 && word1.length <= 8 && word2.length <= 8) {
+      // Проверяем основу (первые 3-4 символа)
+      int stemLength = min(word1.length, word2.length) - 2;
+      stemLength = max(3, stemLength);
+      
+      if (word1.substring(0, stemLength) == word2.substring(0, stemLength)) {
+        // Извлекаем окончания
+        String ending1 = word1.substring(stemLength);
+        String ending2 = word2.substring(stemLength);
+        
+        // Группы связанных окончаний для коротких прилагательных
+        List<List<String>> shortAdjGroups = [
+          ['ая', 'ой', 'ую', 'ой'],     // женский род: генная, генной, генную
+          ['яя', 'ей', 'юю', 'ей'],     // женский род мягкий: синяя, синей, синюю
+          ['ый', 'ого', 'ому', 'ым', 'ом'], // мужской род: новый, нового, новому
+          ['ий', 'его', 'ему', 'им', 'ем'], // мужской род мягкий: синий, синего, синему
+          ['ое', 'ого', 'ому', 'ым', 'ом'], // средний род: новое, нового, новому
+          ['ее', 'его', 'ему', 'им', 'ем']  // средний род мягкий: синее, синего, синему
+        ];
+        
+        // Проверяем принадлежность к одной группе
+        for (var group in shortAdjGroups) {
+          if (group.contains(ending1) && group.contains(ending2)) {
+            return true;
+          }
+        }
+        
+        // Дополнительная проверка для распространенных случаев
+        if ((ending1 == 'ая' && ending2 == 'ой') || (ending1 == 'ой' && ending2 == 'ая')) {
+          return true; // генная/генной
+        }
+        if ((ending1 == 'ая' && ending2 == 'ую') || (ending1 == 'ую' && ending2 == 'ая')) {
+          return true; // генная/генную
+        }
+        if ((ending1 == 'ой' && ending2 == 'ую') || (ending1 == 'ую' && ending2 == 'ой')) {
+          return true; // генной/генную
+        }
+      }
+    }
 
     // 0. Специальная проверка для существительных множественного числа (надпочечники/надпочечниками)
     if (word1.length > 8 && word2.length > 8) {
@@ -1172,6 +1226,24 @@ class _ResultsScreenState extends State<ResultsScreen> {
       return Icons.sentiment_satisfied;
     } else {
       return Icons.emoji_events;
+    }
+  }
+
+  Future<void> _playResultSound(double percentage) async {
+    try {
+      String soundFile;
+      
+      if (percentage <= 35) {
+        soundFile = 'sounds/bad.mp3';
+      } else if (percentage <= 70) {
+        soundFile = 'sounds/grate.mp3';
+      } else {
+        soundFile = 'sounds/normal.mp3';
+      }
+      
+      await _audioPlayer.play(AssetSource(soundFile));
+    } catch (e) {
+      print('Ошибка воспроизведения звука: $e');
     }
   }
 }
