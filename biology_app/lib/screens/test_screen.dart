@@ -41,11 +41,16 @@ class _TestScreenState extends State<TestScreen> {
 
   String _getBackgroundImage() {
     switch (widget.chapterId) {
-      case 1: return "assets/images/backgroundfirstchapter.jpg";
-      case 2: return "assets/images/backgroundsecondchapter.jpg";
-      case 3: return "assets/images/backgroundthirdchapter.jpg";
-      case 4: return "assets/images/backgroundfourthchapter.jpg";
-      default: return "assets/images/backgrounddefault.jpg";
+      case 1:
+        return "assets/images/backgroundfirstchapter.jpg";
+      case 2:
+        return "assets/images/backgroundsecondchapter.jpg";
+      case 3:
+        return "assets/images/backgroundthirdchapter.jpg";
+      case 4:
+        return "assets/images/backgroundfourthchapter.jpg";
+      default:
+        return "assets/images/backgrounddefault.jpg";
     }
   }
 
@@ -97,7 +102,8 @@ class _TestScreenState extends State<TestScreen> {
       currentQuestionIndex = savedState.currentQuestionIndex;
       userAnswers = List<String?>.from(savedState.userAnswers);
       matchingAnswers = Map<String, List<String>>.from(
-          savedState.matchingAnswers?.map((key, value) => MapEntry(key, List<String>.from(value))) ?? {}
+          savedState.matchingAnswers?.map((key, value) =>
+              MapEntry(key, List<String>.from(value))) ?? {}
       );
 
       if (currentQuestionIndex < questions.length) {
@@ -106,7 +112,8 @@ class _TestScreenState extends State<TestScreen> {
 
         final currentAnswer = userAnswers[currentQuestionIndex];
         if (currentAnswer != null) {
-          if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
+          if (questionType == 'single_word' || questionType == 'two_words' ||
+              questionType == 'number') {
             answerController.text = currentAnswer;
           } else if (questionType == 'sequence') {
             sequenceAnswer = currentAnswer;
@@ -153,7 +160,8 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadQuestions() async {
-    final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(widget.topicId);
+    final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(
+        widget.topicId);
     setState(() {
       questions = loadedQuestions;
       userAnswers = List.filled(loadedQuestions.length, null);
@@ -167,7 +175,8 @@ class _TestScreenState extends State<TestScreen> {
     if (questionType == 'matching') {
       userAnswers[currentQuestionIndex] = selectedAnswer;
     }
-    else if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
+    else if (questionType == 'single_word' || questionType == 'two_words' ||
+        questionType == 'number') {
       userAnswers[currentQuestionIndex] = answerController.text.trim();
     }
     else if (questionType == 'sequence') {
@@ -214,8 +223,11 @@ class _TestScreenState extends State<TestScreen> {
           final userAnswer = userAnswers[i];
           if (userAnswer == null) continue;
 
-          final userMatchingAnswers = json.jsonDecode(userAnswer) as Map<String, dynamic>;
-          final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(question['id']);
+          final userMatchingAnswers = json.jsonDecode(userAnswer) as Map<
+              String,
+              dynamic>;
+          final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(
+              question['id']);
 
           bool isCorrect = true;
           Map<String, List<String>> userMatches = {};
@@ -253,7 +265,8 @@ class _TestScreenState extends State<TestScreen> {
         final correctAnswer = question['correct_answer'];
 
         if (userAnswer != null && correctAnswer != null &&
-            userAnswer.toUpperCase() == correctAnswer.toString().toUpperCase()) {
+            userAnswer.toUpperCase() ==
+                correctAnswer.toString().toUpperCase()) {
           correctAnswers++;
         }
       } else if (questionType == 'multi_choice') {
@@ -261,8 +274,10 @@ class _TestScreenState extends State<TestScreen> {
         final correctAnswer = question['correct_answer'];
 
         if (userAnswer != null && correctAnswer != null) {
-          final userLetters = userAnswer.split('')..sort();
-          final correctLetters = correctAnswer.toString().split('')..sort();
+          final userLetters = userAnswer.split('')
+            ..sort();
+          final correctLetters = correctAnswer.toString().split('')
+            ..sort();
 
           if (userLetters.join() == correctLetters.join()) {
             correctAnswers++;
@@ -278,11 +293,13 @@ class _TestScreenState extends State<TestScreen> {
                 .map((answer) => answer.trim().toUpperCase())
                 .toList();
 
-            bool isAnyMatch = acceptableAnswers.contains(userAnswer.trim().toUpperCase());
+            bool isAnyMatch = acceptableAnswers.contains(
+                userAnswer.trim().toUpperCase());
 
             if (isAnyMatch) correctAnswers++;
           } else {
-            if (userAnswer.trim().toUpperCase() == correctAnswer.toString().trim().toUpperCase()) {
+            if (userAnswer.trim().toUpperCase() ==
+                correctAnswer.toString().trim().toUpperCase()) {
               correctAnswers++;
             }
           }
@@ -290,7 +307,8 @@ class _TestScreenState extends State<TestScreen> {
       }
     }
 
-    double score = questions.isEmpty ? 0 : (correctAnswers / questions.length) * 100;
+    double score = questions.isEmpty ? 0 : (correctAnswers / questions.length) *
+        100;
 
     await TestProgressService.saveTestResult(widget.topicId, score);
 
@@ -316,7 +334,8 @@ class _TestScreenState extends State<TestScreen> {
         const end = Offset.zero;
         const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween = Tween(begin: begin, end: end).chain(
+            CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -446,7 +465,8 @@ class _TestScreenState extends State<TestScreen> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.check_circle, color: Colors.black, size: 14),
+                            Icon(Icons.check_circle, color: Colors.black,
+                                size: 14),
                             SizedBox(width: 4),
                             Text(
                               'Текущие соответствия:',
@@ -480,7 +500,8 @@ class _TestScreenState extends State<TestScreen> {
                               if (item['item_index'] == entry.value) {
                                 rightText = item['item_text'].toString();
                                 if (rightText.length > 25) {
-                                  rightText = rightText.substring(0, 25) + '...';
+                                  rightText =
+                                      rightText.substring(0, 25) + '...';
                                 }
                                 break;
                               }
@@ -488,7 +509,8 @@ class _TestScreenState extends State<TestScreen> {
 
                             return Container(
                               margin: const EdgeInsets.only(bottom: 4),
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(4),
@@ -512,7 +534,8 @@ class _TestScreenState extends State<TestScreen> {
           );
         },
       );
-    } else if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
+    } else if (questionType == 'single_word' || questionType == 'two_words' ||
+        questionType == 'number') {
       return SingleChildScrollView(
         child: Column(
           children: [
@@ -532,31 +555,30 @@ class _TestScreenState extends State<TestScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextField(
                   controller: answerController,
                   textInputAction: TextInputAction.done,
-                  keyboardType: questionType == 'number' ? TextInputType.number : TextInputType.text,
+                  keyboardType: questionType == 'number'
+                      ? TextInputType.number
+                      : TextInputType.text,
                   enableSuggestions: true,
                   autocorrect: true,
                   decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: questionType == 'number' ? 'Введите число' : 'Ваш ответ',
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    labelText: questionType == 'number'
+                        ? 'Введите число'
+                        : 'Ваш ответ',
                     labelStyle: const TextStyle(color: Colors.black),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black),
-                    ),
                     hintText: questionType == 'two_words'
                         ? 'Введите два слова через пробел'
                         : 'Можно вводить ответ в любом падеже',
                     hintStyle: const TextStyle(color: Colors.black54),
-                    filled: true,
-                    fillColor: Colors.transparent,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
                   style: const TextStyle(color: Colors.black),
                   cursorColor: Colors.black,
@@ -589,6 +611,17 @@ class _TestScreenState extends State<TestScreen> {
         options = ['А) Вариант А', 'Б) Вариант Б', 'В) Вариант В', 'Г) Вариант Г'];
       }
 
+      // Разделяем варианты на 3 колонки
+      int columnCount = 3;
+      int itemsPerColumn = (options.length / columnCount).ceil();
+      List<List<String>> columns = [];
+      for (int i = 0; i < columnCount; i++) {
+        int start = i * itemsPerColumn;
+        int end = (i + 1) * itemsPerColumn;
+        if (end > options.length) end = options.length;
+        columns.add(options.sublist(start, end));
+      }
+
       return SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -607,47 +640,40 @@ class _TestScreenState extends State<TestScreen> {
                   if (questionImage != null) questionImage,
                   const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.white.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: options.map((option) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 24,
-                              height: 24,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.black, width: 1),
-                              ),
-                              child: Text(
-                                option.substring(0, 1),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${option.substring(0, 1)}:',
                                 style: const TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                option.substring(2),
-                                style: const TextStyle(
                                   fontSize: 14,
-                                  color: Colors.black,
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  option.substring(2),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       )).toList(),
                     ),
@@ -655,24 +681,25 @@ class _TestScreenState extends State<TestScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
-            Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 180),
-                child: Column(
-                  children: [
-                    for (int i = 0; i < options.length; i += 2) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildSequenceButton(options[i].substring(0, 1), i),
-                          if (i + 1 < options.length) _buildSequenceButton(options[i + 1].substring(0, 1), i + 1),
-                        ],
-                      ),
-                      if (i + 1 < options.length) const SizedBox(height: 8),
-                    ],
-                  ],
-                ),
+            const SizedBox(height: 6),
+            // Отображаем кнопки в 3 колонках
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 70.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  for (int i = 0; i < columns.length; i++)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: columns[i].map((option) =>
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: _buildSequenceButton(option.substring(0, 1), options.indexOf(option)),
+                          )
+                      ).toList(),
+                    ),
+                ],
               ),
             ),
             if (sequenceAnswer.isNotEmpty) ...[
@@ -682,7 +709,7 @@ class _TestScreenState extends State<TestScreen> {
                 child: Text(
                   'Ваша последовательность: $sequenceAnswer',
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                     color: Colors.black,
                   ),
                 ),
@@ -711,19 +738,20 @@ class _TestScreenState extends State<TestScreen> {
                 ),
                 if (questionImage != null) questionImage,
                 const SizedBox(height: 20),
-                ...options.map((option) => RadioListTile<String>(
-                  title: Text(
-                    option.toString(),
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  value: option.toString(),
-                  groupValue: selectedAnswer,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedAnswer = value;
-                    });
-                  },
-                )).toList(),
+                ...options.map((option) =>
+                    RadioListTile<String>(
+                      title: Text(
+                        option.toString(),
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                      value: option.toString(),
+                      groupValue: selectedAnswer,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedAnswer = value;
+                        });
+                      },
+                    )).toList(),
               ],
             ),
           );
@@ -736,7 +764,12 @@ class _TestScreenState extends State<TestScreen> {
         answers.add(question['correct_answer'].toString());
       }
 
-      for (String field in ['wrong_answer1', 'wrong_answer2', 'wrong_answer3', 'wrong_answer4']) {
+      for (String field in [
+        'wrong_answer1',
+        'wrong_answer2',
+        'wrong_answer3',
+        'wrong_answer4'
+      ]) {
         if (question[field] != null) {
           answers.add(question[field].toString());
         }
@@ -819,15 +852,18 @@ class _TestScreenState extends State<TestScreen> {
               ),
             ),
             if (questionImage != null) questionImage,
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             ...options.map((option) {
               String letter = option.substring(0, 1);
               bool isSelected = selectedLetters.contains(letter);
+              String optionText = option.substring(2).trim();
 
               return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    // Кнопка выбора (отдельный элемент)
                     SizedBox(
                       width: 50,
                       height: 50,
@@ -845,26 +881,46 @@ class _TestScreenState extends State<TestScreen> {
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          backgroundColor: isSelected ? Colors.grey : const Color(0xFF42A5F5),
-                          foregroundColor: Colors.white,
-                          shadowColor: Colors.black26,
-                          elevation: 4,
+                          backgroundColor: isSelected
+                              ? const Color(0xFF3D82B4)
+                              : Color(0xFF42A5F5),
+                          foregroundColor: isSelected
+                              ? Colors.white
+                              : Colors.white,
+                          elevation: 1,
+                          side: BorderSide(
+                            color: isSelected
+                                ? const Color(0xFF3D82B4)
+                                : Colors.grey.shade400,
+                          ),
                         ),
                         child: Text(
                           letter,
-                          style: const TextStyle(fontSize: 20),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Montserrat',
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 4),
+                    // Текст ответа в белом полупрозрачном блоке
                     Expanded(
-                      child: Text(
-                        option,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
+                      child: Container(
+                        padding: const EdgeInsets.all(14.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          optionText,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ),
@@ -873,22 +929,28 @@ class _TestScreenState extends State<TestScreen> {
               );
             }).toList(),
             if (selectedLetters.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Text(
-                  'Выбранные варианты: ${selectedLetters.join(', ')}',
+                  'Выбрано: ${selectedLetters.join(', ')}',
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ],
+            const SizedBox(height: 20),
           ],
         ),
       );
-    } else {
+    }else {
       return SingleChildScrollView(
         child: Column(
           children: [
@@ -940,7 +1002,8 @@ class _TestScreenState extends State<TestScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          backgroundColor: isSelected ? Color(0xFF3D82B4) : const Color(0xFF42A5F5),
+          backgroundColor: isSelected ? Color(0xFF3D82B4) : const Color(
+              0xFF42A5F5),
           foregroundColor: Colors.white,
           shadowColor: Colors.black26,
           elevation: 4,
@@ -956,7 +1019,8 @@ class _TestScreenState extends State<TestScreen> {
   Widget _buildTimer() {
     int minutes = _timeLeft ~/ 60;
     int seconds = _timeLeft % 60;
-    String timeString = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    String timeString = '${minutes.toString().padLeft(2, '0')}:${seconds
+        .toString().padLeft(2, '0')}';
 
     Color textColor = _timeLeft <= 30 ? Colors.red : Colors.black;
 
@@ -979,30 +1043,31 @@ class _TestScreenState extends State<TestScreen> {
       onWillPop: () async {
         final shouldExit = await showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Выйти из теста'),
-            content: const Text('Что вы хотите сделать?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Отмена'),
+          builder: (context) =>
+              AlertDialog(
+                title: const Text('Выйти из теста'),
+                content: const Text('Что вы хотите сделать?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Отмена'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      await _saveTestState();
+                      Navigator.of(context).pop(true);
+                    },
+                    child: const Text('Сохранить и выйти'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      await TestProgressService.clearTestState(widget.topicId);
+                      Navigator.of(context).pop(true);
+                    },
+                    child: const Text('Выйти без сохранения'),
+                  ),
+                ],
               ),
-              TextButton(
-                onPressed: () async {
-                  await _saveTestState();
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text('Сохранить и выйти'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  await TestProgressService.clearTestState(widget.topicId);
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text('Выйти без сохранения'),
-              ),
-            ],
-          ),
         );
 
         return shouldExit ?? false;
@@ -1020,73 +1085,94 @@ class _TestScreenState extends State<TestScreen> {
             ),
             Column(
               children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 40, left: 16),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.black),
-                      onPressed: () async {
-                        final shouldExit = await showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Выйти из теста'),
-                            content: const Text('Что вы хотите сделать?'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(false),
-                                child: const Text('Отмена'),
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  await _saveTestState();
-                                  Navigator.of(context).pop(true);
-                                },
-                                child: const Text('Сохранить и выйти'),
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  await TestProgressService.clearTestState(widget.topicId);
-                                  Navigator.of(context).pop(true);
-                                },
-                                child: const Text('Выйти без сохранения'),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (shouldExit ?? false) {
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    ),
-                  ),
-                ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
-                  child: Text(
-                    widget.topicTitle,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                  padding: const EdgeInsets.only(
+                      top: 60, left: 16, right: 16, bottom: 16),
+                  // Добавлен bottom отступ
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    // Выравнивание по центру по вертикали
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                            Icons.arrow_back, color: Colors.black, size: 28),
+                        // Увеличен размер иконки
+                        padding: EdgeInsets.zero,
+                        // Убраны внутренние отступы
+                        constraints: const BoxConstraints(),
+                        // Убраны ограничения
+                        onPressed: () async {
+                          final shouldExit = await showDialog(
+                            context: context,
+                            builder: (context) =>
+                                AlertDialog(
+                                  title: const Text('Выйти из теста'),
+                                  content: const Text('Что вы хотите сделать?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: const Text('Отмена'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        await _saveTestState();
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      child: const Text('Сохранить и выйти'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        await TestProgressService
+                                            .clearTestState(widget.topicId);
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      child: const Text('Выйти без сохранения'),
+                                    ),
+                                  ],
+                                ),
+                          );
+                          if (shouldExit ?? false) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      // Добавлен отступ между кнопкой и текстом
+                      Expanded(
+                        child: Text(
+                          widget.topicTitle,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(width: 1),
+                      // Добавлен отступ для балансировки
+                    ],
                   ),
                 ),
                 if (widget.isTimerEnabled) _buildTimer(),
 
                 questions.isEmpty
-                    ? const Expanded(child: Center(child: CircularProgressIndicator()))
+                    ? const Expanded(
+                    child: Center(child: CircularProgressIndicator()))
                     : Expanded(
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: TweenAnimationBuilder<double>(
                             tween: Tween<double>(
                               begin: 0,
-                              end: (currentQuestionIndex + 1) / questions.length,
+                              end: (currentQuestionIndex + 1) /
+                                  questions.length,
                             ),
                             duration: const Duration(milliseconds: 500),
                             curve: Curves.easeInOut,
@@ -1094,7 +1180,8 @@ class _TestScreenState extends State<TestScreen> {
                               return LinearProgressIndicator(
                                 value: value,
                                 backgroundColor: Colors.grey[200],
-                                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3d82b4)),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF3d82b4)),
                                 minHeight: 10,
                               );
                             },
@@ -1134,7 +1221,7 @@ class _TestScreenState extends State<TestScreen> {
                               Expanded(
                                 child: _buildQuestion(questions[currentQuestionIndex]),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 40), // Увеличенный отступ перед кнопкой
                               ElevatedButton(
                                 onPressed: () {
                                   _moveToNextQuestion();
@@ -1429,10 +1516,10 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
       child: Container(
         padding: const EdgeInsets.all(2),
         decoration: const BoxDecoration(
-          color: Colors.red,
+          color: Colors.white38,
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.close, size: 16, color: Colors.white),
+        child: const Icon(Icons.arrow_back, size: 16, color: Colors.white),
       ),
     );
   }

@@ -287,7 +287,7 @@ class _TopicScreenState extends State<TopicScreen> {
                           decoration: BoxDecoration(
                             color: testScore! >= 90
                                 ? Colors.green.withOpacity(0.7)
-                                : Colors.orange.withOpacity(0.7),
+                                : Colors.red.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
@@ -299,17 +299,12 @@ class _TopicScreenState extends State<TopicScreen> {
                           ),
                           child: Column(
                             children: [
-                              Icon(
-                                testScore! >= 90 ? Icons.check_circle : Icons.info,
-                                color: Colors.white,
-                                size: 40,
-                              ),
                               const SizedBox(height: 8),
                               Text(
                                 'Тест пройден с результатом: ${testScore!.toStringAsFixed(1)}%',
                                 style: GoogleFonts.montserrat(
                                   textStyle: const TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white,
                                   ),
@@ -325,13 +320,14 @@ class _TopicScreenState extends State<TopicScreen> {
                                 style: GoogleFonts.montserrat(
                                   textStyle: const TextStyle(
                                     color: Colors.white,
+                                    fontSize: 24,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 150),  // Добавленный отступ
                       ElevatedButton(
                         onPressed: () {
                           if (isTimerEnabled) {

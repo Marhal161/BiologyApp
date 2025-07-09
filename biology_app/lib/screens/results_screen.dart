@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'topic_screen.dart'; // Импортируем TopicScreen
+import 'topic_screen.dart';
 import 'dart:convert';
 import '../database.dart';
 import 'dart:math' show min, max, Random;
@@ -29,7 +29,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   late String motivationImagePath;
   final Random _random = Random();
   final AudioPlayer _audioPlayer = AudioPlayer();
-
+  final GlobalKey _motivationImageKey = GlobalKey();
 
   String _getBackgroundImage() {
     switch (widget.chapterId) {
@@ -45,7 +45,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   void initState() {
     super.initState();
     _checkAnswers();
-    _setMotivationImage(0); // Инициализируем с нулевым процентом, потом обновим
+    _setMotivationImage(0);
   }
 
   @override
@@ -69,42 +69,30 @@ class _ResultsScreenState extends State<ResultsScreen> {
             continue;
           }
 
-          final userMatchingAnswers = json.decode(userAnswer) as Map<
-              String,
-              dynamic>;
-          final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(
-              question['id']);
+          final userMatchingAnswers = json.decode(userAnswer) as Map<String, dynamic>;
+          final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(question['id']);
 
           bool isCorrect = true;
-          // Проверяем что количество соответствий совпадает
           if (correctMatchingAnswers.length != userMatchingAnswers.length) {
             isCorrect = false;
           } else {
-            // Проверяем каждое соответствие
             for (var correctPair in correctMatchingAnswers) {
-              final leftIndex = correctPair['left_item_index']
-                  ?.toString(); // Приводим к строке
-              final rightIndex = correctPair['right_item_index']
-                  ?.toString(); // Приводим к строке
+              final leftIndex = correctPair['left_item_index']?.toString();
+              final rightIndex = correctPair['right_item_index']?.toString();
 
-              // Проверяем есть ли такой ключ у пользователя
-              if (leftIndex == null || rightIndex == null ||
-                  !userMatchingAnswers.containsKey(leftIndex)) {
+              if (leftIndex == null || rightIndex == null || !userMatchingAnswers.containsKey(leftIndex)) {
                 isCorrect = false;
                 break;
               }
 
-              // Получаем ответ пользователя (может быть строкой или списком)
               dynamic userAnswerForLeft = userMatchingAnswers[leftIndex];
 
-              // Если ответ пользователя - список, проверяем содержит ли он правильный ответ
               if (userAnswerForLeft is List) {
                 if (!userAnswerForLeft.contains(rightIndex)) {
                   isCorrect = false;
                   break;
                 }
               }
-              // Если ответ пользователя - строка, просто сравниваем
               else if (userAnswerForLeft.toString() != rightIndex) {
                 isCorrect = false;
                 break;
@@ -116,34 +104,24 @@ class _ResultsScreenState extends State<ResultsScreen> {
           results.add(false);
         }
       } else if (questionType == 'multi_choice') {
-        // Проверка для вопросов с множественным выбором
         final correctAnswer = question['correct_answer'];
 
         if (userAnswer != null && correctAnswer != null) {
-          // Преобразуем ответы в наборы букв для сравнения без учета порядка
-          final userLetters = userAnswer.split('')
-            ..sort();
-          final correctLetters = correctAnswer.toString().split('')
-            ..sort();
-
-          // Сравниваем отсортированные наборы букв
+          final userLetters = userAnswer.split('')..sort();
+          final correctLetters = correctAnswer.toString().split('')..sort();
           results.add(userLetters.join() == correctLetters.join());
         } else {
           results.add(false);
         }
       } else {
-        // Проверка для обычных вопросов (single_word, two_words, number)
         final correctAnswer = question['correct_answer'];
 
         if (userAnswer != null && correctAnswer != null) {
-          // Проверяем, содержит ли правильный ответ символ "/"
           if (correctAnswer.toString().contains('/')) {
-            // Разбиваем правильный ответ на несколько вариантов
             final acceptableAnswers = correctAnswer.toString().split('/')
                 .map((answer) => answer.trim().toUpperCase())
                 .toList();
 
-            // Проверяем, является ли ответ пользователя формой любого из вариантов
             bool isAnyMatch = false;
             final userAnswerUpper = userAnswer.trim().toUpperCase();
 
@@ -155,11 +133,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
             }
             results.add(isAnyMatch);
           } else {
-            // Обычная проверка для одного правильного ответа
             final userAnswerUpper = userAnswer.trim().toUpperCase();
             final correctAnswerUpper = correctAnswer.toString().trim().toUpperCase();
-
-            // Используем улучшенный алгоритм для проверки падежей
             results.add(_isWordFormMatch(userAnswerUpper, correctAnswerUpper));
           }
         } else {
@@ -172,15 +147,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
       setState(() {
         answerResults = results;
         isLoading = false;
-
-        // Подсчет процента правильных ответов
         int correctAnswers = answerResults.where((result) => result).length;
         double percentage = widget.questions.isEmpty
             ? 0
             : (correctAnswers / widget.questions.length) * 100;
 
         _setMotivationImage(percentage);
-        // Воспроизводим звук в зависимости от результата
         _playResultSound(percentage);
       });
     }
@@ -196,7 +168,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
       category = 'excellent';
     }
 
-    // Выбираем случайную картинку из категории (1, 2 или 3)
     int imageNumber = _random.nextInt(3) + 1;
     setState(() {
       motivationImagePath = 'assets/images/resultImages/$category$imageNumber.png';
@@ -205,16 +176,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Подсчет правильных ответов
-    int correctAnswers = answerResults
-        .where((result) => result)
-        .length;
+    int correctAnswers = answerResults.where((result) => result).length;
     double percentage = widget.questions.isEmpty
         ? 0
         : (correctAnswers / widget.questions.length) * 100;
 
     return Scaffold(
-      appBar: null, //
+      appBar: null,
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -223,13 +191,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
           ),
         ),
         child: isLoading
-            ? const Center(
-            child: CircularProgressIndicator(color: Color(0xFF42A5F5)))
+            ? const Center(child: CircularProgressIndicator(color: Color(0xFF42A5F5)))
             : Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.only(top: 48.0, left: 16.0, right: 16.0, bottom: 16.0),
           child: Column(
             children: [
-              // Заголовок и кнопка возврата
               Row(
                 children: [
                   IconButton(
@@ -254,11 +220,10 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(width: 48), // Для симметрии
+                  const SizedBox(width: 48),
                 ],
               ),
-              const SizedBox(height: 10),
-              // Результаты теста
+              const SizedBox(height: 15),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -293,12 +258,15 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 15),
-                    // Добавляем мотивационную картинку
+                    const SizedBox(height: 5),
+                    // Фиксированная мотивационная картинка
                     Container(
+                      key: _motivationImageKey,
+                      width: 400, // Фиксированная ширина
+                      height: 180, // Фиксированная высота
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20), // Закругляем углы контейнера
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.05),
@@ -308,13 +276,13 @@ class _ResultsScreenState extends State<ResultsScreen> {
                           ),
                         ],
                       ),
-                      child: ClipRRect( // Обрезаем изображение по границам
-                        borderRadius: BorderRadius.circular(15), // Закругляем углы изображения
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
                         child: Image.asset(
                           motivationImagePath,
-                          fit: BoxFit.cover, // Заполняет всю область с сохранением пропорций
-                          height: 180,
-                          width: double.infinity, // Растягиваем на всю доступную ширину
+                          fit: BoxFit.cover,
+                          width: 300, // Фиксированная ширина
+                          height: 180, // Фиксированная высота
                         ),
                       ),
                     ),
@@ -322,7 +290,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Список вопросов и ответов
               Expanded(
                 child: ListView.builder(
                   itemCount: widget.questions.length,
@@ -332,7 +299,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     final isCorrect = index < answerResults.length ? answerResults[index] : false;
                     final questionType = question['question_type'] as String?;
 
-                    // Упрощенная версия карточки вопроса
                     return Card(
                       color: Colors.white.withOpacity(0.8),
                       margin: const EdgeInsets.only(bottom: 10),
@@ -374,7 +340,6 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                // Добавляем проверку на тип вопроса
                                 if (questionType == 'matching')
                                   FutureBuilder(
                                     future: _buildMatchingDetails(question, userAnswer),
@@ -487,6 +452,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       ),
     );
   }
+
   // Улучшенный метод форматирования ответов
   String _formatCorrectAnswer(Map<String, dynamic> question) {
     final questionType = question['question_type'] as String?;
@@ -1245,7 +1211,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   Future<void> _playResultSound(double percentage) async {
     try {
       String soundFile;
-      
+
       if (percentage <= 35) {
         soundFile = 'sounds/bad.mp3';
       } else if (percentage <= 70) {
@@ -1253,7 +1219,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
       } else {
         soundFile = 'sounds/normal.mp3';
       }
-      
+
       await _audioPlayer.play(AssetSource(soundFile));
     } catch (e) {
       print('Ошибка воспроизведения звука: $e');
