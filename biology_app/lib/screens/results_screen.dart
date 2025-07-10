@@ -87,13 +87,17 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
               dynamic userAnswerForLeft = userMatchingAnswers[leftIndex];
 
-              if (userAnswerForLeft is List) {
-                if (!userAnswerForLeft.contains(rightIndex)) {
-                  isCorrect = false;
-                  break;
-                }
-              }
-              else if (userAnswerForLeft.toString() != rightIndex) {
+              // Универсальное сравнение: приводим оба к списку строк, сортируем и сравниваем
+              List<String> userList = userAnswerForLeft is List
+                  ? userAnswerForLeft.map((e) => e.toString()).toList()
+                  : [userAnswerForLeft.toString()];
+              List<String> correctList = [rightIndex];
+
+              userList.sort();
+              correctList.sort();
+
+              if (userList.length != correctList.length ||
+                  !userList.asMap().entries.every((entry) => correctList.length > entry.key && correctList[entry.key] == entry.value)) {
                 isCorrect = false;
                 break;
               }
@@ -899,6 +903,34 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   // Универсальный метод для проверки различных форм слов (существительных, прилагательных, причастий)
   bool _checkWordForms(String word1, String word2) {
+    // Специальная обработка для существительных женского рода на -а/-ы/-и (интерфаза/интерфазы)
+    if (word1.length > 5 && word2.length > 5) {
+      final endings = ['а', 'ы', 'и'];
+      for (var e1 in endings) {
+        for (var e2 in endings) {
+          if (word1.endsWith(e1) && word2.endsWith(e2)) {
+            final base1 = word1.substring(0, word1.length - 1);
+            final base2 = word2.substring(0, word2.length - 1);
+            if (base1 == base2) return true;
+          }
+        }
+      }
+    }
+
+    // Новый блок: если оба слова заканчиваются на пробел и число, сравниваем основу и число отдельно
+    final regExpNum = RegExp(r'^(.*?)\s*(\d+)$');
+    final match1 = regExpNum.firstMatch(word1);
+    final match2 = regExpNum.firstMatch(word2);
+    if (match1 != null && match2 != null) {
+      final base1 = match1.group(1) ?? '';
+      final num1 = match1.group(2) ?? '';
+      final base2 = match2.group(1) ?? '';
+      final num2 = match2.group(2) ?? '';
+      if (num1 == num2 && _checkWordForms(base1, base2)) {
+        return true;
+      }
+    }
+
     // Слишком короткие слова не сравниваем
     if (word1.length < 3 || word2.length < 3) return false;
 
@@ -923,7 +955,8 @@ class _ResultsScreenState extends State<ResultsScreen> {
           ['ый', 'ого', 'ому', 'ым', 'ом'], // мужской род: новый, нового, новому
           ['ий', 'его', 'ему', 'им', 'ем'], // мужской род мягкий: синий, синего, синему
           ['ое', 'ого', 'ому', 'ым', 'ом'], // средний род: новое, нового, новому
-          ['ее', 'его', 'ему', 'им', 'ем']  // средний род мягкий: синее, синего, синему
+          ['ее', 'его', 'ему', 'им', 'ем'], // средний род мягкий: синее, синего, синему
+          ['ому', 'ему', 'ом', 'ем', 'ым', 'им'] // смешанная группа для мужского рода
         ];
         
         // Проверяем принадлежность к одной группе
@@ -1041,6 +1074,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           // Группы окончаний, которые связаны между собой (формы одного падежа)
           List<List<String>> relatedGroups = [
             ['ый', 'ом', 'ому', 'ого', 'ым'],  // мужской род, ед. число (продолговатый, продолговатом...)
+            ['ой', 'ого', 'ому', 'ым', 'ом'],  // мужской род, ед. число (узловой, узлового, узловому, узловым, узловом)
             ['ий', 'ем', 'ему', 'его', 'им'],  // мужской род, мягкий вариант (синий, синем...)
             ['ая', 'ой', 'ую'],                // женский род (красная, красной, красную)
             ['яя', 'ей', 'юю'],                // женский род, мягкий вариант (синяя, синей, синюю)
