@@ -580,124 +580,149 @@ class _TestScreenState extends State<TestScreen> {
         final line = questionParts[i].trim();
         if (line.startsWith('А)') || line.startsWith('Б)') ||
             line.startsWith('В)') || line.startsWith('Г)') ||
-            line.startsWith('Д)') || line.startsWith('Е)') ||
-            line.startsWith('Ж)') || line.startsWith('З)')) {
+            line.startsWith('Д)') || line.startsWith('Е)')) {
           options.add(line);
         }
       }
 
+      // Ограничиваем максимум 6 вариантов (3x2)
+      options = options.take(6).toList();
       if (options.isEmpty) {
-        options = ['А) Вариант А', 'Б) Вариант Б', 'В) Вариант В', 'Г) Вариант Г'];
+        options = ['А) Вариант А', 'Б) Вариант Б', 'В) Вариант В',
+          'Г) Вариант Г', 'Д) Вариант Д', 'Е) Вариант Е'];
       }
 
-      // Разделяем варианты на 3 колонки
-      int columnCount = 3;
-      int itemsPerColumn = (options.length / columnCount).ceil();
-      List<List<String>> columns = [];
-      for (int i = 0; i < columnCount; i++) {
-        int start = i * itemsPerColumn;
-        int end = (i + 1) * itemsPerColumn;
-        if (end > options.length) end = options.length;
-        columns.add(options.sublist(start, end));
-      }
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final bool isSmallScreen = constraints.maxWidth < 600;
+          final double buttonSize = isSmallScreen ? constraints.maxWidth / 4 : constraints.maxWidth / 6;
+          final double buttonPadding = isSmallScreen ? 4.0 : 8.0;
 
-      return SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Text(
-                    mainQuestion,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black,
-                    ),
-                  ),
-                  if (questionImage != null) questionImage,
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: options.map((option) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${option.substring(0, 1)}:',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  option.substring(2),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black,
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        mainQuestion,
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 16.0 : 18.0,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      if (questionImage != null) questionImage,
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: options.map((option) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 30,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '${option.substring(0, 1)}:',
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: isSmallScreen ? 14.0 : 16.0,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    option.substring(2),
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 14.0 : 16.0,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )).toList(),
                         ),
-                      )).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 6),
-            // Отображаем кнопки в 3 колонках
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 70.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  for (int i = 0; i < columns.length; i++)
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: columns[i].map((option) =>
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: _buildSequenceButton(option.substring(0, 1), options.indexOf(option)),
-                          )
-                      ).toList(),
-                    ),
-                ],
-              ),
-            ),
-            if (sequenceAnswer.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Ваша последовательность: $sequenceAnswer',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ],
-        ),
+                const SizedBox(height: 16),
+                // Сетка 3x2 для кнопок
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16.0 : 32.0),
+                  child: Column(
+                    children: [
+                      // Первая строка (3 кнопки)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          for (int i = 0; i < 3 && i < options.length; i++)
+                            Padding(
+                              padding: EdgeInsets.all(buttonPadding),
+                              child: SizedBox(
+                                width: buttonSize,
+                                height: buttonSize,
+                                child: _buildSequenceButton(options[i].substring(0, 1), i),
+                              ),
+                            ),
+                        ],
+                      ),
+                      // Вторая строка (3 кнопки)
+                      if (options.length > 3)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            for (int i = 3; i < 6 && i < options.length; i++)
+                              Padding(
+                                padding: EdgeInsets.all(buttonPadding),
+                                child: SizedBox(
+                                  width: buttonSize,
+                                  height: buttonSize,
+                                  child: _buildSequenceButton(options[i].substring(0, 1), i),
+                                ),
+                              ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+                if (sequenceAnswer.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Ваша последовательность: $sequenceAnswer',
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 14.0 : 16.0,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 20),
+              ],
+            ),
+          );
+        },
       );
-    } else if (question['options'] != null) {
+    }else if (question['options'] != null) {
       try {
         var options = json.jsonDecode(question['options'] as String);
         if (options is List && options.isNotEmpty) {
@@ -834,7 +859,7 @@ class _TestScreenState extends State<TestScreen> {
                         fontSize: 18,
                         color: Colors.black,
                       ),
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.justify,
                     ),
                   ),
 
@@ -981,12 +1006,12 @@ class _TestScreenState extends State<TestScreen> {
     }
   }
 
-  Widget _buildSequenceButton(String letter, int _) {
+  Widget _buildSequenceButton(String letter, int _, {double size = 70}) {
     bool isSelected = sequenceAnswer.contains(letter);
 
     return SizedBox(
-      width: 70,
-      height: 70,
+      width: size,
+      height: size,
       child: ElevatedButton(
         onPressed: () {
           setState(() {
@@ -1002,16 +1027,19 @@ class _TestScreenState extends State<TestScreen> {
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
-          backgroundColor: isSelected ? Color(0xFF3D82B4) : const Color(0xFF42A5F5),
+          backgroundColor: isSelected ? const Color(0xFF3D82B4) : const Color(0xFF42A5F5),
           foregroundColor: Colors.white,
           shadowColor: Colors.black26,
           elevation: 4,
         ),
         child: Text(
           letter,
-          style: const TextStyle(fontSize: 24),
+          style: TextStyle(
+            fontSize: size * 0.4,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

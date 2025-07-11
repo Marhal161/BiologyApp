@@ -38,7 +38,7 @@ class AppTheme {
   static BoxDecoration chapterBackgroundDecoration(int chapterId) {
     return BoxDecoration(
       image: DecorationImage(
-        image: Image.asset(getChapterBackground(chapterId)).image,
+        image: AssetImage(getChapterBackground(chapterId)),
         fit: BoxFit.cover,
       ),
     );
@@ -92,7 +92,8 @@ class _StartScreenState extends State<StartScreen> {
         _videoController.play();
 
         _videoController.addListener(() {
-          if (_videoController.value.position >= _videoController.value.duration) {
+          if (_videoController.value.position >=
+              _videoController.value.duration) {
             _showMainInterface();
           }
         });
@@ -133,12 +134,14 @@ class _StartScreenState extends State<StartScreen> {
 
   Route _createRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const ChaptersScreen(),
+      pageBuilder: (context, animation,
+          secondaryAnimation) => const ChaptersScreen(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
         const curve = Curves.ease;
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween = Tween(begin: begin, end: end).chain(
+            CurveTween(curve: curve));
         return SlideTransition(position: animation.drive(tween), child: child);
       },
     );
@@ -149,19 +152,21 @@ class _StartScreenState extends State<StartScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Выберите документ'),
+          title: const Text('Выберите документ', textAlign: TextAlign.center),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('Политика обработки данных'),
+                title: const Text(
+                    'Политика обработки данных', textAlign: TextAlign.center),
                 onTap: () {
                   Navigator.pop(context);
                   _openDocument('assets/documents/politic.pdf');
                 },
               ),
               ListTile(
-                title: const Text('Положение об обработке персональных данных'),
+                title: const Text('Положение об обработке персональных данных',
+                    textAlign: TextAlign.center),
                 onTap: () {
                   Navigator.pop(context);
                   _openDocument('assets/documents/processing_pd.pdf');
@@ -188,7 +193,6 @@ class _StartScreenState extends State<StartScreen> {
       if (result.type != ResultType.done) {
         _showError('Не удалось открыть файл: ${result.message}');
       }
-
     } catch (e) {
       _showError('Ошибка при открытии файла: ${e.toString()}');
     }
@@ -198,7 +202,9 @@ class _StartScreenState extends State<StartScreen> {
     try {
       final byteData = await rootBundle.load(assetPath);
       final tempDir = await getTemporaryDirectory();
-      final fileName = assetPath.split('/').last;
+      final fileName = assetPath
+          .split('/')
+          .last;
       final tempPath = '${tempDir.path}/$fileName';
       final file = File(tempPath);
       await file.writeAsBytes(byteData.buffer.asUint8List(
@@ -214,12 +220,22 @@ class _StartScreenState extends State<StartScreen> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(content: Text(message, textAlign: TextAlign.center)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    final isSmallScreen = screenHeight < 600 || screenWidth < 350;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -247,152 +263,172 @@ class _StartScreenState extends State<StartScreen> {
               duration: const Duration(milliseconds: 500),
               child: Container(
                 decoration: AppTheme.chapterBackgroundDecoration(1),
-                child: SafeArea(
-                  child: Stack(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.asset(
-                                'assets/images/icon/logobio.png',
-                                height: 160,
-                                width: 150,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            Text(
-                              'Дорогой друг!',
-                              style: GoogleFonts.montserrat(
-                                textStyle: const TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 24,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
-                              child: Text(
-                                'Это приложение поможет подготовиться к ЕГЭ, ОГЭ и по другим экзаменам по биологии предлагая задания разных форматов для развития биологического мышления и выявления слабых тем',
-                                textAlign: TextAlign.justify,
-                                style: GoogleFonts.montserrat(
-                                  textStyle: const TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 18,
-                                    color: Colors.black,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
+                        child: SafeArea(
+                          child: Padding(
+                            padding: EdgeInsets.all(
+                                isSmallScreen ? 12.0 : 16.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.asset(
+                                    'assets/images/icon/logobio.png',
+                                    height: isSmallScreen ? 100 : 160,
+                                    width: isSmallScreen ? 100 : 150,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
-                              child: Text(
-                                'Загляни в наш ТГ-Канал для полезной информации!',
-                                textAlign: TextAlign.justify,
-                                style: GoogleFonts.montserrat(
-                                  textStyle: const TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.black,
+                                SizedBox(height: isSmallScreen ? 10 : 20),
+                                Text(
+                                  'Дорогой друг!',
+                                  style: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: isSmallScreen ? 18 : 24,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                SizedBox(height: isSmallScreen ? 8 : 12),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: isSmallScreen ? 10 : 20),
+                                  child: Text(
+                                    'Это приложение поможет подготовиться к ЕГЭ, ОГЭ и другим экзаменам по биологии, предлагая задания разных форматов для развития биологического мышления и выявления слабых тем',
+                                    textAlign: TextAlign.justify,
+                                    style: GoogleFonts.montserrat(
+                                      textStyle: TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: isSmallScreen ? 12 : 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: 250,
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: _openTelegram,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF42A5F5),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                                SizedBox(height: isSmallScreen ? 8 : 12),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: isSmallScreen ? 10 : 20),
+                                  child: Text(
+                                    'Загляни в наш ТГ-Канал для полезной информации!',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.montserrat(
+                                      textStyle: TextStyle(
+                                        fontSize: isSmallScreen ? 12 : 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.send, color: Colors.white),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Telegram',
+                                SizedBox(height: isSmallScreen ? 8 : 12),
+                                SizedBox(
+                                  width: isSmallScreen ? 180 : 220,
+                                  height: isSmallScreen ? 36 : 44,
+                                  child: ElevatedButton(
+                                    onPressed: _openTelegram,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF42A5F5),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .center,
+                                      children: [
+                                        Icon(Icons.send, color: Colors.white,
+                                            size: isSmallScreen ? 16 : 20),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          'Telegram',
+                                          style: GoogleFonts.montserrat(
+                                            textStyle: TextStyle(
+                                              fontSize: isSmallScreen ? 14 : 18,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: isSmallScreen ? 8 : 12),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: isSmallScreen ? 10 : 20),
+                                  child: Text(
+                                    'У тебя всё получится! Вперёд!',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.montserrat(
+                                      textStyle: TextStyle(
+                                        fontSize: isSmallScreen ? 12 : 16,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: isSmallScreen ? 8 : 12),
+                                SizedBox(
+                                  width: isSmallScreen ? 180 : 220,
+                                  height: isSmallScreen ? 36 : 44,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pushReplacement(
+                                          context, _createRoute());
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF42A5F5),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Вперёд!',
                                       style: GoogleFonts.montserrat(
-                                        textStyle: const TextStyle(
-                                          fontSize: 20,
+                                        textStyle: TextStyle(
+                                          fontSize: isSmallScreen ? 14 : 18,
                                           color: Colors.white,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
-                              child: Text(
-                                'У тебя всё получится! Вперёд!',
-                                textAlign: TextAlign.justify,
-                                style: GoogleFonts.montserrat(
-                                  textStyle: const TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.black,
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: 250,
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pushReplacement(context, _createRoute());
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF42A5F5),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Вперёд!',
-                                  style: GoogleFonts.montserrat(
-                                    textStyle: const TextStyle(
-                                      fontSize: 24,
-                                      color: Colors.white,
+                                SizedBox(height: isSmallScreen ? 8 : 12),
+                                GestureDetector(
+                                  onTap: _showDocumentChoice,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text(
+                                      'Политика обработки и положение об обработке перс. данных',
+                                      style: GoogleFonts.montserrat(
+                                        textStyle: TextStyle(
+                                          fontSize: isSmallScreen ? 10 : 12,
+                                          color: Colors.black,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                            const SizedBox(height: 20),
-                            GestureDetector(
-                              onTap: _showDocumentChoice,
-                              child: Text(
-                                'Политика обработки и защиты перс. данных',
-                                style: GoogleFonts.montserrat(
-                                  textStyle: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ),
             ),
