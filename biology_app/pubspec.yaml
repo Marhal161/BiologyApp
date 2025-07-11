@@ -20,7 +20,7 @@ dependencies:
   path_provider_android: ^2.0.11
   open_file: ^3.3.1
   clipboard: ^0.1.3
-  audioplayers: ^5.2.1
+  audioplayers: ^6.5.0
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +32,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/logotip.png
+    - assets/images/icon/logobio.png
     - assets/images/q_img/
     - assets/database.db
     - fonts/

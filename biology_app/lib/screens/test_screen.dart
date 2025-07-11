@@ -41,16 +41,11 @@ class _TestScreenState extends State<TestScreen> {
 
   String _getBackgroundImage() {
     switch (widget.chapterId) {
-      case 1:
-        return "assets/images/backgroundfirstchapter.jpg";
-      case 2:
-        return "assets/images/backgroundsecondchapter.jpg";
-      case 3:
-        return "assets/images/backgroundthirdchapter.jpg";
-      case 4:
-        return "assets/images/backgroundfourthchapter.jpg";
-      default:
-        return "assets/images/backgrounddefault.jpg";
+      case 1: return "assets/images/backgroundfirstchapter.jpg";
+      case 2: return "assets/images/backgroundsecondchapter.jpg";
+      case 3: return "assets/images/backgroundthirdchapter.jpg";
+      case 4: return "assets/images/backgroundfourthchapter.jpg";
+      default: return "assets/images/backgrounddefault.jpg";
     }
   }
 
@@ -160,8 +155,7 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadQuestions() async {
-    final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(
-        widget.topicId);
+    final loadedQuestions = await DBProvider.db.getQuestionsByTopicId(widget.topicId);
     setState(() {
       questions = loadedQuestions;
       userAnswers = List.filled(loadedQuestions.length, null);
@@ -223,11 +217,8 @@ class _TestScreenState extends State<TestScreen> {
           final userAnswer = userAnswers[i];
           if (userAnswer == null) continue;
 
-          final userMatchingAnswers = json.jsonDecode(userAnswer) as Map<
-              String,
-              dynamic>;
-          final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(
-              question['id']);
+          final userMatchingAnswers = json.jsonDecode(userAnswer) as Map<String, dynamic>;
+          final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(question['id']);
 
           bool isCorrect = true;
           Map<String, List<String>> userMatches = {};
@@ -265,8 +256,7 @@ class _TestScreenState extends State<TestScreen> {
         final correctAnswer = question['correct_answer'];
 
         if (userAnswer != null && correctAnswer != null &&
-            userAnswer.toUpperCase() ==
-                correctAnswer.toString().toUpperCase()) {
+            userAnswer.toUpperCase() == correctAnswer.toString().toUpperCase()) {
           correctAnswers++;
         }
       } else if (questionType == 'multi_choice') {
@@ -274,10 +264,8 @@ class _TestScreenState extends State<TestScreen> {
         final correctAnswer = question['correct_answer'];
 
         if (userAnswer != null && correctAnswer != null) {
-          final userLetters = userAnswer.split('')
-            ..sort();
-          final correctLetters = correctAnswer.toString().split('')
-            ..sort();
+          final userLetters = userAnswer.split('')..sort();
+          final correctLetters = correctAnswer.toString().split('')..sort();
 
           if (userLetters.join() == correctLetters.join()) {
             correctAnswers++;
@@ -293,8 +281,7 @@ class _TestScreenState extends State<TestScreen> {
                 .map((answer) => answer.trim().toUpperCase())
                 .toList();
 
-            bool isAnyMatch = acceptableAnswers.contains(
-                userAnswer.trim().toUpperCase());
+            bool isAnyMatch = acceptableAnswers.contains(userAnswer.trim().toUpperCase());
 
             if (isAnyMatch) correctAnswers++;
           } else {
@@ -307,8 +294,7 @@ class _TestScreenState extends State<TestScreen> {
       }
     }
 
-    double score = questions.isEmpty ? 0 : (correctAnswers / questions.length) *
-        100;
+    double score = questions.isEmpty ? 0 : (correctAnswers / questions.length) * 100;
 
     await TestProgressService.saveTestResult(widget.topicId, score);
 
@@ -322,20 +308,18 @@ class _TestScreenState extends State<TestScreen> {
 
   Route _createRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          ResultsScreen(
-            topicTitle: widget.topicTitle,
-            questions: questions,
-            userAnswers: userAnswers,
-            chapterId: widget.chapterId,
-          ),
+      pageBuilder: (context, animation, secondaryAnimation) => ResultsScreen(
+        topicTitle: widget.topicTitle,
+        questions: questions,
+        userAnswers: userAnswers,
+        chapterId: widget.chapterId,
+      ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
         const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(
-            CurveTween(curve: curve));
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -352,7 +336,7 @@ class _TestScreenState extends State<TestScreen> {
     if (question['image_path'] != null && question['image_path'] is String) {
       questionImage = Container(
         margin: const EdgeInsets.symmetric(vertical: 10),
-        height: 200,
+        height: 300, // Увеличенная высота изображения
         width: double.infinity,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
@@ -379,11 +363,7 @@ class _TestScreenState extends State<TestScreen> {
         future: DBProvider.db.getMatchingOptions(question['id']),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.black,
-                )
-            );
+            return const Center(child: CircularProgressIndicator(color: Colors.black));
           }
 
           final options = snapshot.data!;
@@ -402,14 +382,15 @@ class _TestScreenState extends State<TestScreen> {
                           question['question_text'] ?? 'Вопрос без текста',
                           style: const TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w400,
                             color: Colors.black,
                           ),
+                            textAlign: TextAlign.justify
                         ),
                         if (questionImage != null)
                           Container(
                             margin: const EdgeInsets.only(top: 8),
-                            height: 100,
+                            height: 200, // Увеличенная высота изображения
                             width: double.infinity,
                             child: questionImage,
                           ),
@@ -465,8 +446,7 @@ class _TestScreenState extends State<TestScreen> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.check_circle, color: Colors.black,
-                                size: 14),
+                            Icon(Icons.check_circle, color: Colors.black, size: 14),
                             SizedBox(width: 4),
                             Text(
                               'Текущие соответствия:',
@@ -500,8 +480,7 @@ class _TestScreenState extends State<TestScreen> {
                               if (item['item_index'] == entry.value) {
                                 rightText = item['item_text'].toString();
                                 if (rightText.length > 25) {
-                                  rightText =
-                                      rightText.substring(0, 25) + '...';
+                                  rightText = rightText.substring(0, 25) + '...';
                                 }
                                 break;
                               }
@@ -509,8 +488,7 @@ class _TestScreenState extends State<TestScreen> {
 
                             return Container(
                               margin: const EdgeInsets.only(bottom: 4),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(4),
@@ -534,8 +512,7 @@ class _TestScreenState extends State<TestScreen> {
           );
         },
       );
-    } else if (questionType == 'single_word' || questionType == 'two_words' ||
-        questionType == 'number') {
+    } else if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
       return SingleChildScrollView(
         child: Column(
           children: [
@@ -546,7 +523,9 @@ class _TestScreenState extends State<TestScreen> {
                 style: const TextStyle(
                   fontSize: 20,
                   color: Colors.black,
+                  fontWeight: FontWeight.w400
                 ),
+                textAlign: TextAlign.justify,
               ),
             ),
             if (questionImage != null) questionImage,
@@ -838,119 +817,142 @@ class _TestScreenState extends State<TestScreen> {
         selectedLetters = selectedAnswer!.split('');
       }
 
-      return SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                mainQuestion,
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            if (questionImage != null) questionImage,
-            const SizedBox(height: 20),
-            ...options.map((option) {
-              String letter = option.substring(0, 1);
-              bool isSelected = selectedLetters.contains(letter);
-              String optionText = option.substring(2).trim();
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final bool isSmallScreen = constraints.maxWidth < 400;
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Кнопка выбора (отдельный элемент)
-                    SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            if (isSelected) {
-                              selectedLetters.remove(letter);
-                            } else {
-                              selectedLetters.add(letter);
-                            }
-                            selectedAnswer = selectedLetters.join('');
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          backgroundColor: isSelected
-                              ? const Color(0xFF3D82B4)
-                              : Color(0xFF42A5F5),
-                          foregroundColor: isSelected
-                              ? Colors.white
-                              : Colors.white,
-                          elevation: 1,
-                          side: BorderSide(
-                            color: isSelected
-                                ? const Color(0xFF3D82B4)
-                                : Colors.grey.shade400,
-                          ),
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      mainQuestion,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                  if (questionImage != null) questionImage,
+
+                  const SizedBox(height: 20),
+
+                  // Адаптивное отображение вариантов ответа
+                  ...options.map((option) {
+                    String letter = option.substring(0, 1);
+                    bool isSelected = selectedLetters.contains(letter);
+                    String optionText = option.substring(2).trim();
+
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: isSmallScreen ? 8.0 : 16.0,
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white.withOpacity(0.7),
                         ),
-                        child: Text(
-                          letter,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: 'Montserrat',
-                          ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Кнопка выбора с адаптивным размером
+                            SizedBox(
+                              width: isSmallScreen ? 40 : 50,
+                              height: isSmallScreen ? 40 : 50,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    if (isSelected) {
+                                      selectedLetters.remove(letter);
+                                    } else {
+                                      selectedLetters.add(letter);
+                                    }
+                                    selectedAnswer = selectedLetters.join('');
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  backgroundColor: isSelected
+                                      ? const Color(0xFF3D82B4)
+                                      : const Color(0xFF42A5F5),
+                                  foregroundColor: Colors.white,
+                                  elevation: 1,
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? const Color(0xFF3D82B4)
+                                        : Colors.grey.shade400,
+                                  ),
+                                ),
+                                child: Text(
+                                  letter,
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 20 : 24,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 8),
+
+                            // Текст ответа с адаптивными отступами
+                            Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: isSmallScreen ? 8.0 : 14.0,
+                                  horizontal: 8.0,
+                                ),
+                                child: Text(
+                                  optionText,
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 14 : 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    // Текст ответа в белом полупрозрачном блоке
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(14.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          optionText,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
+                    );
+                  }).toList(),
+
+                  if (selectedLetters.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Выбрано: ${selectedLetters.join(', ')}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ],
-                ),
-              );
-            }).toList(),
-            if (selectedLetters.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Выбрано: ${selectedLetters.join(', ')}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+
+                  const SizedBox(height: 20),
+                ],
               ),
-            ],
-            const SizedBox(height: 20),
-          ],
-        ),
+            ),
+          );
+        },
       );
-    }else {
+    } else {
       return SingleChildScrollView(
         child: Column(
           children: [
@@ -1002,8 +1004,7 @@ class _TestScreenState extends State<TestScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          backgroundColor: isSelected ? Color(0xFF3D82B4) : const Color(
-              0xFF42A5F5),
+          backgroundColor: isSelected ? Color(0xFF3D82B4) : const Color(0xFF42A5F5),
           foregroundColor: Colors.white,
           shadowColor: Colors.black26,
           elevation: 4,
@@ -1019,8 +1020,7 @@ class _TestScreenState extends State<TestScreen> {
   Widget _buildTimer() {
     int minutes = _timeLeft ~/ 60;
     int seconds = _timeLeft % 60;
-    String timeString = '${minutes.toString().padLeft(2, '0')}:${seconds
-        .toString().padLeft(2, '0')}';
+    String timeString = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
     Color textColor = _timeLeft <= 30 ? Colors.red : Colors.black;
 
@@ -1086,21 +1086,14 @@ class _TestScreenState extends State<TestScreen> {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(
-                      top: 60, left: 16, right: 16, bottom: 16),
-                  // Добавлен bottom отступ
+                  padding: const EdgeInsets.only(top: 60, left: 16, right: 16, bottom: 16),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    // Выравнивание по центру по вертикали
                     children: [
                       IconButton(
-                        icon: const Icon(
-                            Icons.arrow_back, color: Colors.black, size: 28),
-                        // Увеличен размер иконки
+                        icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
                         padding: EdgeInsets.zero,
-                        // Убраны внутренние отступы
                         constraints: const BoxConstraints(),
-                        // Убраны ограничения
                         onPressed: () async {
                           final shouldExit = await showDialog(
                             context: context,
@@ -1110,8 +1103,7 @@ class _TestScreenState extends State<TestScreen> {
                                   content: const Text('Что вы хотите сделать?'),
                                   actions: [
                                     TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(false),
+                                      onPressed: () => Navigator.of(context).pop(false),
                                       child: const Text('Отмена'),
                                     ),
                                     TextButton(
@@ -1123,8 +1115,7 @@ class _TestScreenState extends State<TestScreen> {
                                     ),
                                     TextButton(
                                       onPressed: () async {
-                                        await TestProgressService
-                                            .clearTestState(widget.topicId);
+                                        await TestProgressService.clearTestState(widget.topicId);
                                         Navigator.of(context).pop(true);
                                       },
                                       child: const Text('Выйти без сохранения'),
@@ -1138,7 +1129,6 @@ class _TestScreenState extends State<TestScreen> {
                         },
                       ),
                       const SizedBox(width: 12),
-                      // Добавлен отступ между кнопкой и текстом
                       Expanded(
                         child: Text(
                           widget.topicTitle,
@@ -1151,28 +1141,24 @@ class _TestScreenState extends State<TestScreen> {
                         ),
                       ),
                       const SizedBox(width: 1),
-                      // Добавлен отступ для балансировки
                     ],
                   ),
                 ),
                 if (widget.isTimerEnabled) _buildTimer(),
 
                 questions.isEmpty
-                    ? const Expanded(
-                    child: Center(child: CircularProgressIndicator()))
+                    ? const Expanded(child: Center(child: CircularProgressIndicator()))
                     : Expanded(
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: TweenAnimationBuilder<double>(
                             tween: Tween<double>(
                               begin: 0,
-                              end: (currentQuestionIndex + 1) /
-                                  questions.length,
+                              end: (currentQuestionIndex + 1) / questions.length,
                             ),
                             duration: const Duration(milliseconds: 500),
                             curve: Curves.easeInOut,
@@ -1180,8 +1166,7 @@ class _TestScreenState extends State<TestScreen> {
                               return LinearProgressIndicator(
                                 value: value,
                                 backgroundColor: Colors.grey[200],
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                    Color(0xFF3d82b4)),
+                                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3d82b4)),
                                 minHeight: 10,
                               );
                             },
@@ -1221,7 +1206,7 @@ class _TestScreenState extends State<TestScreen> {
                               Expanded(
                                 child: _buildQuestion(questions[currentQuestionIndex]),
                               ),
-                              const SizedBox(height: 40), // Увеличенный отступ перед кнопкой
+                              const SizedBox(height: 40),
                               ElevatedButton(
                                 onPressed: () {
                                   _moveToNextQuestion();

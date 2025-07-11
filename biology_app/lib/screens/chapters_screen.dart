@@ -232,11 +232,6 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                     tooltip: 'Техподдержка',
                   ),
                   const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.description_outlined, color: Colors.black54),
-                    onPressed: _showDocumentChoice,
-                    tooltip: 'Документы',
-                  ),
                 ],
               ),
             ),
@@ -267,11 +262,10 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF42A5F5),
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(60),
                               ),
-                              elevation: 4,
                               minimumSize: const Size(double.infinity, 60),
                             ),
                             onPressed: () {

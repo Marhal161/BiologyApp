@@ -5,6 +5,10 @@ import 'database.dart';
 import 'screens/chapters_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:io';
 
 void main() async {
   try {
@@ -140,6 +144,80 @@ class _StartScreenState extends State<StartScreen> {
     );
   }
 
+  Future<void> _showDocumentChoice() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Выберите документ'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Политика обработки данных'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _openDocument('assets/documents/politic.pdf');
+                },
+              ),
+              ListTile(
+                title: const Text('Положение об обработке персональных данных'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _openDocument('assets/documents/processing_pd.pdf');
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openDocument(String assetPath) async {
+    try {
+      final file = await _getLocalFile(assetPath);
+
+      if (!await file.exists()) {
+        _showError('Файл не найден');
+        return;
+      }
+
+      final result = await OpenFile.open(file.path);
+
+      if (result.type != ResultType.done) {
+        _showError('Не удалось открыть файл: ${result.message}');
+      }
+
+    } catch (e) {
+      _showError('Ошибка при открытии файла: ${e.toString()}');
+    }
+  }
+
+  Future<File> _getLocalFile(String assetPath) async {
+    try {
+      final byteData = await rootBundle.load(assetPath);
+      final tempDir = await getTemporaryDirectory();
+      final fileName = assetPath.split('/').last;
+      final tempPath = '${tempDir.path}/$fileName';
+      final file = File(tempPath);
+      await file.writeAsBytes(byteData.buffer.asUint8List(
+        byteData.offsetInBytes,
+        byteData.lengthInBytes,
+      ));
+      return file;
+    } catch (e) {
+      print('Ошибка при создании временного файла: $e');
+      throw Exception('Не удалось создать временный файл');
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,40 +246,10 @@ class _StartScreenState extends State<StartScreen> {
               opacity: _showMainContent ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 500),
               child: Container(
-                decoration: AppTheme.chapterBackgroundDecoration(1), // Дефолтный фон
+                decoration: AppTheme.chapterBackgroundDecoration(1),
                 child: SafeArea(
                   child: Stack(
                     children: [
-                      Positioned(
-                        top: 15,
-                        right: 15,
-                        child: Material(
-                          color: const Color(0xFF42A5F5),
-                          borderRadius: BorderRadius.circular(20),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(20),
-                            onTap: _openTelegram,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.send, color: Colors.white, size: 15),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Telegram',
-                                    style: GoogleFonts.montserrat(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
                       Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Column(
@@ -211,9 +259,9 @@ class _StartScreenState extends State<StartScreen> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: Image.asset(
-                                'assets/images/logotip.png',
-                                height: 250,
-                                width: 240,
+                                'assets/images/icon/logobio.png',
+                                height: 160,
+                                width: 150,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -222,7 +270,7 @@ class _StartScreenState extends State<StartScreen> {
                               'Дорогой друг!',
                               style: GoogleFonts.montserrat(
                                 textStyle: const TextStyle(
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w400,
                                   fontSize: 24,
                                   color: Colors.black,
                                 ),
@@ -236,6 +284,7 @@ class _StartScreenState extends State<StartScreen> {
                                 textAlign: TextAlign.justify,
                                 style: GoogleFonts.montserrat(
                                   textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w400,
                                     fontSize: 18,
                                     color: Colors.black,
                                   ),
@@ -244,19 +293,63 @@ class _StartScreenState extends State<StartScreen> {
                             ),
                             const SizedBox(height: 16),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 40),
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
                               child: Text(
-                                'У тебя всё получится! Вперёд!',
+                                'Загляни в наш ТГ-Канал для полезной информации!',
                                 textAlign: TextAlign.justify,
                                 style: GoogleFonts.montserrat(
                                   textStyle: const TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 18,
                                     color: Colors.black,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: 250,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: _openTelegram,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF42A5F5),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.send, color: Colors.white),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Telegram',
+                                      style: GoogleFonts.montserrat(
+                                        textStyle: const TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              child: Text(
+                                'У тебя всё получится! Вперёд!',
+                                textAlign: TextAlign.justify,
+                                style: GoogleFonts.montserrat(
+                                  textStyle: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                             SizedBox(
                               width: 250,
                               height: 50,
@@ -277,6 +370,20 @@ class _StartScreenState extends State<StartScreen> {
                                       fontSize: 24,
                                       color: Colors.white,
                                     ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            GestureDetector(
+                              onTap: _showDocumentChoice,
+                              child: Text(
+                                'Политика обработки и защиты перс. данных',
+                                style: GoogleFonts.montserrat(
+                                  textStyle: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                    decoration: TextDecoration.underline,
                                   ),
                                 ),
                               ),

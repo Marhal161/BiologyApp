@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'topic_screen.dart';
 import '../database.dart';
 import '../services/test_progress_service.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final int chapterId;
@@ -92,34 +91,29 @@ class CategoriesScreenState extends State<CategoriesScreen> {
           Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+                padding: const EdgeInsets.only(top: 60, left: 16, right: 16, bottom: 16),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                      icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                       onPressed: () => Navigator.pop(context),
                     ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         widget.chapterTitle,
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            color: Colors.black87,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w400,
-                            shadows: [
-                              Shadow(
-                                color: Colors.white.withOpacity(0.5),
-                                offset: const Offset(0, 2),
-                                blurRadius: 10,
-                              ),
-                            ],
-                          ),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    const SizedBox(width: 48),
+                    const SizedBox(width: 1),
                   ],
                 ),
               ),
@@ -139,14 +133,10 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                   ),
                   child: TextField(
                     controller: _searchController,
-                    style: GoogleFonts.montserrat(
-                      textStyle: const TextStyle(color: Colors.black87),
-                    ),
+                    style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
                       hintText: 'Поиск по темам...',
-                      hintStyle: GoogleFonts.montserrat(
-                        textStyle: TextStyle(color: Colors.black54),
-                      ),
+                      hintStyle: TextStyle(color: Colors.black54),
                       prefixIcon: const Icon(Icons.search, color: Colors.black54),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -207,7 +197,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                 topicTitle: topic['title'],
                 topicId: topic['id'],
                 chapterImage: widget.chapterImage,
-                chapterId: widget.chapterId, // Передаем chapterId
+                chapterId: widget.chapterId,
               ),
               transitionsBuilder: (context, animation, secondaryAnimation, child) {
                 const begin = Offset(1.0, 0.0);
@@ -272,18 +262,16 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
                       topic['title'],
-                      style: GoogleFonts.montserrat(
-                        textStyle: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                          shadows: [
-                            Shadow(
-                              color: Colors.white,
-                              offset: Offset(1, 1),
-                              blurRadius: 10,
-                            )
-                          ],
-                        ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                        shadows: [
+                          Shadow(
+                            color: Colors.white,
+                            offset: Offset(1, 1),
+                            blurRadius: 10,
+                          )
+                        ],
                       ),
                       textAlign: TextAlign.left,
                       maxLines: 3,

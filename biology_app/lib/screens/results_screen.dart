@@ -212,14 +212,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       style: const TextStyle(
                         fontSize: 20,
                         color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black38,
-                            offset: Offset(0, 1),
-                            blurRadius: 3,
-                          ),
-                        ],
+                        fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
                     ),
