@@ -381,16 +381,20 @@ class _TestScreenState extends State<TestScreen> {
                         Text(
                           question['question_text'] ?? 'Вопрос без текста',
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 16,
                             fontWeight: FontWeight.w400,
                             color: Colors.black,
+                            letterSpacing: -0.2,
+                            wordSpacing: 0.5,
+                            height: 1.3,
                           ),
-                            textAlign: TextAlign.justify
+                            textAlign: TextAlign.justify,
+                          textScaleFactor: 0.98,
                         ),
                         if (questionImage != null)
                           Container(
                             margin: const EdgeInsets.only(top: 8),
-                            height: 200, // Увеличенная высота изображения
+                            height: 300, // Увеличенная высота изображения
                             width: double.infinity,
                             child: questionImage,
                           ),
@@ -521,11 +525,15 @@ class _TestScreenState extends State<TestScreen> {
               child: Text(
                 question['question_text'] ?? 'Вопрос без текста',
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   color: Colors.black,
-                  fontWeight: FontWeight.w400
+                  fontWeight: FontWeight.w400,
+                  letterSpacing: -0.2,
+                  wordSpacing: 0.5,
+                  height: 1.3,
                 ),
                 textAlign: TextAlign.justify,
+                textScaleFactor: 0.98,
               ),
             ),
             if (questionImage != null) questionImage,
@@ -603,7 +611,7 @@ class _TestScreenState extends State<TestScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Унифицированные отступы
                   child: Column(
                     children: [
                       Text(
@@ -611,8 +619,12 @@ class _TestScreenState extends State<TestScreen> {
                         style: TextStyle(
                           fontSize: isSmallScreen ? 16.0 : 18.0,
                           color: Colors.black,
+                          letterSpacing: -0.2,
+                          wordSpacing: 0.5,
+                          height: 1.3,
                         ),
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.justify,
+                        textScaleFactor: 0.98,
                       ),
                       if (questionImage != null) questionImage,
                       const SizedBox(height: 16),
@@ -852,14 +864,18 @@ class _TestScreenState extends State<TestScreen> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(4.0),
                     child: Text(
                       mainQuestion,
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.black,
+                        letterSpacing: -0.2,
+                        wordSpacing: 0.5,
+                        height: 1.3,
                       ),
                       textAlign: TextAlign.justify,
+                      textScaleFactor: 0.98,
                     ),
                   ),
 
@@ -1316,6 +1332,7 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
               Expanded(
                 child: _buildDraggableItems(),
               ),
+              const SizedBox(width: 32), // Увеличенное расстояние между колонками
               Expanded(
                 child: _buildDropTargets(),
               ),
@@ -1337,14 +1354,14 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
             widget.currentMatches[itemIndex]!.isNotEmpty;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0), // Увеличенный вертикальный отступ
           child: LongPressDraggable<String>(
             data: itemIndex,
             delay: const Duration(milliseconds: 500),
             hapticFeedbackOnStart: true,
             feedback: Material(
               child: Container(
-                width: 200,
+                width: 250, // Увеличенная ширина при перетаскивании
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.9),
@@ -1407,7 +1424,7 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
         });
 
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0), // Увеличенный вертикальный отступ
           child: DragTarget<String>(
             builder: (context, candidateData, rejectedData) {
               final isHighlighted = candidateData.isNotEmpty;
@@ -1539,10 +1556,11 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
 
   Widget _buildItemContent(String index, String text, {bool faded = false}) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 24,
-          height: 24,
+          width: 28,
+          height: 28,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: faded ? Colors.grey.shade400 : Colors.black.withOpacity(0.3),
@@ -1554,7 +1572,7 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
             style: TextStyle(
               color: faded ? Colors.grey.shade700 : Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 16, // Увличенный размер шрифта
             ),
           ),
         ),
@@ -1564,8 +1582,10 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
             text ?? '',
             style: TextStyle(
               color: faded ? Colors.grey.shade700 : Colors.white,
-              fontSize: 14,
+              fontSize: 14, // Увеличенный размер шрифта
+              height: 1.2, // Улучшенный межстрочный интервал
             ),
+            softWrap: true, // Включен перенос слов
           ),
         ),
       ],
