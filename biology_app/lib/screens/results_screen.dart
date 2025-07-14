@@ -197,7 +197,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         child: isLoading
             ? const Center(child: CircularProgressIndicator(color: Color(0xFF42A5F5)))
             : Padding(
-          padding: const EdgeInsets.only(top: 48.0, left: 16.0, right: 16.0, bottom: 16.0),
+          padding: const EdgeInsets.only(top: 64.0, left: 16.0, right: 16.0, bottom: 16.0),
           child: Column(
             children: [
               Row(
@@ -936,12 +936,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
       // Проверяем основу (первые 3-4 символа)
       int stemLength = min(word1.length, word2.length) - 2;
       stemLength = max(3, stemLength);
-      
+
       if (word1.substring(0, stemLength) == word2.substring(0, stemLength)) {
         // Извлекаем окончания
         String ending1 = word1.substring(stemLength);
         String ending2 = word2.substring(stemLength);
-        
+
         // Группы связанных окончаний для коротких прилагательных
         List<List<String>> shortAdjGroups = [
           ['ая', 'ой', 'ую', 'ой'],     // женский род: генная, генной, генную
@@ -952,14 +952,14 @@ class _ResultsScreenState extends State<ResultsScreen> {
           ['ее', 'его', 'ему', 'им', 'ем'], // средний род мягкий: синее, синего, синему
           ['ому', 'ему', 'ом', 'ем', 'ым', 'им'] // смешанная группа для мужского рода
         ];
-        
+
         // Проверяем принадлежность к одной группе
         for (var group in shortAdjGroups) {
           if (group.contains(ending1) && group.contains(ending2)) {
             return true;
           }
         }
-        
+
         // Дополнительная проверка для распространенных случаев
         if ((ending1 == 'ая' && ending2 == 'ой') || (ending1 == 'ой' && ending2 == 'ая')) {
           return true; // генная/генной
@@ -1056,7 +1056,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           List<String> adjEndings = [
             'ый', 'ой', 'ий', 'ая', 'яя', 'ое', 'ее',   // именительный
             'ого', 'его', 'ой', 'ей',                   // родительный
-            'ому', 'ему', 'ой', 'ей',                   // дательный 
+            'ому', 'ему', 'ой', 'ей',                   // дательный
             'ый', 'ой', 'ий', 'ую', 'юю', 'ое', 'ее',   // винительный
             'ым', 'им', 'ой', 'ей',                     // творительный
             'ом', 'ем', 'ой', 'ей',                     // предложный
@@ -1064,7 +1064,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             'ен', 'ена', 'ено', 'ены',                  // краткие формы
             'ее', 'ей', 'ейш', 'айш'                    // сравнительные степени
           ];
-          
+
           // Группы окончаний, которые связаны между собой (формы одного падежа)
           List<List<String>> relatedGroups = [
             ['ый', 'ом', 'ому', 'ого', 'ым'],  // мужской род, ед. число (продолговатый, продолговатом...)
@@ -1079,7 +1079,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
             ['щие', 'щих', 'щим', 'щими'],     // причастия мн. число (говорящие, говорящих...)
             ['ий', 'ый', 'ом', 'ем', 'ым', 'им'] // смешанная группа для мужского рода
           ];
-          
+
           // Проверка на принадлежность к известным окончаниям
           if (adjEndings.contains(ending1) && adjEndings.contains(ending2)) {
             // Проверка на принадлежность к одной группе падежных форм
@@ -1088,18 +1088,18 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 return true;
               }
             }
-            
+
             // Дополнительная проверка для случаев, не попавших в группы
-            if ((ending1.length <= 3 && ending2.length <= 3) && 
+            if ((ending1.length <= 3 && ending2.length <= 3) &&
                 (word1.length - word2.length).abs() <= 3) {
               // Для случаев как "продолговатый"/"продолговатом"
-              if ((ending1 == 'ый' || ending1 == 'ий' || ending1 == 'ой') && 
+              if ((ending1 == 'ый' || ending1 == 'ий' || ending1 == 'ой') &&
                   (ending2 == 'ом' || ending2 == 'ем' || ending2 == 'ым' || ending2 == 'им')) {
                 return true;
               }
-              
+
               // И в обратном порядке
-              if ((ending2 == 'ый' || ending2 == 'ий' || ending2 == 'ой') && 
+              if ((ending2 == 'ый' || ending2 == 'ий' || ending2 == 'ой') &&
                   (ending1 == 'ом' || ending1 == 'ем' || ending1 == 'ым' || ending1 == 'им')) {
                 return true;
               }
@@ -1108,7 +1108,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         }
       }
     }
-    
+
     // 2. Существительные (короткие и средние слова)
     // Используем более короткую основу для существительных
     int rootLength = min(min(word1.length, word2.length) - 1, 5);

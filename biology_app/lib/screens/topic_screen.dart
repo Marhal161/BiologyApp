@@ -234,9 +234,13 @@ class _TopicScreenState extends State<TopicScreen> {
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
+                          letterSpacing: -0.2,
+                          wordSpacing: 0.1,
                           height: 1.0, // Уменьшенный межстрочный интервал
                         ),
                         textAlign: TextAlign.center,
+                        softWrap: true,
+                        textScaleFactor: 0.9,
                       ),
                     ),
                     IconButton(

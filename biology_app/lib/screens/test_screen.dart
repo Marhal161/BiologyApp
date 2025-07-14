@@ -1188,7 +1188,9 @@ class _TestScreenState extends State<TestScreen> {
                             color: Colors.black,
                             height: 1.0,
                             overflow: TextOverflow.clip,
-                            wordSpacing: 0.5,// Уменьшен межстрочный интервал
+                            wordSpacing: 0.1,// Уменьшен межстрочный интервал
+                            letterSpacing: -0.2,
+
                           ),
                           textAlign: TextAlign.center,
                           softWrap: true,
