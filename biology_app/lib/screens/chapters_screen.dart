@@ -226,11 +226,6 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.mail_outline, color: Colors.black54),
-                    onPressed: _launchEmail,
-                    tooltip: 'Техподдержка',
-                  ),
                   const SizedBox(width: 8),
                 ],
               ),
@@ -308,6 +303,23 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
                         );
                       }).toList(),
                     ],
+                  ),
+                ),
+              ),
+            ),
+            // Техподдержка внизу экрана
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: GestureDetector(
+                onTap: _launchEmail,
+                child: Text(
+                  'Техническая поддержка',
+                  style: GoogleFonts.montserrat(
+                    textStyle: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
               ),

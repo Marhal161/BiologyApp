@@ -312,6 +312,9 @@ class _StartScreenState extends State<StartScreen> {
                                         fontWeight: FontWeight.w400,
                                         fontSize: isSmallScreen ? 12 : 16,
                                         color: Colors.black,
+                                        letterSpacing: -0.2,
+                                        wordSpacing: 0.5,
+                                        height: 1.3,
                                       ),
                                     ),
                                   ),
@@ -410,10 +413,10 @@ class _StartScreenState extends State<StartScreen> {
                                   child: Padding(
                                     padding: const EdgeInsets.only(bottom: 8.0),
                                     child: Text(
-                                      'Политика обработки и положение об обработке перс. данных',
+                                      'Политика обработки и Положение об обработке персональных данных',
                                       style: GoogleFonts.montserrat(
                                         textStyle: TextStyle(
-                                          fontSize: isSmallScreen ? 10 : 12,
+                                          fontSize: isSmallScreen ? 10 : 14,
                                           color: Colors.black,
                                           decoration: TextDecoration.underline,
                                         ),

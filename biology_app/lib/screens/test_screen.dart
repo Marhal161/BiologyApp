@@ -385,11 +385,13 @@ class _TestScreenState extends State<TestScreen> {
                             fontWeight: FontWeight.w400,
                             color: Colors.black,
                             letterSpacing: -0.2,
-                            wordSpacing: 0.5,
-                            height: 1.3,
+                            wordSpacing: 0.1,
+                            height: 1.2,
+
                           ),
                             textAlign: TextAlign.justify,
-                          textScaleFactor: 0.98,
+                          softWrap: true,
+                          textScaleFactor: 0.9,
                         ),
                         if (questionImage != null)
                           Container(
@@ -529,11 +531,12 @@ class _TestScreenState extends State<TestScreen> {
                   color: Colors.black,
                   fontWeight: FontWeight.w400,
                   letterSpacing: -0.2,
-                  wordSpacing: 0.5,
-                  height: 1.3,
+                  wordSpacing: 0.1,
+                  height: 1.2,
                 ),
                 textAlign: TextAlign.justify,
-                textScaleFactor: 0.98,
+                softWrap: true,
+                textScaleFactor: 0.9,
               ),
             ),
             if (questionImage != null) questionImage,
@@ -603,15 +606,16 @@ class _TestScreenState extends State<TestScreen> {
       return LayoutBuilder(
         builder: (context, constraints) {
           final bool isSmallScreen = constraints.maxWidth < 600;
-          final double buttonSize = isSmallScreen ? constraints.maxWidth / 4 : constraints.maxWidth / 6;
-          final double buttonPadding = isSmallScreen ? 4.0 : 8.0;
+          final double buttonSize = isSmallScreen ? constraints.maxWidth / 6 : constraints.maxWidth / 6;
+          // Reduced padding between buttons
+          final double buttonPadding = isSmallScreen ? 4.0 : 4.0;
 
           return SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Унифицированные отступы
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: Column(
                     children: [
                       Text(
@@ -620,11 +624,12 @@ class _TestScreenState extends State<TestScreen> {
                           fontSize: isSmallScreen ? 16.0 : 18.0,
                           color: Colors.black,
                           letterSpacing: -0.2,
-                          wordSpacing: 0.5,
-                          height: 1.3,
+                          wordSpacing: 0.1,
+                          height: 1.2,
                         ),
                         textAlign: TextAlign.justify,
-                        textScaleFactor: 0.98,
+                        softWrap: true,
+                        textScaleFactor: 0.9,
                       ),
                       if (questionImage != null) questionImage,
                       const SizedBox(height: 16),
@@ -682,7 +687,7 @@ class _TestScreenState extends State<TestScreen> {
                         children: [
                           for (int i = 0; i < 3 && i < options.length; i++)
                             Padding(
-                              padding: EdgeInsets.all(buttonPadding),
+                              padding: EdgeInsets.all(6), // Reduced padding
                               child: SizedBox(
                                 width: buttonSize,
                                 height: buttonSize,
@@ -698,7 +703,7 @@ class _TestScreenState extends State<TestScreen> {
                           children: [
                             for (int i = 3; i < 6 && i < options.length; i++)
                               Padding(
-                                padding: EdgeInsets.all(buttonPadding),
+                                padding: EdgeInsets.all(6), // Reduced padding
                                 child: SizedBox(
                                   width: buttonSize,
                                   height: buttonSize,
@@ -871,11 +876,12 @@ class _TestScreenState extends State<TestScreen> {
                         fontSize: 18,
                         color: Colors.black,
                         letterSpacing: -0.2,
-                        wordSpacing: 0.5,
-                        height: 1.3,
+                        wordSpacing: 0.1,
+                        height: 1.2,
                       ),
                       textAlign: TextAlign.justify,
-                      textScaleFactor: 0.98,
+                      softWrap: true,
+                      textScaleFactor: 0.9,
                     ),
                   ),
 
@@ -1130,7 +1136,7 @@ class _TestScreenState extends State<TestScreen> {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 60, left: 16, right: 16, bottom: 16),
+                  padding: const EdgeInsets.only(top: 60, left: 16, right: 16, bottom: 8), // Уменьшен нижний отступ
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -1180,11 +1186,15 @@ class _TestScreenState extends State<TestScreen> {
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
+                            height: 1.0,
+                            overflow: TextOverflow.clip,
+                            wordSpacing: 0.5,// Уменьшен межстрочный интервал
                           ),
                           textAlign: TextAlign.center,
+                          softWrap: true,
                         ),
                       ),
-                      const SizedBox(width: 1),
+                      const SizedBox(width: 40), // Добавлен для балансировки
                     ],
                   ),
                 ),

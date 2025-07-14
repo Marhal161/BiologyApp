@@ -109,11 +109,12 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
+                          height: 1.0, // Уменьшенный межстрочный интервал
                         ),
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    const SizedBox(width: 1),
+                    const SizedBox(width: 40), // Добавлен для балансировки
                   ],
                 ),
               ),
@@ -216,7 +217,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
           );
         },
         child: SizedBox(
-          height: 150,
+          height: 145,
           child: Stack(
             children: [
               if (hasImage)
@@ -265,6 +266,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.black87,
+                        height: 1.0, // Уменьшенный межстрочный интервал
                         shadows: [
                           Shadow(
                             color: Colors.white,

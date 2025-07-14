@@ -234,6 +234,7 @@ class _TopicScreenState extends State<TopicScreen> {
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
+                          height: 1.0, // Уменьшенный межстрочный интервал
                         ),
                         textAlign: TextAlign.center,
                       ),
