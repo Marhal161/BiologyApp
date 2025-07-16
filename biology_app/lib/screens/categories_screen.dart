@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:flutter/widgets.dart';
 import 'topic_screen.dart';
 import '../database.dart';
 import '../services/test_progress_service.dart';
@@ -226,9 +225,6 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                   child: Image.asset(
                     topic['image_path'],
                     fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: 150,
-                    gaplessPlayback: true,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
                         color: Colors.grey[200],
