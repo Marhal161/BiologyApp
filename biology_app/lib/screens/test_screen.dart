@@ -368,106 +368,86 @@ class _TestScreenState extends State<TestScreen> {
 
           final options = snapshot.data!;
 
-          return Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          question['question_text'] ?? 'Вопрос без текста',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
+          return Column(
+            children: [
+              // Вопрос и изображение - теперь занимают меньше места
+              Container(
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.4),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        question['question_text'] ?? 'Вопрос без текста',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      if (questionImage != null) questionImage,
+                      Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'Перетащите элемент слева к соответствующему элементу справа. '
+                              'Если передумали - просто перетащите ещё раз в нужный элемент.',
+                          style: TextStyle(
                             color: Colors.black,
-                            letterSpacing: -0.2,
-                            wordSpacing: 0.1,
-                            height: 1.2,
-
-                          ),
-                            textAlign: TextAlign.center,
-                          softWrap: true,
-                          textScaleFactor: 0.9,
-                        ),
-                        if (questionImage != null)
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            height: 300, // Увеличенная высота изображения
-                            width: double.infinity,
-                            child: questionImage,
-                          ),
-
-                        Container(
-                          margin: const EdgeInsets.only(top: 8),
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'Перетащите элемент слева к соответствующему элементу справа. '
-                                'Если передумали - просто перетащите ещё раз в нужный элемент. '
-                                'Для удаления соответствия нажмите на крестик.',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontStyle: FontStyle.italic,
-                              fontSize: 11,
-                            ),
+                            fontStyle: FontStyle.italic,
+                            fontSize: 11,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-
-                Expanded(
-                  flex: 5,
-                  child: MatchingDragDrop(
-                    leftItems: options['left']!,
-                    rightItems: options['right']!,
-                    onMatchesChanged: (Map<String, List<String>> matches) {
-                      setState(() {
-                        matchingAnswers = matches;
-                        selectedAnswer = json.jsonEncode(matches);
-                      });
-                    },
-                    currentMatches: matchingAnswers,
-                  ),
+              ),
+              const SizedBox(height: 24), // Было 8-12
+              // Область для сопоставления - теперь занимает больше места
+              Expanded(
+                child: MatchingDragDrop(
+                  leftItems: options['left']!,
+                  rightItems: options['right']!,
+                  onMatchesChanged: (Map<String, List<String>> matches) {
+                    setState(() {
+                      matchingAnswers = matches;
+                      selectedAnswer = json.jsonEncode(matches);
+                    });
+                  },
+                  currentMatches: matchingAnswers,
                 ),
+              ),
 
-                if (matchingAnswers.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFA5D5FF),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.check_circle, color: Colors.black, size: 14),
-                            SizedBox(width: 4),
-                            Text(
-                              'Текущие соответствия:',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
+              // Текущие соответствия - компактнее
+              if (matchingAnswers.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFA5D5FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Текущие соответствия:',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
-                        const SizedBox(height: 4),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
+                      ),
+                      const SizedBox(height: 4),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
                           children: matchingAnswers.entries.map((entry) {
                             String leftText = '';
                             String rightText = '';
@@ -475,9 +455,6 @@ class _TestScreenState extends State<TestScreen> {
                             for (var item in options['left']!) {
                               if (item['item_index'] == entry.key) {
                                 leftText = item['item_text'].toString();
-                                if (leftText.length > 25) {
-                                  leftText = leftText.substring(0, 25) + '...';
-                                }
                                 break;
                               }
                             }
@@ -485,15 +462,12 @@ class _TestScreenState extends State<TestScreen> {
                             for (var item in options['right']!) {
                               if (item['item_index'] == entry.value) {
                                 rightText = item['item_text'].toString();
-                                if (rightText.length > 25) {
-                                  rightText = rightText.substring(0, 25) + '...';
-                                }
                                 break;
                               }
                             }
 
                             return Container(
-                              margin: const EdgeInsets.only(bottom: 4),
+                              margin: const EdgeInsets.only(right: 8),
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.2),
@@ -510,15 +484,16 @@ class _TestScreenState extends State<TestScreen> {
                             );
                           }).toList(),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-              ],
-            ),
+                ),
+            ],
           );
         },
       );
-    } else if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
+    }
+    else if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
       return SingleChildScrollView(
         child: Column(
           children: [
@@ -607,7 +582,6 @@ class _TestScreenState extends State<TestScreen> {
         builder: (context, constraints) {
           final bool isSmallScreen = constraints.maxWidth < 600;
           final double buttonSize = isSmallScreen ? constraints.maxWidth / 6 : constraints.maxWidth / 6;
-          // Reduced padding between buttons
           final double buttonPadding = isSmallScreen ? 4.0 : 4.0;
 
           return SingleChildScrollView(
@@ -631,7 +605,7 @@ class _TestScreenState extends State<TestScreen> {
                         softWrap: true,
                         textScaleFactor: 0.9,
                       ),
-                      if (questionImage != null) questionImage,
+                      if (questionImage != null) questionImage!,
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -643,7 +617,7 @@ class _TestScreenState extends State<TestScreen> {
                           children: options.map((option) => Padding(
                             padding: const EdgeInsets.symmetric(vertical: 6.0),
                             child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
                                   width: 30,
@@ -676,18 +650,64 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Сетка 3x2 для кнопок
+                // Измененная сетка для кнопок
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 16.0 : 32.0),
-                  child: Column(
+                  child: options.length == 4
+                      ? Column(
                     children: [
-                      // Первая строка (3 кнопки)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(4), // Reduced padding from 6 to 4
+                            child: SizedBox(
+                              width: buttonSize,
+                              height: buttonSize,
+                              child: _buildSequenceButton('А', options.indexWhere((opt) => opt.startsWith('А'))),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(4), // Reduced padding from 6 to 4
+                            child: SizedBox(
+                              width: buttonSize,
+                              height: buttonSize,
+                              child: _buildSequenceButton('Б', options.indexWhere((opt) => opt.startsWith('Б'))),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(4), // Reduced padding from 6 to 4
+                            child: SizedBox(
+                              width: buttonSize,
+                              height: buttonSize,
+                              child: _buildSequenceButton('В', options.indexWhere((opt) => opt.startsWith('В'))),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(4), // Reduced padding from 6 to 4
+                            child: SizedBox(
+                              width: buttonSize,
+                              height: buttonSize,
+                              child: _buildSequenceButton('Г', options.indexWhere((opt) => opt.startsWith('Г'))),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                      : Column(
+                    children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           for (int i = 0; i < 3 && i < options.length; i++)
                             Padding(
-                              padding: EdgeInsets.all(6), // Reduced padding
+                              padding: EdgeInsets.all(6),
                               child: SizedBox(
                                 width: buttonSize,
                                 height: buttonSize,
@@ -696,14 +716,13 @@ class _TestScreenState extends State<TestScreen> {
                             ),
                         ],
                       ),
-                      // Вторая строка (3 кнопки)
                       if (options.length > 3)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             for (int i = 3; i < 6 && i < options.length; i++)
                               Padding(
-                                padding: EdgeInsets.all(6), // Reduced padding
+                                padding: EdgeInsets.all(6),
                                 child: SizedBox(
                                   width: buttonSize,
                                   height: buttonSize,
