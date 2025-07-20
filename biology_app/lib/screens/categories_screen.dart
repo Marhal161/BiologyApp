@@ -362,26 +362,36 @@ class CategoriesScreenState extends State<CategoriesScreen> {
               if (hasImage)
                 Expanded(
                   flex: 2,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SizedBox(
-                        width: constraints.maxWidth * 1.05, // +5% ширины
-                        child: ClipRect(
-                          child: Image.asset(
-                            topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
-                            fit: BoxFit.cover,
-                            alignment: Alignment.center,
-                          ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.horizontal(
+                        left: Radius.circular(28),
+                      ),
+                    ),
+                    child: ClipRect(
+                      child: OverflowBox(
+                        alignment: Alignment.center,
+                        maxWidth: double.infinity,
+                        child: Image.asset(
+                          topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
+                          fit: BoxFit.cover,
+                          width: MediaQuery.of(context).size.width * 0.4, // 40% ширины экрана
+                          height: double.infinity,
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ),
               Expanded(
                 flex: 3,
                 child: Container(
                   padding: const EdgeInsets.all(20),
-                  color: Colors.white.withOpacity(0.85),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.horizontal(
+                      right: Radius.circular(28),
+                    ),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -415,7 +425,6 @@ class CategoriesScreenState extends State<CategoriesScreen> {
       ),
     );
   }
-
   Widget _buildTestIndicator(int topicId, bool isTablet) {
     return FutureBuilder<double?>(
       future: TestProgressService.getTestScore(topicId),
