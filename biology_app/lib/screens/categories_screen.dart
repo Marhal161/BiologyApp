@@ -258,7 +258,8 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                   Positioned.fill(
                     child: Image.asset(
                       topic['image_path'],
-                      fit: BoxFit.cover,
+                      fit: BoxFit.fitWidth,
+                      width: double.infinity,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.grey[200],

@@ -1350,10 +1350,12 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 12),
               ),
               onPressed: () => widget.onMatchesChanged({}),
-              child: const Text('Сбросить все', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                  'Сбросить все', style: TextStyle(color: Colors.white)),
             ),
           ),
 
@@ -1363,7 +1365,8 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
               Expanded(
                 child: _buildDraggableItems(),
               ),
-              const SizedBox(width: 32), // Увеличенное расстояние между колонками
+              const SizedBox(width: 32),
+              // Увеличенное расстояние между колонками
               Expanded(
                 child: _buildDropTargets(),
               ),
@@ -1385,25 +1388,23 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
             widget.currentMatches[itemIndex]!.isNotEmpty;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0), // Увеличенный вертикальный отступ
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: LongPressDraggable<String>(
             data: itemIndex,
             delay: const Duration(milliseconds: 500),
             hapticFeedbackOnStart: true,
-            feedback: Material(
+            feedback: Opacity(
+              opacity: 0.8,
               child: Container(
-                width: 250, // Увеличенная ширина при перетаскивании
+                width: 250,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  color: const Color(0xFFcce9cb),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
+                  ),
                 ),
                 child: _buildItemContent(itemIndex, itemText),
               ),
@@ -1438,7 +1439,6 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
       },
     );
   }
-
   Widget _buildDropTargets() {
     return ListView.builder(
       itemCount: widget.rightItems.length,
@@ -1455,7 +1455,8 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
         });
 
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0), // Увеличенный вертикальный отступ
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          // Увеличенный вертикальный отступ
           child: DragTarget<String>(
             builder: (context, candidateData, rejectedData) {
               final isHighlighted = candidateData.isNotEmpty;
@@ -1504,22 +1505,63 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
     );
   }
 
+  Widget _buildItemContent(String index, String text, {bool faded = false, bool isLeft = true}) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: isLeft ? const Color(0xFFcce9cb) : const Color(0xFFc8e9f8),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              index ?? '?',
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: Colors.white.withOpacity(0.5),
+                  width: 3,
+                ),
+              ),
+            ),
+            child: Text(
+              text ?? '',
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+                height: 1.2,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildItem(String index, String text, {bool isMatched = false, bool isLeft = true}) {
     return Container(
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isLeft
-            ? (isMatched ? Colors.green.shade800 : Colors.green.shade500)
-            : (isMatched ? Colors.blue.shade600 : Colors.blue.shade400),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isMatched
-              ? (isLeft ? Colors.grey : Colors.yellow)
-              : (isLeft ? Colors.green.shade700 : Colors.blue.shade700),
+          color: isMatched ? Colors.green.shade300 : Colors.grey.shade300,
           width: 1,
         ),
+        // Убрал boxShadow для всех элементов
       ),
-      child: _buildItemContent(index, text),
+      child: _buildItemContent(index, text, isLeft: isLeft),
     );
   }
 
@@ -1532,26 +1574,23 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
     });
 
     return Container(
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isActuallyMatched
-            ? Colors.blue.shade600
-            : (isHighlighted ? Colors.blue.shade300 : Colors.blue.shade400),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isHighlighted
-              ? Colors.yellow.shade700
-              : (isActuallyMatched ? Colors.yellow : Colors.blue.shade700),
+              ? Colors.orange
+              : (isActuallyMatched ? Colors.green : Colors.grey.shade300),
           width: isHighlighted ? 2 : 1,
         ),
+        // Убрал boxShadow и для правых элементов
       ),
       child: Stack(
         children: [
-          _buildItemContent(index, text),
+          _buildItemContent(index, text, isLeft: false),
           if (isActuallyMatched)
             Positioned(
-              right: 0,
-              top: 0,
+              right: 8,
+              top: 8,
               child: _buildRemoveMatchButton(index),
             ),
         ],
@@ -1575,51 +1614,17 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
         widget.onMatchesChanged(newMatches);
       },
       child: Container(
-        padding: const EdgeInsets.all(2),
-        decoration: const BoxDecoration(
-          color: Colors.white38,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.2), // Серый цвет с прозрачностью
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.arrow_back, size: 16, color: Colors.white),
+        child: const Icon(
+          Icons.arrow_back, // Иконка "назад" вместо крестика
+          size: 16,
+          color: Colors.white,
+        ),
       ),
     );
   }
-
-  Widget _buildItemContent(String index, String text, {bool faded = false}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: faded ? Colors.grey.shade400 : Colors.black.withOpacity(0.3),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 1),
-          ),
-          child: Text(
-            index ?? '?',
-            style: TextStyle(
-              color: faded ? Colors.grey.shade700 : Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16, // Увличенный размер шрифта
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text ?? '',
-            style: TextStyle(
-              color: faded ? Colors.grey.shade700 : Colors.white,
-              fontSize: 14, // Увеличенный размер шрифта
-              height: 1.2, // Улучшенный межстрочный интервал
-            ),
-            softWrap: true, // Включен перенос слов
-          ),
-        ),
-      ],
-    );
   }
-}
