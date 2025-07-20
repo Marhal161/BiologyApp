@@ -28,11 +28,11 @@ class CategoriesScreenState extends State<CategoriesScreen> {
 
   String _getBackgroundImage() {
     switch (widget.chapterId) {
-      case 1: return "assets/images/backgroundfirstchapter.jpg";
-      case 2: return "assets/images/backgroundsecondchapter.jpg";
-      case 3: return "assets/images/backgroundthirdchapter.jpg";
-      case 4: return "assets/images/backgroundfourthchapter.jpg";
-      default: return "assets/images/backgrounddefault.jpg";
+      case 1: return "assets/images/backgroundfirstchapter.webp";
+      case 2: return "assets/images/backgroundsecondchapter.webp";
+      case 3: return "assets/images/backgroundthirdchapter.webp";
+      case 4: return "assets/images/backgroundfourthchapter.webp";
+      default: return "assets/images/backgrounddefault.webp";
     }
   }
 
@@ -212,7 +212,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
   Widget _buildTopicCard(BuildContext context, Map<String, dynamic> topic, bool isTablet) {
     final hasImage = topic['image_path'] != null && topic['image_path'].toString().isNotEmpty;
 
-    // Для телефонов - оставляем старую версию (текст поверх картинки)
+    // Для телефонов
     if (!isTablet) {
       return Card(
         elevation: 6,
@@ -256,22 +256,16 @@ class CategoriesScreenState extends State<CategoriesScreen> {
               children: [
                 if (hasImage)
                   Positioned.fill(
-                    child: Image.asset(
-                      topic['image_path'],
-                      fit: BoxFit.fitWidth,
-                      width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[200],
-                          child: Center(
-                            child: Icon(
-                              Icons.image_not_supported,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        );
-                      },
+                    child: ClipRect(
+                      child: OverflowBox(
+                        alignment: Alignment.center,
+                        maxWidth: double.infinity,
+                        child: Image.asset(
+                          topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
+                          fit: BoxFit.cover,
+                          width: MediaQuery.of(context).size.width * 1.05, // +5% ширины
+                        ),
+                      ),
                     ),
                   )
                 else
@@ -324,7 +318,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
       );
     }
 
-    // Для планшетов - новая версия (картинка и текст в ряд)
+    // Для планшетов
     return Card(
       elevation: 6,
       margin: const EdgeInsets.only(bottom: 24),
@@ -368,29 +362,19 @@ class CategoriesScreenState extends State<CategoriesScreen> {
               if (hasImage)
                 Expanded(
                   flex: 2,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage(topic['image_path']),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: Image.asset(
-                      topic['image_path'],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[200],
-                          child: Center(
-                            child: Icon(
-                              Icons.image_not_supported,
-                              size: 60,
-                              color: Colors.grey,
-                            ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SizedBox(
+                        width: constraints.maxWidth * 1.05, // +5% ширины
+                        child: ClipRect(
+                          child: Image.asset(
+                            topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
+                            fit: BoxFit.cover,
+                            alignment: Alignment.center,
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               Expanded(

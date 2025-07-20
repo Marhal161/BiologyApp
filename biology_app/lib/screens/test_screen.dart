@@ -408,7 +408,7 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24), // Было 8-12
+              const SizedBox(height:0), // Было 8-12
               // Область для сопоставления - теперь занимает больше места
               Expanded(
                 child: MatchingDragDrop(
@@ -427,7 +427,7 @@ class _TestScreenState extends State<TestScreen> {
               // Текущие соответствия - компактнее
               if (matchingAnswers.isNotEmpty)
                 Container(
-                  margin: const EdgeInsets.only(top: 8),
+                  margin: const EdgeInsets.only(top: 4),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: const Color(0xFFA5D5FF),
@@ -1365,7 +1365,7 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
               Expanded(
                 child: _buildDraggableItems(),
               ),
-              const SizedBox(width: 32),
+              const SizedBox(width: 16),
               // Увеличенное расстояние между колонками
               Expanded(
                 child: _buildDropTargets(),
