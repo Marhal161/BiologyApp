@@ -41,11 +41,11 @@ class _TestScreenState extends State<TestScreen> {
 
   String _getBackgroundImage() {
     switch (widget.chapterId) {
-      case 1: return "assets/images/backgroundfirstchapter.jpg";
-      case 2: return "assets/images/backgroundsecondchapter.jpg";
-      case 3: return "assets/images/backgroundthirdchapter.jpg";
-      case 4: return "assets/images/backgroundfourthchapter.jpg";
-      default: return "assets/images/backgrounddefault.jpg";
+      case 1: return "assets/images/backgroundfirstchapter.webp";
+      case 2: return "assets/images/backgroundsecondchapter.webp";
+      case 3: return "assets/images/backgroundthirdchapter.webp";
+      case 4: return "assets/images/backgroundfourthchapter.webp";
+      default: return "assets/images/backgrounddefault.webp";
     }
   }
 
@@ -1118,10 +1118,6 @@ class _TestScreenState extends State<TestScreen> {
                 content: const Text('Что вы хотите сделать?'),
                 actions: [
                   TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Отмена'),
-                  ),
-                  TextButton(
                     onPressed: () async {
                       await _saveTestState();
                       Navigator.of(context).pop(true);
@@ -1171,10 +1167,6 @@ class _TestScreenState extends State<TestScreen> {
                                   title: const Text('Выйти из теста'),
                                   content: const Text('Что вы хотите сделать?'),
                                   actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(false),
-                                      child: const Text('Отмена'),
-                                    ),
                                     TextButton(
                                       onPressed: () async {
                                         await _saveTestState();

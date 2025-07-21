@@ -30,11 +30,11 @@ class _TopicScreenState extends State<TopicScreen> {
 
   String _getBackgroundImage() {
     switch (widget.chapterId) {
-      case 1: return "assets/images/backgroundfirstchapter.jpg";
-      case 2: return "assets/images/backgroundsecondchapter.jpg";
-      case 3: return "assets/images/backgroundthirdchapter.jpg";
-      case 4: return "assets/images/backgroundfourthchapter.jpg";
-      default: return "assets/images/backgrounddefault.jpg";
+      case 1: return "assets/images/backgroundfirstchapter.webp";
+      case 2: return "assets/images/backgroundsecondchapter.webp";
+      case 3: return "assets/images/backgroundthirdchapter.webp";
+      case 4: return "assets/images/backgroundfourthchapter.webp";
+      default: return "assets/images/backgrounddefault.webp";
     }
   }
 

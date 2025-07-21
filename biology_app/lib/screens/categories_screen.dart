@@ -58,6 +58,10 @@ class CategoriesScreenState extends State<CategoriesScreen> {
         _filteredTopics = topics;
         _isLoading = false;
       });
+      // Предзагрузка изображений
+      if (mounted) {
+         _precacheTopicImages(context, topics);
+      }
     } catch (e) {
       print('Ошибка при загрузке тем: $e');
       setState(() {
@@ -463,5 +467,17 @@ class CategoriesScreenState extends State<CategoriesScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _precacheTopicImages(BuildContext context, List<Map<String, dynamic>> topics) async {
+    for (var topic in topics) {
+      final imagePath = topic['image_path'];
+      if (imagePath != null && imagePath.toString().isNotEmpty) {
+        await precacheImage(
+          AssetImage(imagePath.toString().replaceAll('.jpg', '.webp').replaceAll('.png', '.webp')),
+          context,
+        );
+      }
+    }
   }
 }

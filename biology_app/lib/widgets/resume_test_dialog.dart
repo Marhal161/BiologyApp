@@ -112,12 +112,6 @@ class ResumeTestDialog extends StatelessWidget {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
-          },
-          child: const Text('Отмена'),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
             onStartNew();
           },
           style: TextButton.styleFrom(

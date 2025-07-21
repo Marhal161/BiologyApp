@@ -33,11 +33,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   String _getBackgroundImage() {
     switch (widget.chapterId) {
-      case 1: return "assets/images/backgroundfirstchapter.jpg";
-      case 2: return "assets/images/backgroundsecondchapter.jpg";
-      case 3: return "assets/images/backgroundthirdchapter.jpg";
-      case 4: return "assets/images/backgroundfourthchapter.jpg";
-      default: return "assets/images/backgrounddefault.jpg";
+      case 1: return "assets/images/backgroundfirstchapter.webp";
+      case 2: return "assets/images/backgroundsecondchapter.webp";
+      case 3: return "assets/images/backgroundthirdchapter.webp";
+      case 4: return "assets/images/backgroundfourthchapter.webp";
+      default: return "assets/images/backgrounddefault.webp";
     }
   }
 
@@ -1118,36 +1118,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
       // Разница в длине не должна быть большой для форм одного слова
       if ((word1.length - word2.length).abs() <= 3) {
         // Известные пары окончаний существительных
-        Map<String, List<String>> nounForms = {
-          'о': ['а', 'у', 'ом', 'е'],   // железо -> железа, железу, железом, железе
-          'а': ['о', 'у', 'ом', 'е'],   // железа -> железо, железу, железом, железе
-          'я': ['е', 'ю', 'ем', 'и'],   // доля -> доле, долю, долей
-          'ь': ['я', 'ю', 'ем', 'и'],   // конь -> коня, коню, конем
-          'й': ['я', 'ю', 'ем', 'и'],   // край -> края, краю, краем
-          'е': ['я', 'ю', 'ем'],        // поле -> поля, полю, полем
-        };
-        
-        // Особые случаи существительных
-        // О/А пары (железо/железа)
-        if ((word1.endsWith('о') && word2.endsWith('а')) || 
-            (word1.endsWith('а') && word2.endsWith('о'))) {
-          return true;
-        }
-        
-        // Проверка по таблице окончаний
-        if (word1.length > 0 && word2.length > 0) {
-          String ending1 = word1.substring(word1.length - 1);
-          String ending2 = word2.substring(word2.length - 1);
-          
-          // Проверяем первое слово
-          if (nounForms.containsKey(ending1) && 
-              nounForms[ending1]!.any((e) => word2.endsWith(e))) {
-            return true;
-          }
-          
-          // Проверяем второе слово
-          if (nounForms.containsKey(ending2) && 
-              nounForms[ending2]!.any((e) => word1.endsWith(e))) {
+        List<List<String>> nounEndings = [
+          ['а', ''], // крахмал/крахмала
+          ['я', ''], // рог/рога
+          ['у', ''], // стол/столу
+          ['ю', ''], // соль/солью
+          ['ом', ''], // стол/столом
+          ['е', ''], // стол/столе
+          ['ой', ''], // герой/героем
+          ['ью', ''], // лошадь/лошадью
+        ];
+        for (var pair in nounEndings) {
+          if ((word1.endsWith(pair[0]) && word2.endsWith(pair[1])) ||
+              (word2.endsWith(pair[0]) && word1.endsWith(pair[1]))) {
             return true;
           }
         }

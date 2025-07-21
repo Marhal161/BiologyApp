@@ -212,7 +212,7 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: Image.asset("assets/images/backgroundfirstchapter.jpg").image,
+            image: Image.asset("assets/images/backgroundfirstchapter.webp").image,
             fit: BoxFit.cover,
           ),
         ),
