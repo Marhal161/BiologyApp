@@ -204,6 +204,21 @@ class _TestScreenState extends State<TestScreen> {
     }
   }
 
+  void _moveToPreviousQuestion() {
+    _saveAnswer();
+    if (currentQuestionIndex > 0) {
+      setState(() {
+        currentQuestionIndex--;
+        selectedAnswer = userAnswers[currentQuestionIndex];
+        answerController.text = userAnswers[currentQuestionIndex] ?? '';
+        // Для других типов вопросов (sequence, matching) восстановите состояние аналогично
+        // Например:
+        // sequenceAnswer = userAnswers[currentQuestionIndex] ?? '';
+        // matchingAnswers = ... // если нужно
+      });
+    }
+  }
+
   void _finishTest() async {
     await TestProgressService.clearTestState(widget.topicId);
 
@@ -1274,25 +1289,42 @@ class _TestScreenState extends State<TestScreen> {
                                 child: _buildQuestion(questions[currentQuestionIndex]),
                               ),
                               const SizedBox(height: 40),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _moveToNextQuestion();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFF42A5F5),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  if (currentQuestionIndex > 0)
+                                    ElevatedButton(
+                                      onPressed: _moveToPreviousQuestion,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.grey,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: const Text('Назад'),
+                                    ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      _moveToNextQuestion();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Color(0xFF42A5F5),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      shadowColor: Colors.black26,
+                                      elevation: 4,
+                                    ),
+                                    child: Text(
+                                      currentQuestionIndex < questions.length - 1
+                                          ? 'Следующий вопрос'
+                                          : 'Проверить результаты',
+                                      style: const TextStyle(),
+                                    ),
                                   ),
-                                  shadowColor: Colors.black26,
-                                  elevation: 4,
-                                ),
-                                child: Text(
-                                  currentQuestionIndex < questions.length - 1
-                                      ? 'Следующий вопрос'
-                                      : 'Проверить результаты',
-                                  style: const TextStyle(),
-                                ),
+                                ],
                               ),
                             ],
                           ),
