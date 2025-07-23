@@ -255,19 +255,20 @@ class CategoriesScreenState extends State<CategoriesScreen> {
             );
           },
           child: SizedBox(
-            height: 145,
+            height: 160,
             child: Stack(
               children: [
                 if (hasImage)
                   Positioned.fill(
-                    child: ClipRect(
-                      child: OverflowBox(
-                        alignment: Alignment.center,
-                        maxWidth: double.infinity,
-                        child: Image.asset(
-                          topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
-                          fit: BoxFit.fill,
-                          width: MediaQuery.of(context).size.width * 1.05, // +5% ширины
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        image: DecorationImage(
+                          image: AssetImage(
+                            topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
+                          ),
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
                         ),
                       ),
                     ),
@@ -279,7 +280,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                       child: Center(
                         child: Icon(
                           Icons.menu_book,
-                          size: 50,
+                          size: 0,
                           color: Colors.black54,
                         ),
                       ),
@@ -368,20 +369,13 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                   flex: 2,
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.horizontal(
-                        left: Radius.circular(28),
-                      ),
-                    ),
-                    child: ClipRect(
-                      child: OverflowBox(
-                        alignment: Alignment.center,
-                        maxWidth: double.infinity,
-                        child: Image.asset(
+                      borderRadius: BorderRadius.horizontal(left: Radius.circular(28)),
+                      image: DecorationImage(
+                        image: AssetImage(
                           topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
-                          fit: BoxFit.cover,
-                          width: MediaQuery.of(context).size.width * 0.4, // 40% ширины экрана
-                          height: double.infinity,
                         ),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.center,
                       ),
                     ),
                   ),
@@ -392,9 +386,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.85),
-                    borderRadius: BorderRadius.horizontal(
-                      right: Radius.circular(28),
-                    ),
+                    borderRadius: BorderRadius.horizontal(right: Radius.circular(28)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
