@@ -219,7 +219,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
     // Для телефонов
     if (!isTablet) {
       return Card(
-        elevation: 6,
+        elevation: 4,
         margin: const EdgeInsets.only(bottom: 16),
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
@@ -266,7 +266,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                         maxWidth: double.infinity,
                         child: Image.asset(
                           topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
-                          fit: BoxFit.cover,
+                          fit: BoxFit.fill,
                           width: MediaQuery.of(context).size.width * 1.05, // +5% ширины
                         ),
                       ),

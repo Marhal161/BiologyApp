@@ -411,7 +411,7 @@ class _TestScreenState extends State<TestScreen> {
                         ),
                         child: const Text(
                           'Перетащите элемент слева к соответствующему элементу справа. '
-                              'Если передумали - просто перетащите ещё раз в нужный элемент.',
+                              'Если передумали — просто перетащите ещё раз в нужный элемент.',
                           style: TextStyle(
                             color: Colors.black,
                             fontStyle: FontStyle.italic,
@@ -423,10 +423,23 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height:0), // Было 8-12
-              // Область для сопоставления - теперь занимает больше места
+              const SizedBox(height: 0),
+
+              // Область сопоставления: выбираем нужный виджет
               Expanded(
-                child: MatchingDragDrop(
+                child: questionImage != null
+                    ? MatchingDragDropWithImage(
+                  leftItems: options['left']!,
+                  rightItems: options['right']!,
+                  onMatchesChanged: (Map<String, List<String>> matches) {
+                    setState(() {
+                      matchingAnswers = matches;
+                      selectedAnswer = json.jsonEncode(matches);
+                    });
+                  },
+                  currentMatches: matchingAnswers,
+                )
+                    : MatchingDragDrop(
                   leftItems: options['left']!,
                   rightItems: options['right']!,
                   onMatchesChanged: (Map<String, List<String>> matches) {
@@ -439,7 +452,7 @@ class _TestScreenState extends State<TestScreen> {
                 ),
               ),
 
-              // Текущие соответствия - компактнее
+              // Текущие соответствия — компактнее
               if (matchingAnswers.isNotEmpty)
                 Container(
                   margin: const EdgeInsets.only(top: 4),
@@ -475,7 +488,7 @@ class _TestScreenState extends State<TestScreen> {
                             }
 
                             for (var item in options['right']!) {
-                              if (item['item_index'] == entry.value) {
+                              if (item['item_index'] == entry.value.first) {
                                 rightText = item['item_text'].toString();
                                 break;
                               }
@@ -489,7 +502,7 @@ class _TestScreenState extends State<TestScreen> {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                '${entry.key} → ${entry.value}',
+                                '$leftText → $rightText',
                                 style: const TextStyle(
                                   color: Colors.black,
                                   fontSize: 12,
@@ -508,6 +521,7 @@ class _TestScreenState extends State<TestScreen> {
         },
       );
     }
+
     else if (questionType == 'single_word' || questionType == 'two_words' || questionType == 'number') {
       return SingleChildScrollView(
         child: Column(
@@ -649,7 +663,7 @@ class _TestScreenState extends State<TestScreen> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    option.substring(2),
+                                    option.substring(3),
                                     style: TextStyle(
                                       fontSize: isSmallScreen ? 14.0 : 16.0,
                                       color: Colors.black,
@@ -1652,3 +1666,296 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
     );
   }
   }
+
+class MatchingDragDropWithImage extends StatefulWidget {
+  final List<Map<String, dynamic>> leftItems;
+  final List<Map<String, dynamic>> rightItems;
+  final Function(Map<String, List<String>>) onMatchesChanged;
+  final Map<String, List<String>> currentMatches;
+
+  const MatchingDragDropWithImage({
+    Key? key,
+    required this.leftItems,
+    required this.rightItems,
+    required this.onMatchesChanged,
+    required this.currentMatches,
+  }) : super(key: key);
+
+  @override
+  State<MatchingDragDropWithImage> createState() => _MatchingDragDropWithImageState();
+}
+
+class _MatchingDragDropWithImageState extends State<MatchingDragDropWithImage> {
+  String? _draggedItem;
+  String? _hoveredTarget;
+  final double _leftItemHeight = 60.0;
+  final double _rightItemWidth = 60.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (widget.currentMatches.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              onPressed: () => widget.onMatchesChanged({}),
+              child: const Text('Сбросить все', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+        Expanded(
+          child: Row(
+            children: [
+              // Левый блок с вопросами
+              Expanded(
+                flex: 4,
+                child: _buildLeftColumn(),
+              ),
+              const SizedBox(width: 8),
+              // Правый блок только с буквами
+              SizedBox(
+                width: _rightItemWidth,
+                child: _buildRightColumn(),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLeftColumn() {
+    return ListView.builder(
+      itemCount: widget.leftItems.length,
+      itemBuilder: (context, index) {
+        final item = widget.leftItems[index];
+        final itemIndex = item['item_index'] as String;
+        final itemText = item['item_text'] as String;
+        final isMatched = widget.currentMatches.containsKey(itemIndex) &&
+            widget.currentMatches[itemIndex]!.isNotEmpty;
+
+        return SizedBox(
+          height: _leftItemHeight,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: LongPressDraggable<String>(
+              data: itemIndex,
+              delay: const Duration(milliseconds: 500),
+              hapticFeedbackOnStart: true,
+              feedback: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: 300,
+                  height: _leftItemHeight,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: _buildLeftItemContent(itemIndex, itemText),
+                ),
+              ),
+              childWhenDragging: Container(
+                height: _leftItemHeight,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: _buildLeftItemContent(itemIndex, itemText, faded: true),
+              ),
+              onDragStarted: () {
+                setState(() {
+                  _draggedItem = itemIndex;
+                });
+              },
+              onDragEnd: (_) {
+                setState(() {
+                  _draggedItem = null;
+                  _hoveredTarget = null;
+                });
+              },
+              child: _buildLeftItem(itemIndex, itemText, isMatched: isMatched),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRightColumn() {
+    return ListView.builder(
+      itemCount: widget.rightItems.length,
+      itemBuilder: (context, index) {
+        final item = widget.rightItems[index];
+        final itemIndex = item['item_index'] as String;
+
+        bool isMatched = false;
+        widget.currentMatches.forEach((key, values) {
+          if (values.contains(itemIndex)) {
+            isMatched = true;
+          }
+        });
+
+        return SizedBox(
+          height: _leftItemHeight,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: DragTarget<String>(
+              builder: (context, candidateData, rejectedData) {
+                final isHighlighted = candidateData.isNotEmpty;
+                final isCurrentTarget = _hoveredTarget == itemIndex;
+
+                return _buildRightTargetItem(
+                  itemIndex,
+                  isMatched: isMatched,
+                  isHighlighted: isHighlighted || isCurrentTarget,
+                );
+              },
+              onWillAccept: (data) {
+                setState(() {
+                  _hoveredTarget = itemIndex;
+                });
+                return true;
+              },
+              onAccept: (leftItemIndex) {
+                final newMatches = {...widget.currentMatches};
+                newMatches[leftItemIndex] ??= [];
+
+                if (newMatches[leftItemIndex]!.contains(itemIndex)) {
+                  newMatches[leftItemIndex]!.remove(itemIndex);
+                  if (newMatches[leftItemIndex]!.isEmpty) {
+                    newMatches.remove(leftItemIndex);
+                  }
+                } else {
+                  newMatches[leftItemIndex]!.add(itemIndex);
+                }
+
+                widget.onMatchesChanged(newMatches);
+
+                setState(() {
+                  _hoveredTarget = null;
+                });
+              },
+              onLeave: (data) {
+                setState(() {
+                  _hoveredTarget = null;
+                });
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLeftItemContent(String index, String text, {bool faded = false}) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white.withOpacity(faded ? 0.5 : 1.0),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.blue.shade500,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                index,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeftItem(String index, String text, {bool isMatched = false}) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        border: Border.all(
+          color: isMatched ? Colors.green : Colors.grey.shade300,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: _buildLeftItemContent(index, text),
+    );
+  }
+
+  Widget _buildRightTargetItem(String index, {bool isMatched = false, bool isHighlighted = false}) {
+    bool isActuallyMatched = false;
+    widget.currentMatches.forEach((key, values) {
+      if (values.contains(index)) {
+        isActuallyMatched = true;
+      }
+    });
+
+    return Container(
+      width: _rightItemWidth - 16,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: isHighlighted
+            ? Colors.blue.shade200
+            : (isActuallyMatched ? Colors.blue.shade400 : Colors.blue),
+        border: Border.all(
+          color: isHighlighted
+              ? Colors.orange
+              : (isActuallyMatched ? Colors.green : Colors.blue.shade700),
+          width: isHighlighted ? 2 : 1,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          index,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+      ),
+    );
+  }
+}
