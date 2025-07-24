@@ -260,6 +260,9 @@ class CategoriesScreenState extends State<CategoriesScreen> {
               children: [
                 if (hasImage)
                   Positioned.fill(
+                    bottom: 0, // Прижмите текст к низу
+                    right: 0,
+                    left: 0,
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(24),
@@ -268,13 +271,14 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                             topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
                           ),
                           fit: BoxFit.cover,
-                          alignment: Alignment.topCenter,
+                          alignment: widget.chapterId != 1 ? Alignment.topCenter : Alignment.center,
                         ),
                       ),
                     ),
                   )
                 else
                   Positioned.fill(
+
                     child: Container(
                       color: Colors.white.withOpacity(0.8),
                       child: Center(
