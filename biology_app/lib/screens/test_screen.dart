@@ -977,7 +977,7 @@ class _TestScreenState extends State<TestScreen> {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   backgroundColor: isSelected
-                                      ? const Color(0xFF3D82B4)
+                                      ? const Color(0xFF1ACA00)
                                       : const Color(0xFF42A5F5),
                                   foregroundColor: Colors.white,
                                   elevation: 1,
@@ -1592,10 +1592,10 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
   Widget _buildItem(String index, String text, {bool isMatched = false, bool isLeft = true}) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isMatched ? Colors.green.shade300 : Colors.grey.shade300,
-          width: 1,
+          color: isMatched ? Colors.blue : Colors.grey.shade300,
+          width: 2,
         ),
         // Убрал boxShadow для всех элементов
       ),
@@ -1613,12 +1613,12 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: isHighlighted
               ? Colors.orange
-              : (isActuallyMatched ? Colors.green : Colors.grey.shade300),
-          width: isHighlighted ? 2 : 1,
+              : (isActuallyMatched ? Colors.red : Colors.grey.shade300),
+          width: isHighlighted ? 2 : 3,
         ),
         // Убрал boxShadow и для правых элементов
       ),
@@ -1654,7 +1654,7 @@ class _MatchingDragDropState extends State<MatchingDragDrop> {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.2), // Серый цвет с прозрачностью
+          color: Colors.grey.withOpacity(0.4), // Серый цвет с прозрачностью
           shape: BoxShape.circle,
         ),
         child: const Icon(
@@ -1908,8 +1908,8 @@ class _MatchingDragDropWithImageState extends State<MatchingDragDropWithImage> {
         borderRadius: BorderRadius.circular(12),
         color: Colors.white,
         border: Border.all(
-          color: isMatched ? Colors.green : Colors.grey.shade300,
-          width: 1,
+          color: isMatched ? Colors.blue : Colors.grey.shade300,
+          width: 2,
         ),
         boxShadow: [
           BoxShadow(
@@ -1935,15 +1935,15 @@ class _MatchingDragDropWithImageState extends State<MatchingDragDropWithImage> {
       width: _rightItemWidth - 16,
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(24),
         color: isHighlighted
             ? Colors.blue.shade200
             : (isActuallyMatched ? Colors.blue.shade400 : Colors.blue),
         border: Border.all(
           color: isHighlighted
               ? Colors.orange
-              : (isActuallyMatched ? Colors.green : Colors.blue.shade700),
-          width: isHighlighted ? 2 : 1,
+              : (isActuallyMatched ? Colors.red : Colors.blue.shade300),
+          width: isHighlighted ? 2 : 3,
         ),
       ),
       child: Center(
