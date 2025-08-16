@@ -344,6 +344,88 @@ class _TestScreenState extends State<TestScreen> {
     );
   }
 
+  // Добавляю функцию для открытия изображения в полноэкранном режиме
+  void _openFullScreenImage(String imagePath) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.black,
+          insetPadding: EdgeInsets.zero,
+          child: Stack(
+            children: [
+              // Полноэкранное изображение
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                child: InteractiveViewer(
+                  panEnabled: true,
+                  boundaryMargin: EdgeInsets.all(20),
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 100,
+                          color: Colors.white,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              // Кнопка закрытия
+              Positioned(
+                top: 40,
+                right: 20,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ),
+              // Инструкция для пользователя
+              Positioned(
+                bottom: 40,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'Используйте жесты для масштабирования и перемещения изображения',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildQuestion(Map<String, dynamic> question) {
     final questionType = question['question_type'] as String?;
 
@@ -351,24 +433,51 @@ class _TestScreenState extends State<TestScreen> {
     if (question['image_path'] != null && question['image_path'] is String) {
       questionImage = Container(
         margin: const EdgeInsets.symmetric(vertical: 10),
-        height: 300, // Увеличенная высота изображения
-        width: double.infinity,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Image.asset(
-            question['image_path'],
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              debugPrint('Ошибка загрузки изображения: $error');
-              return const Center(
-                child: Icon(
-                  Icons.image_not_supported,
-                  size: 50,
-                  color: Colors.grey,
+        child: Row(
+          children: [
+            // Уменьшенное изображение
+            Expanded(
+              child: Container(
+                height: 200, // Уменьшенная высота с 300 до 200
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    question['image_path'],
+                    fit: BoxFit.contain,
+                    width: double.infinity,
+                    height: double.infinity,
+                    errorBuilder: (context, error, stackTrace) {
+                      debugPrint('Ошибка загрузки изображения: $error');
+                      return const Center(
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            // Кнопка лупы рядом с изображением
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.zoom_in,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                onPressed: () => _openFullScreenImage(question['image_path']),
+                tooltip: 'Увеличить изображение',
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -387,7 +496,7 @@ class _TestScreenState extends State<TestScreen> {
             children: [
               // Вопрос и изображение - теперь занимают меньше места
               Container(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.4),
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.3), // Уменьшено с 0.4 до 0.25
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -402,23 +511,6 @@ class _TestScreenState extends State<TestScreen> {
                         textAlign: TextAlign.center,
                       ),
                       if (questionImage != null) questionImage,
-                      Container(
-                        margin: const EdgeInsets.only(top: 8),
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'Перетащите элемент слева к соответствующему элементу справа. '
-                              'Если передумали — просто перетащите ещё раз в нужный элемент.',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontStyle: FontStyle.italic,
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

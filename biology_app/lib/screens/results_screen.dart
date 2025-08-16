@@ -354,13 +354,23 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Ваш ответ:',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black54,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            isCorrect ? Icons.check_circle : Icons.cancel,
+                                            color: isCorrect ? Colors.green : Colors.red,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text(
+                                            'Ваш ответ:',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       Container(
                                         width: double.infinity,
@@ -385,13 +395,23 @@ class _ResultsScreenState extends State<ResultsScreen> {
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            const Text(
-                                              'Правильный ответ:',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black54,
-                                              ),
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.check_circle,
+                                                  color: Colors.green,
+                                                  size: 20,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                const Text(
+                                                  'Правильный ответ:',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black54,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                             Container(
                                               width: double.infinity,
@@ -543,13 +563,23 @@ class _ResultsScreenState extends State<ResultsScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Ваши соответствия:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
+          Row(
+            children: [
+              Icon(
+                Icons.compare_arrows,
+                color: Colors.blue,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Ваши соответствия:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           ...correctMap.keys.map((leftKey) {
@@ -646,12 +676,22 @@ class _ResultsScreenState extends State<ResultsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.black.withOpacity(0.6),
-          ),
+        Row(
+          children: [
+            Icon(
+              isCorrect ? Icons.check_circle : Icons.cancel,
+              color: isCorrect ? Colors.green : Colors.red,
+              size: 16,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black.withOpacity(0.6),
+              ),
+            ),
+          ],
         ),
         ...keys.map((key) =>
             Padding(
