@@ -72,39 +72,58 @@ class _ResultsScreenState extends State<ResultsScreen> {
           final userMatchingAnswers = json.decode(userAnswer) as Map<String, dynamic>;
           final correctMatchingAnswers = await DBProvider.db.getMatchingAnswers(question['id']);
 
+          // Сформируем карты: левый индекс -> список правых индексов (строки)
+          final Map<String, List<String>> correctMap = {};
+          for (final pair in correctMatchingAnswers) {
+            final leftIndex = pair['left_item_index']?.toString();
+            final rightIndex = pair['right_item_index']?.toString();
+            if (leftIndex == null || rightIndex == null) {
+              continue;
+            }
+            correctMap.putIfAbsent(leftIndex, () => []);
+            correctMap[leftIndex]!.add(rightIndex);
+          }
+
+          final Map<String, List<String>> userMap = {};
+          userMatchingAnswers.forEach((key, value) {
+            final leftKey = key.toString();
+            if (value is List) {
+              userMap[leftKey] = value.map((e) => e.toString()).toList();
+            } else {
+              userMap[leftKey] = [value.toString()];
+            }
+          });
+
           bool isCorrect = true;
-          if (correctMatchingAnswers.length != userMatchingAnswers.length) {
+
+          // Проверяем, что пользователь не добавил лишние ключи слева
+          if (!correctMap.keys.toSet().containsAll(userMap.keys.toSet())) {
             isCorrect = false;
           } else {
-            for (var correctPair in correctMatchingAnswers) {
-              final leftIndex = correctPair['left_item_index']?.toString();
-              final rightIndex = correctPair['right_item_index']?.toString();
-
-              if (leftIndex == null || rightIndex == null || !userMatchingAnswers.containsKey(leftIndex)) {
-                isCorrect = false;
-                break;
-              }
-
-              dynamic userAnswerForLeft = userMatchingAnswers[leftIndex];
-
-              // Универсальное сравнение: приводим оба к списку строк, сортируем и сравниваем
-              List<String> userList = userAnswerForLeft is List
-                  ? userAnswerForLeft.map((e) => e.toString()).toList()
-                  : [userAnswerForLeft.toString()];
-              List<String> correctList = [rightIndex];
-
+            // Сравниваем по каждому левому ключу набор правых значений
+            for (final leftKey in correctMap.keys) {
+              final List<String> userList = List<String>.from(userMap[leftKey] ?? const []);
+              final List<String> correctList = List<String>.from(correctMap[leftKey] ?? const []);
               userList.sort();
               correctList.sort();
 
               if (userList.length != correctList.length ||
-                  !userList.asMap().entries.every((entry) => correctList.length > entry.key && correctList[entry.key] == entry.value)) {
+                  !userList.every((u) => correctList.contains(u))) {
                 isCorrect = false;
                 break;
               }
             }
           }
+
           results.add(isCorrect);
         } catch (e) {
+          results.add(false);
+        }
+      } else if (questionType == 'sequence') {
+        final correctAnswer = question['correct_answer'];
+        if (userAnswer != null && correctAnswer != null) {
+          results.add(userAnswer.toUpperCase() == correctAnswer.toString().toUpperCase());
+        } else {
           results.add(false);
         }
       } else if (questionType == 'multi_choice') {
