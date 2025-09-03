@@ -60,7 +60,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
       });
       // Предзагрузка изображений
       if (mounted) {
-         _precacheTopicImages(context, topics);
+        _precacheTopicImages(context, topics);
       }
     } catch (e) {
       print('Ошибка при загрузке тем: $e');
@@ -260,9 +260,11 @@ class CategoriesScreenState extends State<CategoriesScreen> {
               children: [
                 if (hasImage)
                   Positioned.fill(
-                    bottom: 0, // Прижмите текст к низу
-                    right: 0,
-                    left: 0,
+                    // Увеличиваем изображение для первой главы
+                    left: widget.chapterId == 1 ? -20 : 0,
+                    right: widget.chapterId == 1 ? -20 : 0,
+                    top: widget.chapterId == 1 ? -20 : 0,
+                    bottom: widget.chapterId == 1 ? -20 : 0,
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(24),
@@ -271,14 +273,13 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                             topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
                           ),
                           fit: BoxFit.cover,
-                          alignment: widget.chapterId != 1 ? Alignment.topCenter : Alignment.center,
+                          alignment: widget.chapterId == 1 ? Alignment.center : Alignment.topCenter,
                         ),
                       ),
                     ),
                   )
                 else
                   Positioned.fill(
-
                     child: Container(
                       color: Colors.white.withOpacity(0.8),
                       child: Center(
@@ -291,14 +292,14 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                     ),
                   ),
                 Positioned(
-                  right: 16,
+                  right: 12, // Уменьшил отступ с 16 до 12
                   top: 0,
                   bottom: 0,
-                  width: MediaQuery.of(context).size.width * 0.5,
+                  width: MediaQuery.of(context).size.width * 0.52, // Увеличил ширину с 0.5 до 0.52
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 6), // Уменьшил отступ с 8 до 6
                       child: Text(
                         topic['title'],
                         style: const TextStyle(
@@ -387,7 +388,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
               Expanded(
                 flex: 3,
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(18), // Уменьшил отступ с 20 до 18
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.85),
                     borderRadius: BorderRadius.horizontal(right: Radius.circular(28)),
@@ -407,7 +408,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6), // Уменьшил отступ с 8 до 6
                       const Text(
                         'Нажмите для изучения',
                         style: TextStyle(
