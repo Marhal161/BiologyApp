@@ -380,7 +380,7 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                           topic['image_path'].replaceAll('.jpg', '.webp').replaceAll('.png', '.webp'),
                         ),
                         fit: BoxFit.cover,
-                        alignment: Alignment.center,
+                        alignment: Alignment.centerLeft,
                       ),
                     ),
                   ),
