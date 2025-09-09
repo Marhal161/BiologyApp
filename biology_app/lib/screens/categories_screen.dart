@@ -300,23 +300,26 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 6), // Уменьшил отступ с 8 до 6
-                      child: Text(
-                        topic['title'],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                          height: 1.0,
-                          shadows: [
-                            Shadow(
-                              color: Colors.white,
-                              offset: Offset(1, 1),
-                              blurRadius: 10,
-                            )
-                          ],
+                      child: RichText(
+                        text: TextSpan(
+                          text: topic['title'],
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black87,
+                            height: 1.0,
+                            shadows: [
+                              Shadow(
+                                color: Colors.white,
+                                offset: Offset(1, 1),
+                                blurRadius: 10,
+                              )
+                            ],
+                          ),
                         ),
                         textAlign: TextAlign.left,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
+                        textScaleFactor: 1.0,
                       ),
                     ),
                   ),
@@ -397,16 +400,19 @@ class CategoriesScreenState extends State<CategoriesScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        topic['title'],
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          height: 1.2,
+                      RichText(
+                        text: TextSpan(
+                          text: topic['title'],
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.2,
+                          ),
                         ),
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
+                        textScaleFactor: 1.0,
                       ),
                       const SizedBox(height: 6), // Уменьшил отступ с 8 до 6
                       const Text(

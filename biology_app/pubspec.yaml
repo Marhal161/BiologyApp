@@ -1,7 +1,7 @@
 name: biology_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.2.0
+version: 1.0.0+1
 
 environment:
   sdk: ^3.7.0
@@ -67,4 +67,7 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: "assets/images/icon/logobio.png"
+
+dependency_overrides:
+  audioplayers_darwin: 6.2.0
 

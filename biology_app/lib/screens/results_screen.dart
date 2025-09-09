@@ -193,7 +193,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
     int imageNumber = _random.nextInt(3) + 1;
     setState(() {
-      motivationImagePath = 'assets/images/resultImages/$category$imageNumber.png';
+      motivationImagePath = 'assets/images/resultImages/$category$imageNumber.webp';
     });
   }
 
