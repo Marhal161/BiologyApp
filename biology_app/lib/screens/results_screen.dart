@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'topic_screen.dart';
 import 'dart:convert';
 import '../database.dart';
 import 'dart:math' show min, max, Random;
 import 'package:audioplayers/audioplayers.dart';
+import '../widgets/platform_banner.dart';
+import '../ads_config.dart';
 
 class ResultsScreen extends StatefulWidget {
   final String topicTitle;
@@ -206,6 +207,9 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
     return Scaffold(
       appBar: null,
+      bottomNavigationBar: const SafeArea(
+        child: PlatformBanner(),
+      ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(

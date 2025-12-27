@@ -3,12 +3,12 @@ import '../database.dart';
 import 'categories_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:open_file/open_file.dart';
-import 'package:clipboard/clipboard.dart';
-import 'package:flutter/services.dart';
+import '../widgets/platform_banner.dart';
+import '../ads_config.dart';
 
 class ChaptersScreen extends StatefulWidget {
   const ChaptersScreen({super.key});
@@ -35,7 +35,7 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Ошибка при загрузке глав: $e');
+      debugPrint('Ошибка при загрузке глав: $e');
       setState(() {
         _isLoading = false;
       });
@@ -66,7 +66,7 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
           return;
         }
       } catch (e) {
-        print('Ошибка при открытии Gmail через Intent: $e');
+        debugPrint('Ошибка при открытии Gmail через Intent: $e');
       }
     }
 
@@ -181,8 +181,8 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
       final file = await _getLocalFile(assetPath);
       if (await file.exists()) {
         final result = await OpenFile.open(file.path);
-        if (result != "done") { // В новых версиях "done" означает успешное открытие
-          _showError('Не удалось открыть файл: $result');
+        if (result.type != ResultType.done) {
+          _showError('Не удалось открыть файл: ${result.message}');
         }
       } else {
         _showError('Файл не найден: ${file.path}');
@@ -209,6 +209,9 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const SafeArea(
+        child: PlatformBanner(),
+      ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -226,7 +229,16 @@ class _ChaptersScreenState extends State<ChaptersScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  const SizedBox(width: 8),
+                  IconButton(
+                    tooltip: 'Документы',
+                    icon: const Icon(Icons.description_outlined, color: Colors.black),
+                    onPressed: _showDocumentChoice,
+                  ),
+                  IconButton(
+                    tooltip: 'Техподдержка',
+                    icon: const Icon(Icons.email_outlined, color: Colors.black),
+                    onPressed: _launchEmail,
+                  ),
                 ],
               ),
             ),

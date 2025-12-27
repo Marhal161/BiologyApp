@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'topic_screen.dart';
 import '../database.dart';
 import '../services/test_progress_service.dart';
+import '../widgets/platform_banner.dart';
+import '../ads_config.dart';
 
 class CategoriesScreen extends StatefulWidget {
   final int chapterId;
@@ -84,6 +86,9 @@ class CategoriesScreenState extends State<CategoriesScreen> {
     final isTablet = MediaQuery.of(context).size.shortestSide > 600;
 
     return Scaffold(
+      bottomNavigationBar: const SafeArea(
+        child: PlatformBanner(),
+      ),
       body: Stack(
         children: [
           Container(

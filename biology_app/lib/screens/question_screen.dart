@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../widgets/platform_banner.dart';
+import '../ads_config.dart';
 
 class QuestionScreen extends StatelessWidget {
   final String questionText;
@@ -15,6 +17,9 @@ class QuestionScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Вопрос'),
+      ),
+      bottomNavigationBar: const SafeArea(
+        child: PlatformBanner(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -82,6 +87,9 @@ class NextScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Следующий экран'),
+      ),
+      bottomNavigationBar: const SafeArea(
+        child: PlatformBanner(),
       ),
       body: const Center(
         child: Text('Вы перешли на следующий экран!'),

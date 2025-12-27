@@ -1,10 +1,9 @@
 import 'dart:io';
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/foundation.dart';
 
 class DBProvider {
   DBProvider._();
@@ -62,7 +61,10 @@ class DBProvider {
       // Открываем скопированную базу данных
       _database = await openDatabase(dbPath);
       
-    } catch (e) {}
+    } catch (e, st) {
+      debugPrint('DB import failed: $e');
+      debugPrintStack(stackTrace: st);
+    }
   }
 
   // Методы для получения данных из базы данных

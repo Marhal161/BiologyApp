@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'test_screen.dart';
 import '../services/test_progress_service.dart';
+import '../widgets/platform_banner.dart';
+import '../ads_config.dart';
 
 class TopicScreen extends StatefulWidget {
   final String topicTitle;
@@ -203,6 +205,9 @@ class _TopicScreenState extends State<TopicScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const SafeArea(
+        child: PlatformBanner(),
+      ),
       body: Stack(
         children: [
           Container(

@@ -1,6 +1,6 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
+    id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 
@@ -34,17 +34,17 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.biolearn.biology_app"
+    namespace "com.example.biology_app"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion "27.0.12077973"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -61,7 +61,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.biolearn.biology_app"
+        applicationId "com.example.biology_app"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
@@ -80,5 +80,8 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-} 
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    // VK (myTarget) Android SDK for banner ads
+    // Pin exact version to avoid unexpected breakages from dynamic 5.+
+    implementation 'com.my.target:mytarget-sdk:5.27.4'
+}

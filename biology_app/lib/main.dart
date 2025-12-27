@@ -9,10 +9,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:io';
+import 'package:yandex_mobileads/mobile_ads.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
+    
+    // Инициализация Yandex Mobile Ads SDK
+    MobileAds.initialize();
+    
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -27,11 +32,11 @@ void main() async {
 class AppTheme {
   static String getChapterBackground(chapterId) {
     switch (chapterId) {
-      case 1: return "assets/images/backgroundfirstchapter.jpg";
-      case 2: return "assets/images/backgroundsecondchapter.jpg";
-      case 3: return "assets/images/backgroundthirdchapter.jpg";
-      case 4: return "assets/images/backgroundfourthchapter.jpg";
-      default: return "assets/images/backgroundfirstchapter.jpg";
+      case 1: return "assets/images/backgroundfirstchapter.webp";
+      case 2: return "assets/images/backgroundsecondchapter.webp";
+      case 3: return "assets/images/backgroundthirdchapter.webp";
+      case 4: return "assets/images/backgroundfourthchapter.webp";
+      default: return "assets/images/backgroundfirstchapter.webp";
     }
   }
 
