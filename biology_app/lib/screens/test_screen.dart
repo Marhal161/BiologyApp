@@ -3,6 +3,7 @@ import '../database.dart';
 import 'results_screen.dart';
 import 'dart:async';
 import '../services/test_progress_service.dart';
+import '../services/yandex_interstitial_service.dart';
 import 'dart:convert' as json;
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
@@ -53,6 +54,9 @@ class _TestScreenState extends State<TestScreen> {
   void initState() {
     super.initState();
     _checkForSavedState();
+    
+    // Предзагружаем межстраничную рекламу для показа после теста
+    YandexInterstitialAdService.loadAd();
   }
 
   @override

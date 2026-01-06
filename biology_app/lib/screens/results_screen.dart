@@ -4,6 +4,7 @@ import '../database.dart';
 import 'dart:math' show min, max, Random;
 import 'package:audioplayers/audioplayers.dart';
 import '../widgets/platform_banner.dart';
+import '../services/yandex_interstitial_service.dart';
 import '../ads_config.dart';
 
 class ResultsScreen extends StatefulWidget {
@@ -47,12 +48,26 @@ class _ResultsScreenState extends State<ResultsScreen> {
     super.initState();
     _checkAnswers();
     _setMotivationImage(0);
+    
+    // Показываем межстраничную рекламу после небольшой задержки
+    Future.delayed(const Duration(seconds: 2), () {
+      _showInterstitialAd();
+    });
   }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
     super.dispose();
+  }
+
+  /// Показывает межстраничную рекламу
+  Future<void> _showInterstitialAd() async {
+    debugPrint('🎬 Попытка показать межстраничную рекламу...');
+    final shown = await YandexInterstitialAdService.showAfterLoad();
+    if (!shown) {
+      debugPrint('⚠️ Межстраничная реклама не была показана (не успела загрузиться или ошибка загрузки).');
+    }
   }
 
   Future<void> _checkAnswers() async {
@@ -207,9 +222,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
     return Scaffold(
       appBar: null,
-      bottomNavigationBar: const SafeArea(
-        child: PlatformBanner(),
-      ),
+      // На экране результатов баннер снизу убираем, т.к. здесь показываем межстраничную рекламу.
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(

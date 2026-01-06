@@ -10,6 +10,7 @@ import 'package:open_file/open_file.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:io';
 import 'package:yandex_mobileads/mobile_ads.dart';
+import 'services/yandex_interstitial_service.dart';
 
 void main() async {
   try {
@@ -17,6 +18,9 @@ void main() async {
     
     // Инициализация Yandex Mobile Ads SDK
     MobileAds.initialize();
+    
+    // Предзагружаем межстраничную рекламу
+    YandexInterstitialAdService.loadAd();
     
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,

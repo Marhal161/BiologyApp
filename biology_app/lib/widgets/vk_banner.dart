@@ -28,39 +28,43 @@ class VkBanner extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Wrap in a container that fits exactly to banner size (no extra padding)
-    return Container(
+    final bannerHeight = (height ?? _getHeight(adSize)) + extraHeight;
+
+    // Используем явную высоту, иначе AndroidView может быть обрезан снизу на устройствах с жестами.
+    return SizedBox(
       width: double.infinity,
-      color: Colors.transparent,
-      child: AspectRatio(
-        aspectRatio: _getAspectRatio(adSize),
-        child: AndroidView(
-          viewType: 'vk_mytarget_banner',
-          layoutDirection: TextDirection.ltr,
-          creationParams: <String, dynamic>{
-            'slotId': slotId,
-            if (adSize != null) 'adSize': adSize,
-            // Allow forcing debug/test even in release builds during diagnostics.
-            'debug': debug || kDebugMode,
-            'testMode': testMode,
-          },
-          creationParamsCodec: const StandardMessageCodec(),
+      height: bannerHeight,
+      child: Center(
+        child: SizedBox(
+          width: double.infinity,
+          height: height ?? _getHeight(adSize),
+          child: AndroidView(
+            viewType: 'vk_mytarget_banner',
+            layoutDirection: TextDirection.ltr,
+            creationParams: <String, dynamic>{
+              'slotId': slotId,
+              if (adSize != null) 'adSize': adSize,
+              // Allow forcing debug/test even in release builds during diagnostics.
+              'debug': debug || kDebugMode,
+              'testMode': testMode,
+            },
+            creationParamsCodec: const StandardMessageCodec(),
+          ),
         ),
       ),
     );
   }
 
-  double _getAspectRatio(String? size) {
+  double _getHeight(String? size) {
     switch (size) {
       case '300x250':
-        return 300 / 250;
+        return 250;
       case '728x90':
-        return 728 / 90;
+        return 90;
       case '320x50':
-        return 320 / 50;
+        return 50;
       default:
-        // Standard banner aspect ratio
-        return 320 / 50;
+        return 50;
     }
   }
 }

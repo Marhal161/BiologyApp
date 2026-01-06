@@ -18,7 +18,7 @@ class YandexBanner extends StatefulWidget {
 
 class _YandexBannerState extends State<YandexBanner> {
   BannerAd? _bannerAd;
-  bool _isAdLoaded = false;
+  int? _calculatedHeight;
 
   @override
   void initState() {
@@ -26,31 +26,41 @@ class _YandexBannerState extends State<YandexBanner> {
     _loadAd();
   }
 
-  void _loadAd() {
+  Future<void> _loadAd() async {
     if (!Platform.isAndroid && !Platform.isIOS) {
       return;
     }
 
+    final adSize = BannerAdSize.sticky(width: widget.width);
+
+    // Для sticky размер по высоте вычисляется нативно — без этого виджет часто "режется" снизу.
+    try {
+      _calculatedHeight = await adSize.getCalculatedHeight();
+    } catch (_) {
+      _calculatedHeight = 50;
+    }
+
     _bannerAd = BannerAd(
       adUnitId: widget.adUnitId,
-      adSize: BannerAdSize.sticky(width: widget.width),
+      adSize: adSize,
       adRequest: const AdRequest(),
       onAdLoaded: () {
+        debugPrint('✅ Yandex Banner Ad loaded successfully');
         if (mounted) {
-          setState(() {
-            _isAdLoaded = true;
-          });
+          setState(() {});
         }
       },
       onAdFailedToLoad: (error) {
-        debugPrint('Yandex Banner Ad failed to load: ${error.description}');
+        debugPrint('❌ Yandex Banner Ad failed to load: ${error.description}');
         if (mounted) {
-          setState(() {
-            _isAdLoaded = false;
-          });
+          setState(() {});
         }
       },
     );
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -65,26 +75,15 @@ class _YandexBannerState extends State<YandexBanner> {
       return const SizedBox.shrink();
     }
 
-    if (!_isAdLoaded || _bannerAd == null) {
-      // Показываем placeholder пока реклама загружается
-      return Container(
-        height: 50,
-        color: Colors.transparent,
-        child: const Center(
-          child: SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      );
-    }
+    final height = (_calculatedHeight ?? 50).toDouble();
 
     return Container(
       alignment: Alignment.center,
       width: double.infinity,
-      height: 50,
-      child: AdWidget(bannerAd: _bannerAd!),
+      height: height,
+      child: _bannerAd == null
+          ? const SizedBox.shrink()
+          : AdWidget(bannerAd: _bannerAd!),
     );
   }
 }
