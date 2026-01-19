@@ -8,9 +8,3 @@ const String kYandexBannerAdUnitId = 'R-M-17664354-1'; // Баннер 05-11-202
 const String kYandexBannerAdUnitId2 = 'R-M-17664354-2'; // Баннер 06-11-2025 (резервный)
 const String kYandexInterstitialAdUnitId = 'R-M-17664354-3'; // Межстраничная реклама 06-11-2025
 const String kYandexRewardedAdUnitId = 'demo-rewarded-yandex'; // Для будущего использования
-
-// Демо ID для тестирования Яндекс рекламы
-const String kYandexDemoBannerAdUnitId = 'demo-banner-yandex';
-
-// Флаг для включения тестового режима Яндекс рекламы на Android
-const bool kTestYandexOnAndroid = false;
