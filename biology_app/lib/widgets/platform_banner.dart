@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'vk_banner.dart';
 import 'yandex_banner.dart';
+import 'unity_banner.dart';
 import '../ads_config.dart';
 
 /// Виджет для показа рекламы в зависимости от платформы:
+/// - Android (Google Play) → Unity Ads
 /// - Android (RuStore) → VK (myTarget) реклама
 /// - iOS (App Store) → Яндекс реклама
 /// - Android (Тестовый режим) → Яндекс демо-реклама (если kTestYandexOnAndroid = true)
@@ -14,6 +16,12 @@ class PlatformBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (Platform.isAndroid) {
+      if (kUseUnityAdsOnAndroid) {
+        return const UnityBanner(
+          placementId: kUnityBannerPlacementIdAndroid,
+        );
+      }
+
       // Режим тестирования Яндекс рекламы на Android
       if (kTestYandexOnAndroid) {
         return const YandexBanner(

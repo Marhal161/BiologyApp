@@ -14,3 +14,14 @@ const String kYandexDemoBannerAdUnitId = 'demo-banner-yandex';
 
 // Флаг для включения тестового режима Яндекс рекламы на Android
 const bool kTestYandexOnAndroid = false;
+
+// Конфигурация Unity Ads (Google Play)
+// Вставьте свои реальные значения из Unity Ads Monetization
+const String kUnityGameIdAndroid = '6027787';
+const String kUnityBannerPlacementIdAndroid = 'Banner_Android';
+
+// Включить Unity Ads на Android (Google Play сборка)
+const bool kUseUnityAdsOnAndroid = true;
+
+// Тестовый режим Unity Ads (в релизе выключить)
+const bool kUnityTestMode = false;

@@ -1,4 +1,4 @@
-package com.example.biology_app
+package com.biolearn.biology_app_v2
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine

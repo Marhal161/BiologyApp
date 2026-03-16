@@ -378,13 +378,10 @@ class _SettingsMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned.fill(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-            child: Container(
-              color: Colors.black.withOpacity(0),
-            ),
-          ),
+        // BackdropFilter (blur) иногда провоцирует проблемы на некоторых GPU/драйверах (Mali),
+        // особенно в автоматических pre-launch тестах. Заменяем на лёгкое затемнение.
+        const Positioned.fill(
+          child: ColoredBox(color: Color(0x14000000)),
         ),
         Container(
           padding: const EdgeInsets.all(20),

@@ -11,16 +11,12 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:io';
 import 'package:yandex_mobileads/mobile_ads.dart';
 import 'services/yandex_interstitial_service.dart';
+import 'services/unity_ads_service.dart';
+import 'ads_config.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
-    // Инициализация Yandex Mobile Ads SDK
-    MobileAds.initialize();
-    
-    // Предзагружаем межстраничную рекламу
-    YandexInterstitialAdService.loadAd();
     
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -54,8 +50,35 @@ class AppTheme {
   }
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Важно: инициализацию SDK (особенно рекламных/видео) лучше делать ПОСЛЕ первого кадра,
+    // чтобы снизить риск крашей на некоторых устройствах/драйверах (в т.ч. в pre-launch tests).
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        MobileAds.initialize();
+
+        if (Platform.isAndroid && kUseUnityAdsOnAndroid) {
+          await UnityAdsService.initialize();
+        }
+
+        // Предзагружаем межстраничную рекламу
+        YandexInterstitialAdService.loadAd();
+      } catch (e) {
+        debugPrint('Ошибка инициализации SDK: $e');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +110,11 @@ class _StartScreenState extends State<StartScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeVideo();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _initializeVideo();
+      }
+    });
   }
 
   Future<void> _initializeVideo() async {

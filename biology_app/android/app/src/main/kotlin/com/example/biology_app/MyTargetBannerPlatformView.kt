@@ -1,4 +1,4 @@
-package com.example.biology_app
+package com.biolearn.biology_app_v2
 
 import android.content.Context
 import android.util.Log
